@@ -1,117 +1,137 @@
-# Primer Cuatrimestre — Ingeniería en Software
+# Hi, I'm Jordi Blanch 👋
 
-Portfolio de algoritmos, estructuras de datos y proyectos desarrollados durante mi primer cuatrimestre en Hybridge.
+**QA Analyst & Software Engineering Student** · Hybridge · Mexico
 
-## Sobre mí
-
-Estudiante de **Ingeniería en Software** en Hybridge. Apasionado/a por resolver problemas con código limpio y bien estructurado. Actualmente dominando los fundamentos de algoritmos y Python.
+[![Email](https://img.shields.io/badge/paastor.blanch@gmail.com-EA4335?style=flat&logo=gmail&logoColor=white)](mailto:paastor.blanch@gmail.com)
+[![GitHub](https://img.shields.io/badge/JordiBlanch666-181717?style=flat&logo=github&logoColor=white)](https://github.com/JordiBlanch666)
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)
+![Git](https://img.shields.io/badge/Git-F05032?style=flat&logo=git&logoColor=white)
 
 ---
 
-## Estructura del repositorio
+## About me
+
+I'm not your typical first-semester CS student.
+
+Before writing my first algorithm, I spent six years maintaining **zero-error metrics in live broadcast production** at K 102.7 FM — the closest real-world equivalent to a strict SLA. I designed **clinical decision algorithms in a hospital ICU** at San Jose Hospital, where documentation is non-negotiable and edge cases have consequences. At Charter Spectrum, I managed 50+ daily tickets using Jira and Zendesk while improving first-call resolution by 15%.
+
+That background — broadcast ops, clinical QA, and enterprise tech support — is what brought me to Software Engineering. I'm formalizing what I already know about precision, documentation, and systems thinking into code.
+
+This repository is where that transition lives.
+
+---
+
+## Repository structure
 
 ```
-📦 primer-cuatrimestre/
+📦 primer-cuatrimestre-isw/
  ├── 📂 algoritmos/
- │   ├── 📂 ordenamiento/     ← Burbuja, Selección, Inserción
- │   ├── 📂 busqueda/         ← Lineal y Binaria
- │   └── 📂 recursion/        ← Factorial y Fibonacci con memoización
- ├── 📂 estructuras_datos/    ← Pila (Stack) y Cola (Queue)
- ├── 📂 fundamentos/          ← Funciones, estructuras de datos nativas, archivos
+ │   ├── 📂 ordenamiento/     ← Bubble, Selection, Insertion sort
+ │   ├── 📂 busqueda/         ← Linear & Binary search
+ │   └── 📂 recursion/        ← Factorial & Fibonacci (with memoization)
+ ├── 📂 estructuras_datos/    ← Stack (LIFO) & Queue (FIFO)
+ ├── 📂 fundamentos/          ← Functions, native data structures, file I/O
  └── 📂 proyectos/
-     └── 📂 gestor_calificaciones/   ← App CLI con persistencia JSON
+     └── 📂 gestor_calificaciones/   ← CLI app with JSON persistence
 ```
 
 ---
 
-## Algoritmos implementados
+## Algorithms
 
-### Ordenamiento
+### Sorting
 
-| Algoritmo   | Mejor caso | Caso promedio | Peor caso | Espacio |
-|-------------|:----------:|:-------------:|:---------:|:-------:|
-| Burbuja     | O(n)       | O(n²)         | O(n²)     | O(1)    |
-| Selección   | O(n²)      | O(n²)         | O(n²)     | O(1)    |
-| Inserción   | O(n)       | O(n²)         | O(n²)     | O(1)    |
+| Algorithm       | Best case | Average  | Worst case | Space |
+|-----------------|:---------:|:--------:|:----------:|:-----:|
+| Bubble Sort     | O(n)      | O(n²)    | O(n²)      | O(1)  |
+| Selection Sort  | O(n²)     | O(n²)    | O(n²)      | O(1)  |
+| Insertion Sort  | O(n)      | O(n²)    | O(n²)      | O(1)  |
 
-### Búsqueda
+### Searching
 
-| Algoritmo  | Complejidad | Requiere orden |
-|------------|:-----------:|:--------------:|
-| Lineal     | O(n)        | No             |
-| Binaria    | O(log n)    | Sí             |
+| Algorithm     | Complexity | Requires sorted input |
+|---------------|:----------:|:---------------------:|
+| Linear Search | O(n)       | No                    |
+| Binary Search | O(log n)   | Yes                   |
 
-### Recursión
+### Recursion
 
-- **Factorial** — caso base + llamada recursiva
-- **Fibonacci** — comparación entre O(2ⁿ) recursivo y O(n) con memoización
+- **Factorial** — base case + recursive call
+- **Fibonacci** — naive O(2ⁿ) vs. memoized O(n) side by side
 
 ---
 
-## Proyecto principal
+## Featured project — Grade Manager CLI
 
-### Gestor de Calificaciones
-
-App de línea de comandos para registrar y analizar calificaciones de alumnos.
-
-**Características:**
-- Registro de alumnos y calificaciones
-- Cálculo automático de promedios y letra (A–F)
-- Persistencia en archivo JSON
-- Reporte tabular con estadísticas de grupo
+A command-line app to register and analyze student grades — built to demonstrate
+functions, data structures, loops, conditionals, file I/O, and error handling in one coherent tool.
 
 ```bash
 cd proyectos/gestor_calificaciones
 python gestor.py
 ```
 
----
+```
+╔══════════════════════════════╗
+║   Gestor de Calificaciones   ║
+╚══════════════════════════════╝
 
-## Estructuras de Datos
+  Alumno               Califs   Promedio  Letra
+  -----------------------------------------------
+  Ana García                3       88.3      B
+  Carlos López              4       91.5      A
+  María Martínez            2       74.0      C
 
-| Estructura | Tipo  | Operación principal       | Caso de uso real          |
-|------------|-------|---------------------------|---------------------------|
-| Pila       | LIFO  | `push` / `pop`            | Verificación de paréntesis |
-| Cola       | FIFO  | `encolar` / `desencolar`  | Simulación de fila        |
-
----
-
-## Stack tecnológico
-
-![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)
-![Git](https://img.shields.io/badge/Git-F05032?style=flat&logo=git&logoColor=white)
-![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)
-
----
-
-## Ejecutar cualquier módulo
-
-```bash
-# Clonar el repositorio
-git clone https://github.com/TU_USUARIO/primer-cuatrimestre-isw.git
-cd primer-cuatrimestre-isw
-
-# Ejecutar un algoritmo
-python algoritmos/ordenamiento/burbuja.py
-
-# Ejecutar el proyecto
-python proyectos/gestor_calificaciones/gestor.py
+  Class average: 84.6
 ```
 
-> No requiere dependencias externas — solo Python 3.10+.
+**Concepts applied:**
+
+| Concept            | Where                                      |
+|--------------------|--------------------------------------------|
+| Functions          | `load_data`, `calculate_average`, etc.     |
+| Dict / List        | Student and grade storage                  |
+| Loops              | Main menu loop, report rendering           |
+| Conditionals       | Input validation, letter grade logic       |
+| File I/O (JSON)    | Persistence with `json.load / json.dump`   |
+| Error handling     | `try/except` on grade input                |
 
 ---
 
-## Lo que aprendí este cuatrimestre
+## Data Structures
 
-- Analizar complejidad temporal y espacial de algoritmos
-- Implementar ordenamiento y búsqueda desde cero
-- Trabajar con recursión y memoización
-- Diseñar estructuras de datos (Pila, Cola)
-- Persistencia de datos con archivos JSON y CSV
-- Control de versiones con Git y GitHub
-- Terminal Unix/Linux y flujo de trabajo con CLI
+| Structure | Type | Key operations         | Real-world demo              |
+|-----------|------|------------------------|------------------------------|
+| Stack     | LIFO | `push` / `pop`         | Balanced parentheses checker |
+| Queue     | FIFO | `enqueue` / `dequeue`  | Service queue simulation     |
 
 ---
 
-*Hybridge — Ingeniería en Software · Primer cuatrimestre · 2025–2026*
+## What I learned this semester
+
+- Analyzing time and space complexity of algorithms
+- Implementing sorting and searching from scratch
+- Recursion, memoization, and when each matters
+- Designing custom data structures (Stack, Queue)
+- File persistence with JSON and CSV
+- Version control with Git & GitHub
+- Unix/Linux terminal and CLI workflows
+
+---
+
+## Background
+
+| Role              | Organization        | Relevant to SE                             |
+|-------------------|---------------------|--------------------------------------------|
+| QA / Broadcast Ops | K 102.7 FM         | Zero-error SLA, live system monitoring     |
+| Clinical QA       | San Jose Hospital   | Algorithm design, validation, documentation |
+| Tech Support      | Charter Spectrum    | Jira/Zendesk, ticket management, 15% FCR ↑ |
+
+---
+
+> *I show up. I document everything. I don't break things.*
+> Currently finalizing a Software Engineering degree at Hybridge · Certified in Git/GitHub & n8n automation.
+
+---
+
+*Hybridge — Software Engineering · First semester · 2025–2026*

@@ -6,6 +6,7 @@
 [![GitHub](https://img.shields.io/badge/JordiBlanch666-181717?style=flat&logo=github&logoColor=white)](https://github.com/JordiBlanch666)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)
 ![Git](https://img.shields.io/badge/Git-F05032?style=flat&logo=git&logoColor=white)
+![Semester](https://img.shields.io/badge/2nd%20semester-OOP-6A0DAD?style=flat)
 
 ---
 
@@ -34,6 +35,24 @@ This repository tracks that transition, semester by semester.
  ├── 📂 poo/                     ← OOP: the four pillars + banking system ⬅ new
  └── 📂 proyectos/
      └── 📂 gestor_calificaciones/   ← CLI app with JSON persistence
+```
+
+Run the full portfolio demo from the root:
+
+```bash
+python main.py
+```
+
+```
+╔══════════════════════════════════════════╗
+║   Portfolio · Jordi Contreras Blanch    ║
+║   Software Engineering · Hybridge       ║
+╚══════════════════════════════════════════╝
+
+  [1] Algorithms (sorting, searching, recursion)
+  [2] Data structures (Stack, Queue)
+  [3] OOP — Banking System
+  [0] Exit
 ```
 
 ---
@@ -124,14 +143,14 @@ python gestor.py
 
 ```
 ╔══════════════════════════════╗
-║   Gestor de Calificaciones   ║
+║      Grade Manager CLI       ║
 ╚══════════════════════════════╝
 
-  Alumno               Califs   Promedio  Letra
+  Student              Grades   Average   Grade
   -----------------------------------------------
-  Ana García                3       88.3      B
-  Carlos López              4       91.5      A
-  María Martínez            2       74.0      C
+  Ana García                3      88.3       B
+  Carlos López              4      91.5       A
+  María Martínez            2      74.0       C
 
   Class average: 84.6
 ```

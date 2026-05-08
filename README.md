@@ -54,9 +54,9 @@ Four pillars, four files, one integrating project.
 A cohesive example that combines all four pillars:
 
 ```
-Cuenta (ABC)               ← abstract class, encapsulation
-├── CuentaAhorro           ← inheritance, applies interest
-└── CuentaCorriente        ← inheritance, overdraft limit
+Account (ABC)              ← abstract class, encapsulation
+├── SavingsAccount         ← inheritance, applies interest
+└── CheckingAccount        ← inheritance, overdraft limit
 ```
 
 ```bash
@@ -64,26 +64,26 @@ python poo/herencia.py
 ```
 
 ```
-══ Sistema Bancario ════════════════════════════════
+══ Banking System ══════════════════════════════════
 
-Ahorro | MX00001 | Jordi Blanch | saldo: $1,365.00
+Savings | MX00001 | Jordi Blanch | balance: $1,365.00
 
-  Historial:
-    [10:32:01] Cuenta abierta con saldo inicial $1000.00
-    [10:32:01] Depósito    +$    500.00  →  saldo $1500.00
-    [10:32:01] Retiro      -$    200.00  →  saldo $1300.00
-    [10:32:01] Depósito    +$     65.00  →  saldo $1365.00
+  History:
+    [10:32:01] Account opened with initial balance $1000.00
+    [10:32:01] Deposit    +$    500.00  →  balance $1500.00
+    [10:32:01] Withdraw   -$    200.00  →  balance $1300.00
+    [10:32:01] Deposit    +$     65.00  →  balance $1365.00
 ```
 
 **Concepts applied:**
 
 | Concept | Where |
 |---------|-------|
-| Encapsulation | `__saldo` only modified via `depositar` / `retirar` |
-| Inheritance | `CuentaAhorro` and `CuentaCorriente` extend `Cuenta` |
-| Polymorphism | `retirar()` behaves differently in each subclass |
-| Abstraction | `Cuenta` is abstract — cannot be instantiated directly |
-| `super()` | Child constructor delegates to parent |
+| Encapsulation | `__balance` only modified via `deposit` / `withdraw` |
+| Inheritance | `SavingsAccount` and `CheckingAccount` extend `Account` |
+| Polymorphism | `withdraw()` behaves differently in each subclass |
+| Abstraction | `Account` is abstract — cannot be instantiated directly |
+| `super()` | Child constructor delegates initialization to parent |
 | `@property` | Read-only balance exposed cleanly |
 
 ---

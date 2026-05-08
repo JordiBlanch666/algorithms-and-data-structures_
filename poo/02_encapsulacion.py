@@ -1,56 +1,56 @@
 """
-Encapsulación — segundo pilar de la POO.
+Encapsulation — second pillar of OOP.
 
-Los atributos privados (__ prefijo) solo se modifican a través
-de métodos controlados, protegiendo la integridad del objeto.
+Private attributes (__ prefix) can only be modified through controlled
+methods, protecting the integrity of the object's internal state.
 """
 
 
-class CuentaBancaria:
-    def __init__(self, titular: str, saldo_inicial: float = 0.0):
-        self._titular = titular          # protegido: uso interno
-        self.__saldo = saldo_inicial     # privado: acceso solo por métodos
+class BankAccount:
+    def __init__(self, holder: str, initial_balance: float = 0.0):
+        self._holder = holder            # protected: internal use
+        self.__balance = initial_balance  # private: only accessible via methods
 
-    # ── Propiedades (getters) ─────────────────────────────────────────────────
-
-    @property
-    def titular(self) -> str:
-        return self._titular
+    # ── Properties (getters) ──────────────────────────────────────────────────
 
     @property
-    def saldo(self) -> float:
-        return self.__saldo
+    def holder(self) -> str:
+        return self._holder
 
-    # ── Operaciones controladas ───────────────────────────────────────────────
+    @property
+    def balance(self) -> float:
+        return self.__balance
 
-    def depositar(self, monto: float) -> None:
-        if monto <= 0:
-            raise ValueError("El monto debe ser positivo.")
-        self.__saldo += monto
-        print(f"  Depósito ${monto:.2f} → saldo: ${self.__saldo:.2f}")
+    # ── Controlled operations ─────────────────────────────────────────────────
 
-    def retirar(self, monto: float) -> None:
-        if monto <= 0:
-            raise ValueError("El monto debe ser positivo.")
-        if monto > self.__saldo:
-            raise ValueError("Saldo insuficiente.")
-        self.__saldo -= monto
-        print(f"  Retiro  ${monto:.2f} → saldo: ${self.__saldo:.2f}")
+    def deposit(self, amount: float) -> None:
+        if amount <= 0:
+            raise ValueError("Amount must be positive.")
+        self.__balance += amount
+        print(f"  Deposit  +${amount:.2f} → balance: ${self.__balance:.2f}")
+
+    def withdraw(self, amount: float) -> None:
+        if amount <= 0:
+            raise ValueError("Amount must be positive.")
+        if amount > self.__balance:
+            raise ValueError("Insufficient funds.")
+        self.__balance -= amount
+        print(f"  Withdraw -${amount:.2f} → balance: ${self.__balance:.2f}")
 
     def __repr__(self) -> str:
-        return f"CuentaBancaria(titular='{self._titular}', saldo=${self.__saldo:.2f})"
+        return f"BankAccount(holder='{self._holder}', balance=${self.__balance:.2f})"
 
 
 if __name__ == "__main__":
-    cuenta = CuentaBancaria("Jordi Blanch", 500.0)
-    print(cuenta)
-    cuenta.depositar(1000)
-    cuenta.retirar(200)
+    account = BankAccount("Jordi Blanch", 500.0)
+    print(account)
+    account.deposit(1000)
+    account.withdraw(200)
 
-    # Demostración de encapsulación: el atributo privado no es accesible
+    # Demonstrating encapsulation: the private attribute is not directly accessible
     try:
-        print(cuenta.__saldo)          # AttributeError esperado
+        print(account.__balance)       # AttributeError expected
     except AttributeError as e:
-        print(f"\n  Encapsulación activa: {e}")
+        print(f"\n  Encapsulation active: {e}")
 
-    print(f"\n  Saldo via property: ${cuenta.saldo:.2f}")
+    print(f"\n  Balance via property: ${account.balance:.2f}")

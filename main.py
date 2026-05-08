@@ -1,14 +1,14 @@
 """
-Portafolio — Jordi Yashua Contreras Blanch
-Ingeniería en Software · Hybridge
+Portfolio — Jordi Yashua Contreras Blanch
+Software Engineering · Hybridge
 
-Ejecuta las demos de cada módulo del portafolio.
+Runs demos from each portfolio module.
 """
 
 import sys
 
 
-def demo_algoritmos():
+def demo_algorithms():
     from algoritmos.ordenamiento.burbuja import burbuja
     from algoritmos.ordenamiento.insercion import insercion
     from algoritmos.ordenamiento.seleccion import seleccion
@@ -16,82 +16,82 @@ def demo_algoritmos():
     from algoritmos.busqueda.lineal import lineal
     from algoritmos.recursion.fibonacci import fibonacci
 
-    datos = [64, 34, 25, 12, 22, 11, 90]
-    print(f"  Original:         {datos}")
-    print(f"  Burbuja:          {burbuja(datos)}")
-    print(f"  Inserción:        {insercion(datos)}")
-    print(f"  Selección:        {seleccion(datos)}")
+    data = [64, 34, 25, 12, 22, 11, 90]
+    print(f"  Original:          {data}")
+    print(f"  Bubble sort:       {burbuja(data)}")
+    print(f"  Insertion sort:    {insercion(data)}")
+    print(f"  Selection sort:    {seleccion(data)}")
 
-    ordenado = sorted(datos)
-    print(f"\n  Búsqueda lineal de 25:  índice {lineal(datos, 25)}")
-    print(f"  Búsqueda binaria de 25: índice {binaria(ordenado, 25)}")
+    sorted_data = sorted(data)
+    print(f"\n  Linear search for 25:  index {lineal(data, 25)}")
+    print(f"  Binary search for 25:  index {binaria(sorted_data, 25)}")
     print(f"\n  Fibonacci(10): {[fibonacci(i) for i in range(11)]}")
 
 
-def demo_estructuras():
+def demo_data_structures():
     from estructuras_datos.pila import Pila, verificar_parentesis
     from estructuras_datos.cola import Cola
 
-    p = Pila()
+    stack = Pila()
     for v in [10, 20, 30]:
-        p.push(v)
-    print(f"  Pila:  {p}  → pop: {p.pop()}")
+        stack.push(v)
+    print(f"  Stack: {stack}  → pop: {stack.pop()}")
 
-    c = Cola()
+    queue = Cola()
     for v in ["A", "B", "C"]:
-        c.encolar(v)
-    print(f"  Cola:  {c}  → dequeue: {c.desencolar()}")
+        queue.encolar(v)
+    print(f"  Queue: {queue}  → dequeue: {queue.desencolar()}")
 
-    casos = ["(a + b) * [c]", "((x + y)", "{a + [b]}"]
-    print("\n  Verificación de paréntesis:")
-    for expr in casos:
-        estado = "✓" if verificar_parentesis(expr) else "✗"
-        print(f"    {estado}  {expr}")
-
-
-def demo_poo():
-    from poo.herencia import CuentaAhorro, CuentaCorriente
-
-    print("  — Cuenta de Ahorro —")
-    ahorro = CuentaAhorro("Jordi Blanch", 1000.0, tasa_interes=0.05)
-    ahorro.depositar(500)
-    ahorro.aplicar_interes()
-    print(ahorro)
-
-    print("\n  — Cuenta Corriente —")
-    corriente = CuentaCorriente("Ana García", 200.0, limite_sobregiro=300.0)
-    corriente.retirar(400)
-    print(corriente)
+    expressions = ["(a + b) * [c]", "((x + y)", "{a + [b]}"]
+    print("\n  Bracket validation:")
+    for expr in expressions:
+        status = "✓" if verificar_parentesis(expr) else "✗"
+        print(f"    {status}  {expr}")
 
 
-MODULOS = {
-    "1": ("Algoritmos (ordenamiento, búsqueda, recursión)", demo_algoritmos),
-    "2": ("Estructuras de datos (Pila, Cola)",             demo_estructuras),
-    "3": ("POO — Sistema Bancario",                        demo_poo),
+def demo_oop():
+    from poo.herencia import SavingsAccount, CheckingAccount
+
+    print("  — Savings Account —")
+    savings = SavingsAccount("Jordi Blanch", 1000.0, interest_rate=0.05)
+    savings.deposit(500)
+    savings.apply_interest()
+    print(savings)
+
+    print("\n  — Checking Account —")
+    checking = CheckingAccount("Ana García", 200.0, overdraft_limit=300.0)
+    checking.withdraw(400)
+    print(checking)
+
+
+MODULES = {
+    "1": ("Algorithms (sorting, searching, recursion)", demo_algorithms),
+    "2": ("Data structures (Stack, Queue)",             demo_data_structures),
+    "3": ("OOP — Banking System",                       demo_oop),
 }
 
 
 def main():
     print("\n╔══════════════════════════════════════════╗")
-    print("║   Portafolio · Jordi Contreras Blanch   ║")
-    print("║   Ingeniería en Software · Hybridge     ║")
+    print("║   Portfolio · Jordi Contreras Blanch    ║")
+    print("║   Software Engineering · Hybridge       ║")
     print("╚══════════════════════════════════════════╝\n")
 
-    for clave, (nombre, _) in MODULOS.items():
-        print(f"  [{clave}] {nombre}")
-    print("  [0] Salir\n")
+    for key, (name, _) in MODULES.items():
+        print(f"  [{key}] {name}")
+    print("  [0] Exit\n")
 
-    opcion = input("  Elige un módulo: ").strip()
+    choice = input("  Choose a module: ").strip()
 
-    if opcion == "0":
+    if choice == "0":
         sys.exit(0)
 
-    if opcion not in MODULOS:
-        print("  Opción no válida.")
+    if choice not in MODULES:
+        print("  Invalid option.")
         return
 
-    nombre, fn = MODULOS[opcion]
-    print(f"\n── {nombre} ──────────────────────────────────\n")
+    name, fn = MODULES[choice]
+    print(f"\n── {name} ──────────────────────────────────\n")
     fn()
     print()
 

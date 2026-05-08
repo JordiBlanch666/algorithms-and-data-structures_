@@ -1,145 +1,145 @@
 """
-Sistema Bancario — proyecto de 2do cuatrimestre.
-Demuestra encapsulación, herencia y polimorfismo en un solo módulo.
+Banking System — 2nd semester OOP project.
+Demonstrates encapsulation, inheritance, and polymorphism in one cohesive module.
 """
 
 from abc import ABC, abstractmethod
 from datetime import datetime
 
 
-# ── Clase base abstracta ──────────────────────────────────────────────────────
+# ── Abstract base class ───────────────────────────────────────────────────────
 
-class Cuenta(ABC):
-    _contador = 0
+class Account(ABC):
+    _counter = 0
 
-    def __init__(self, titular: str, saldo_inicial: float = 0.0):
-        Cuenta._contador += 1
-        self.__numero = f"MX{Cuenta._contador:05d}"
-        self._titular = titular
-        self.__saldo = max(0.0, saldo_inicial)
-        self.__historial: list[str] = []
-        self._registrar(f"Cuenta abierta con saldo inicial ${saldo_inicial:.2f}")
+    def __init__(self, holder: str, initial_balance: float = 0.0):
+        Account._counter += 1
+        self.__number = f"MX{Account._counter:05d}"
+        self._holder = holder
+        self.__balance = max(0.0, initial_balance)
+        self.__history: list[str] = []
+        self._log(f"Account opened with initial balance ${initial_balance:.2f}")
 
-    # ── Propiedades ───────────────────────────────────────────────────────────
-
-    @property
-    def numero(self) -> str:
-        return self.__numero
+    # ── Properties ────────────────────────────────────────────────────────────
 
     @property
-    def titular(self) -> str:
-        return self._titular
+    def number(self) -> str:
+        return self.__number
 
     @property
-    def saldo(self) -> float:
-        return self.__saldo
+    def holder(self) -> str:
+        return self._holder
 
     @property
-    def historial(self) -> list[str]:
-        return list(self.__historial)
+    def balance(self) -> float:
+        return self.__balance
 
-    # ── Operaciones base ──────────────────────────────────────────────────────
+    @property
+    def history(self) -> list[str]:
+        return list(self.__history)
 
-    def depositar(self, monto: float) -> None:
-        if monto <= 0:
-            raise ValueError("El monto debe ser positivo.")
-        self.__saldo += monto
-        self._registrar(f"Depósito    +${monto:>10.2f}  →  saldo ${self.__saldo:.2f}")
+    # ── Base operations ───────────────────────────────────────────────────────
 
-    def _descontar(self, monto: float) -> None:
-        """Método protegido: usado por las subclases para retirar."""
-        self.__saldo -= monto
+    def deposit(self, amount: float) -> None:
+        if amount <= 0:
+            raise ValueError("Amount must be positive.")
+        self.__balance += amount
+        self._log(f"Deposit    +${amount:>10.2f}  →  balance ${self.__balance:.2f}")
+
+    def _deduct(self, amount: float) -> None:
+        """Protected: used by subclasses to reduce the balance."""
+        self.__balance -= amount
 
     @abstractmethod
-    def retirar(self, monto: float) -> None: ...
+    def withdraw(self, amount: float) -> None: ...
 
     @abstractmethod
-    def tipo(self) -> str: ...
+    def account_type(self) -> str: ...
 
-    # ── Utilidades ────────────────────────────────────────────────────────────
+    # ── Utilities ─────────────────────────────────────────────────────────────
 
-    def _registrar(self, mensaje: str) -> None:
+    def _log(self, message: str) -> None:
         ts = datetime.now().strftime("%H:%M:%S")
-        self.__historial.append(f"[{ts}] {mensaje}")
+        self.__history.append(f"[{ts}] {message}")
 
     def __repr__(self) -> str:
         return (
-            f"{self.tipo()} | {self.numero} | {self._titular} | "
-            f"saldo: ${self.__saldo:.2f}"
+            f"{self.account_type()} | {self.number} | {self._holder} | "
+            f"balance: ${self.__balance:.2f}"
         )
 
 
-# ── Subclase: Cuenta de Ahorro ────────────────────────────────────────────────
+# ── Subclass: Savings Account ─────────────────────────────────────────────────
 
-class CuentaAhorro(Cuenta):
-    def __init__(self, titular: str, saldo_inicial: float = 0.0,
-                 tasa_interes: float = 0.04):
-        super().__init__(titular, saldo_inicial)
-        self.__tasa = tasa_interes
+class SavingsAccount(Account):
+    def __init__(self, holder: str, initial_balance: float = 0.0,
+                 interest_rate: float = 0.04):
+        super().__init__(holder, initial_balance)
+        self.__interest_rate = interest_rate
 
-    def tipo(self) -> str:
-        return "Ahorro"
+    def account_type(self) -> str:
+        return "Savings"
 
-    def retirar(self, monto: float) -> None:
-        if monto <= 0:
-            raise ValueError("El monto debe ser positivo.")
-        if monto > self.saldo:
+    def withdraw(self, amount: float) -> None:
+        if amount <= 0:
+            raise ValueError("Amount must be positive.")
+        if amount > self.balance:
             raise ValueError(
-                f"Saldo insuficiente. Disponible: ${self.saldo:.2f}"
+                f"Insufficient funds. Available: ${self.balance:.2f}"
             )
-        self._descontar(monto)
-        self._registrar(f"Retiro      -${monto:>10.2f}  →  saldo ${self.saldo:.2f}")
+        self._deduct(amount)
+        self._log(f"Withdraw   -${amount:>10.2f}  →  balance ${self.balance:.2f}")
 
-    def aplicar_interes(self) -> None:
-        interes = self.saldo * self.__tasa
-        self.depositar(interes)
-        self._registrar(f"Interés ({self.__tasa:.0%}) aplicado: +${interes:.2f}")
+    def apply_interest(self) -> None:
+        interest = self.balance * self.__interest_rate
+        self.deposit(interest)
+        self._log(f"Interest ({self.__interest_rate:.0%}) applied: +${interest:.2f}")
 
 
-# ── Subclase: Cuenta Corriente ────────────────────────────────────────────────
+# ── Subclass: Checking Account ────────────────────────────────────────────────
 
-class CuentaCorriente(Cuenta):
-    def __init__(self, titular: str, saldo_inicial: float = 0.0,
-                 limite_sobregiro: float = 0.0):
-        super().__init__(titular, saldo_inicial)
-        self.__limite_sobregiro = limite_sobregiro
+class CheckingAccount(Account):
+    def __init__(self, holder: str, initial_balance: float = 0.0,
+                 overdraft_limit: float = 0.0):
+        super().__init__(holder, initial_balance)
+        self.__overdraft_limit = overdraft_limit
 
-    def tipo(self) -> str:
-        return "Corriente"
+    def account_type(self) -> str:
+        return "Checking"
 
-    def retirar(self, monto: float) -> None:
-        if monto <= 0:
-            raise ValueError("El monto debe ser positivo.")
-        disponible = self.saldo + self.__limite_sobregiro
-        if monto > disponible:
+    def withdraw(self, amount: float) -> None:
+        if amount <= 0:
+            raise ValueError("Amount must be positive.")
+        available = self.balance + self.__overdraft_limit
+        if amount > available:
             raise ValueError(
-                f"Límite excedido. Disponible con sobregiro: ${disponible:.2f}"
+                f"Limit exceeded. Available with overdraft: ${available:.2f}"
             )
-        self._descontar(monto)
-        self._registrar(
-            f"Retiro      -${monto:>10.2f}  →  saldo ${self.saldo:.2f}"
-            + ("  [SOBREGIRO]" if self.saldo < 0 else "")
+        self._deduct(amount)
+        self._log(
+            f"Withdraw   -${amount:>10.2f}  →  balance ${self.balance:.2f}"
+            + ("  [OVERDRAFT]" if self.balance < 0 else "")
         )
 
 
 if __name__ == "__main__":
-    print("══ Sistema Bancario ════════════════════════════════\n")
+    print("══ Banking System ══════════════════════════════════\n")
 
-    ahorro = CuentaAhorro("Jordi Blanch", 1_000.0, tasa_interes=0.05)
-    ahorro.depositar(500)
-    ahorro.retirar(200)
-    ahorro.aplicar_interes()
+    savings = SavingsAccount("Jordi Blanch", 1_000.0, interest_rate=0.05)
+    savings.deposit(500)
+    savings.withdraw(200)
+    savings.apply_interest()
 
-    print(ahorro)
-    print("\n  Historial:")
-    for linea in ahorro.historial:
-        print(f"    {linea}")
+    print(savings)
+    print("\n  History:")
+    for entry in savings.history:
+        print(f"    {entry}")
 
     print()
 
-    corriente = CuentaCorriente("Ana García", 200.0, limite_sobregiro=300.0)
-    corriente.retirar(400)
-    print(corriente)
-    print("\n  Historial:")
-    for linea in corriente.historial:
-        print(f"    {linea}")
+    checking = CheckingAccount("Ana García", 200.0, overdraft_limit=300.0)
+    checking.withdraw(400)
+    print(checking)
+    print("\n  History:")
+    for entry in checking.history:
+        print(f"    {entry}")

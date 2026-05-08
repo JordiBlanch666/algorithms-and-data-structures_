@@ -1,68 +1,68 @@
 """
-Herencia — tercer pilar de la POO.
+Inheritance — third pillar of OOP.
 
-Una clase hija hereda atributos y métodos de la clase padre,
-y puede extenderlos o sobreescribirlos.
+A child class inherits attributes and methods from the parent class,
+and can extend or override them.
 """
 
 
 class Animal:
-    def __init__(self, nombre: str, especie: str):
-        self.nombre = nombre
-        self.especie = especie
+    def __init__(self, name: str, species: str):
+        self.name = name
+        self.species = species
 
-    def describir(self) -> str:
-        return f"{self.nombre} es un {self.especie}"
+    def describe(self) -> str:
+        return f"{self.name} is a {self.species}"
 
-    def hacer_sonido(self) -> str:
-        raise NotImplementedError("Cada animal define su propio sonido.")
+    def make_sound(self) -> str:
+        raise NotImplementedError("Each animal defines its own sound.")
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}('{self.nombre}')"
+        return f"{self.__class__.__name__}('{self.name}')"
 
 
-class Perro(Animal):
-    def __init__(self, nombre: str, raza: str):
-        super().__init__(nombre, especie="perro")
-        self.raza = raza
+class Dog(Animal):
+    def __init__(self, name: str, breed: str):
+        super().__init__(name, species="dog")
+        self.breed = breed
 
-    def hacer_sonido(self) -> str:
-        return "¡Guau!"
+    def make_sound(self) -> str:
+        return "Woof!"
 
-    def describir(self) -> str:
-        base = super().describir()
-        return f"{base} de raza {self.raza}"
-
-
-class Gato(Animal):
-    def __init__(self, nombre: str, es_domestico: bool = True):
-        super().__init__(nombre, especie="gato")
-        self.es_domestico = es_domestico
-
-    def hacer_sonido(self) -> str:
-        return "¡Miau!"
+    def describe(self) -> str:
+        base = super().describe()
+        return f"{base}, breed: {self.breed}"
 
 
-class Loro(Animal):
-    def __init__(self, nombre: str, vocabulario: list[str]):
-        super().__init__(nombre, especie="loro")
-        self.vocabulario = vocabulario
+class Cat(Animal):
+    def __init__(self, name: str, is_domestic: bool = True):
+        super().__init__(name, species="cat")
+        self.is_domestic = is_domestic
 
-    def hacer_sonido(self) -> str:
-        return f"¡{self.vocabulario[0]}!"
+    def make_sound(self) -> str:
+        return "Meow!"
 
-    def hablar(self) -> str:
-        return " — ".join(self.vocabulario)
+
+class Parrot(Animal):
+    def __init__(self, name: str, vocabulary: list[str]):
+        super().__init__(name, species="parrot")
+        self.vocabulary = vocabulary
+
+    def make_sound(self) -> str:
+        return f"{self.vocabulary[0]}!"
+
+    def speak(self) -> str:
+        return " — ".join(self.vocabulary)
 
 
 if __name__ == "__main__":
-    animales: list[Animal] = [
-        Perro("Rex", "Pastor Alemán"),
-        Gato("Michi"),
-        Loro("Paco", ["Hola", "Buenos días", "Quiero agua"]),
+    animals: list[Animal] = [
+        Dog("Rex", "German Shepherd"),
+        Cat("Michi"),
+        Parrot("Paco", ["Hello", "Good morning", "I want water"]),
     ]
 
-    print("── Herencia: jerarquía Animal ──────────────────")
-    for a in animales:
-        print(f"  {a!r:<25}  {a.describir()}")
-        print(f"  {'':25}  Sonido: {a.hacer_sonido()}\n")
+    print("── Inheritance: Animal hierarchy ───────────────")
+    for a in animals:
+        print(f"  {a!r:<25}  {a.describe()}")
+        print(f"  {'':25}  Sound: {a.make_sound()}\n")

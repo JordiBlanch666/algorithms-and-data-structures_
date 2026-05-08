@@ -7,6 +7,11 @@ Runs demos from each portfolio module.
 
 import sys
 
+# Windows terminals default to cp1252 which can't render box-drawing characters.
+# This forces UTF-8 output so the portfolio menu displays correctly.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
 
 def demo_algorithms():
     from algoritmos.ordenamiento.burbuja import burbuja

@@ -11,33 +11,84 @@
 
 ## About me
 
-I'm not your typical first-semester CS student.
+I'm not your typical second-semester CS student.
 
 Before writing my first algorithm, I spent six years maintaining **zero-error metrics in live broadcast production** at K 102.7 FM — the closest real-world equivalent to a strict SLA. I designed **clinical decision algorithms in a hospital ICU** at San Jose Hospital, where documentation is non-negotiable and edge cases have consequences. At Charter Spectrum, I managed 50+ daily tickets using Jira and Zendesk while improving first-call resolution by 15%.
 
 That background — broadcast ops, clinical QA, and enterprise tech support — is what brought me to Software Engineering. I'm formalizing what I already know about precision, documentation, and systems thinking into code.
 
-This repository is where that transition lives.
+This repository tracks that transition, semester by semester.
 
 ---
 
 ## Repository structure
 
 ```
-📦 primer-cuatrimestre-isw/
+📦 algorithms-and-data-structures/
  ├── 📂 algoritmos/
- │   ├── 📂 ordenamiento/     ← Bubble, Selection, Insertion sort
- │   ├── 📂 busqueda/         ← Linear & Binary search
- │   └── 📂 recursion/        ← Factorial & Fibonacci (with memoization)
- ├── 📂 estructuras_datos/    ← Stack (LIFO) & Queue (FIFO)
- ├── 📂 fundamentos/          ← Functions, native data structures, file I/O
+ │   ├── 📂 ordenamiento/        ← Bubble, Selection, Insertion sort
+ │   ├── 📂 busqueda/            ← Linear & Binary search
+ │   └── 📂 recursion/           ← Factorial & Fibonacci (with memoization)
+ ├── 📂 estructuras_datos/       ← Stack (LIFO) & Queue (FIFO)
+ ├── 📂 fundamentos/             ← Functions, native data structures, file I/O
+ ├── 📂 poo/                     ← OOP: the four pillars + banking system ⬅ new
  └── 📂 proyectos/
      └── 📂 gestor_calificaciones/   ← CLI app with JSON persistence
 ```
 
 ---
 
-## Algorithms
+## OOP — Second Semester
+
+Four pillars, four files, one integrating project.
+
+| File | Concept | Demo |
+|------|---------|------|
+| `poo/01_clases_objetos.py` | Classes & objects | Product catalog with VAT |
+| `poo/02_encapsulacion.py` | Encapsulation | Bank account with private attributes |
+| `poo/03_herencia.py` | Inheritance + `super()` | Animal → Dog / Cat / Parrot hierarchy |
+| `poo/04_polimorfismo.py` | Polymorphism + ABC | Geometric shapes with a common interface |
+
+### Featured OOP Project — Banking System
+
+A cohesive example that combines all four pillars:
+
+```
+Cuenta (ABC)               ← abstract class, encapsulation
+├── CuentaAhorro           ← inheritance, applies interest
+└── CuentaCorriente        ← inheritance, overdraft limit
+```
+
+```bash
+python poo/herencia.py
+```
+
+```
+══ Sistema Bancario ════════════════════════════════
+
+Ahorro | MX00001 | Jordi Blanch | saldo: $1,365.00
+
+  Historial:
+    [10:32:01] Cuenta abierta con saldo inicial $1000.00
+    [10:32:01] Depósito    +$    500.00  →  saldo $1500.00
+    [10:32:01] Retiro      -$    200.00  →  saldo $1300.00
+    [10:32:01] Depósito    +$     65.00  →  saldo $1365.00
+```
+
+**Concepts applied:**
+
+| Concept | Where |
+|---------|-------|
+| Encapsulation | `__saldo` only modified via `depositar` / `retirar` |
+| Inheritance | `CuentaAhorro` and `CuentaCorriente` extend `Cuenta` |
+| Polymorphism | `retirar()` behaves differently in each subclass |
+| Abstraction | `Cuenta` is abstract — cannot be instantiated directly |
+| `super()` | Child constructor delegates to parent |
+| `@property` | Read-only balance exposed cleanly |
+
+---
+
+## Algorithms — First Semester
 
 ### Sorting
 
@@ -107,12 +158,19 @@ python gestor.py
 
 ---
 
-## What I learned this semester
+## What I've learned
 
-- Analyzing time and space complexity of algorithms
-- Implementing sorting and searching from scratch
-- Recursion, memoization, and when each matters
-- Designing custom data structures (Stack, Queue)
+**Second semester (current)**
+- OOP: classes, encapsulation, inheritance, polymorphism
+- Abstract base classes (`ABC`, `@abstractmethod`)
+- Properties, dunder methods, class vs. instance attributes
+- Designing with object hierarchies
+
+**First semester**
+- Time and space complexity analysis
+- Sorting and searching algorithms from scratch
+- Recursion and memoization
+- Custom data structures (Stack, Queue)
 - File persistence with JSON and CSV
 - Version control with Git & GitHub
 - Unix/Linux terminal and CLI workflows
@@ -130,8 +188,8 @@ python gestor.py
 ---
 
 > *I show up. I document everything. I don't break things.*
-> Currently finalizing a Software Engineering degree at Hybridge · Certified in Git/GitHub & n8n automation.
+> Currently completing a Software Engineering degree at Hybridge · Certified in Git/GitHub & n8n automation.
 
 ---
 
-*Hybridge — Software Engineering · First semester · 2025–2026*
+*Hybridge — Software Engineering · Second semester · 2025–2026*

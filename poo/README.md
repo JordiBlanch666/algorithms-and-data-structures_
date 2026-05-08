@@ -1,36 +1,36 @@
-# Programación Orientada a Objetos
+# Object-Oriented Programming
 
-Segundo cuatrimestre — Ingeniería en Software · Hybridge
+Second semester — Software Engineering · Hybridge
 
-## Los cuatro pilares
+## The four pillars
 
-| # | Archivo | Concepto | Demo |
-|---|---------|----------|------|
-| 1 | `01_clases_objetos.py` | Clases y objetos | Catálogo de productos con IVA |
-| 2 | `02_encapsulacion.py` | Encapsulación | Cuenta bancaria con atributos privados |
-| 3 | `03_herencia.py` | Herencia + `super()` | Jerarquía Animal → Perro / Gato / Loro |
-| 4 | `04_polimorfismo.py` | Polimorfismo + ABC | Figuras geométricas con interfaz común |
+| # | File | Concept | Demo |
+|---|------|---------|------|
+| 1 | `01_clases_objetos.py` | Classes & objects | Product catalog with VAT |
+| 2 | `02_encapsulacion.py` | Encapsulation | Bank account with private attributes |
+| 3 | `03_herencia.py` | Inheritance + `super()` | Animal → Dog / Cat / Parrot hierarchy |
+| 4 | `04_polimorfismo.py` | Polymorphism + ABC | Geometric shapes with a common interface |
 
-## Proyecto integrador: Sistema Bancario (`herencia.py`)
+## Integrating project: Banking System (`herencia.py`)
 
-Aplica los cuatro pilares en un solo módulo coherente:
+Applies all four pillars in one cohesive module:
 
 ```
-Cuenta (ABC)               ← clase abstracta, encapsulación
-├── CuentaAhorro           ← herencia, aplica interés
-└── CuentaCorriente        ← herencia, límite de sobregiro
+Account (ABC)              ← abstract class, encapsulation
+├── SavingsAccount         ← inheritance, applies interest
+└── CheckingAccount        ← inheritance, overdraft limit
 ```
 
-**Conceptos aplicados:**
+**Concepts applied:**
 
-| Concepto | Dónde |
-|----------|-------|
-| Encapsulación | `__saldo` solo modificable via `depositar` / `retirar` |
-| Herencia | `CuentaAhorro` y `CuentaCorriente` extienden `Cuenta` |
-| Polimorfismo | `retirar()` se comporta distinto en cada subclase |
-| Abstracción | `Cuenta` es abstracta; no se puede instanciar directamente |
-| `super()` | El constructor hijo llama al padre con `super().__init__()` |
-| Properties | `@property` expone saldo de solo lectura |
+| Concept | Where |
+|---------|-------|
+| Encapsulation | `__balance` only modified via `deposit` / `withdraw` |
+| Inheritance | `SavingsAccount` and `CheckingAccount` extend `Account` |
+| Polymorphism | `withdraw()` behaves differently in each subclass |
+| Abstraction | `Account` is abstract — cannot be instantiated directly |
+| `super()` | Child constructor delegates initialization to parent |
+| `@property` | Read-only balance exposed cleanly without a getter method |
 
 ```bash
 python poo/herencia.py

@@ -32,7 +32,8 @@ This repository tracks that transition, semester by semester.
  │   └── 📂 recursion/           ← Factorial & Fibonacci (with memoization)
  ├── 📂 estructuras_datos/       ← Stack (LIFO) & Queue (FIFO)
  ├── 📂 fundamentos/             ← Functions, native data structures, file I/O
- ├── 📂 poo/                     ← OOP: the four pillars + banking system ⬅ new
+ ├── 📂 poo/                     ← OOP: the four pillars + banking system ⬅ 2nd sem
+ ├── 📂 redes/                   ← Networking fundamentals: DNS, TCP, HTTP ⬅ 2nd sem
  └── 📂 proyectos/
      └── 📂 gestor_calificaciones/   ← CLI app with JSON persistence
 ```
@@ -104,6 +105,32 @@ Savings | MX00001 | Jordi Blanch | balance: $1,365.00
 | Abstraction | `Account` is abstract — cannot be instantiated directly |
 | `super()` | Child constructor delegates initialization to parent |
 | `@property` | Read-only balance exposed cleanly |
+
+---
+
+## Networking Fundamentals — Second Semester
+
+Four progressive scripts covering how computers find each other, connect, and exchange data.
+No external libraries — Python's standard library only.
+
+| File | Concept | What it does |
+|------|---------|--------------|
+| `redes/01_network_info.py` | DNS & IP addressing | Resolves hostnames, reverse lookup |
+| `redes/02_tcp_client_server.py` | TCP sockets | Echo server + client over localhost |
+| `redes/03_http_client.py` | HTTP protocol | Real GET requests, status codes, JSON API |
+| `redes/04_port_scanner.py` | Ports & services | Concurrent scanner with thread pool |
+
+```bash
+# Terminal 1                               # Terminal 2
+python redes/02_tcp_client_server.py server  &  python redes/02_tcp_client_server.py client
+```
+
+```
+Server listening on 127.0.0.1:65432 ...        Connected to server at 127.0.0.1:65432
+Client connected from ('127.0.0.1', 54321)
+Received: 'hello from the client'              Sent:     'hello from the client'
+Sent:     'HELLO FROM THE CLIENT'              Received: 'HELLO FROM THE CLIENT'
+```
 
 ---
 
@@ -184,6 +211,8 @@ python gestor.py
 - Abstract base classes (`ABC`, `@abstractmethod`)
 - Properties, dunder methods, class vs. instance attributes
 - Designing with object hierarchies
+- Networking: IP addressing, DNS, TCP sockets, HTTP, port scanning
+- Concurrency: `ThreadPoolExecutor` for parallel I/O tasks
 
 **First semester**
 - Time and space complexity analysis

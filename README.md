@@ -6,7 +6,7 @@
 [![GitHub](https://img.shields.io/badge/JordiBlanch666-181717?style=flat&logo=github&logoColor=white)](https://github.com/JordiBlanch666)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)
 ![Git](https://img.shields.io/badge/Git-F05032?style=flat&logo=git&logoColor=white)
-![Semester](https://img.shields.io/badge/2nd%20semester-OOP-6A0DAD?style=flat)
+![Semester](https://img.shields.io/badge/2nd%20semester-OOP%20%26%20Networking-6A0DAD?style=flat)
 
 ---
 
@@ -32,10 +32,14 @@ This repository tracks that transition, semester by semester.
  │   └── 📂 recursion/           ← Factorial & Fibonacci (with memoization)
  ├── 📂 estructuras_datos/       ← Stack (LIFO) & Queue (FIFO)
  ├── 📂 fundamentos/             ← Functions, native data structures, file I/O
- ├── 📂 poo/                     ← OOP: the four pillars + banking system ⬅ 2nd sem
- ├── 📂 redes/                   ← Networking fundamentals: DNS, TCP, HTTP ⬅ 2nd sem
+ ├── 📂 poo/                     ← OOP: the four pillars + banking system
+ ├── 📂 redes/                   ← Networking: DNS, TCP, HTTP, port scanner
  └── 📂 proyectos/
-     └── 📂 gestor_calificaciones/   ← CLI app with JSON persistence
+     ├── 📂 calculadora/         ← Calculator with history & memory  ⬅ new
+     ├── 📂 todo_app/            ← To-Do app with priorities & JSON  ⬅ new
+     ├── 📂 hangman/             ← Hangman game with ASCII art       ⬅ new
+     ├── 📂 quiz/                ← Quiz app with timer & categories  ⬅ new
+     └── 📂 gestor_calificaciones/ ← Grade Manager CLI
 ```
 
 Run the full portfolio demo from the root:
@@ -44,17 +48,138 @@ Run the full portfolio demo from the root:
 python main.py
 ```
 
-```
-╔══════════════════════════════════════════╗
-║   Portfolio · Jordi Contreras Blanch    ║
-║   Software Engineering · Hybridge       ║
-╚══════════════════════════════════════════╝
+---
 
-  [1] Algorithms (sorting, searching, recursion)
-  [2] Data structures (Stack, Queue)
-  [3] OOP — Banking System
-  [0] Exit
+## Projects
+
+### Calculator CLI
+> `proyectos/calculadora/calculadora.py`
+
+A command-line calculator with operation history, memory register, and safe expression parsing — no `eval()` used.
+
+```bash
+python proyectos/calculadora/calculadora.py
 ```
+
+```
+  calc › 125 * 8
+  = 1000
+
+  calc [M=1000] › 1000 / 3
+  = 333.33333333
+
+  calc › history
+  #    Operation                      Result
+  --------------------------------------------------
+  1    125 * 8 = 1000
+  2    1000 / 3 = 333.33333333
+```
+
+| Concept | Where |
+|---------|-------|
+| Input parsing | `parse_expression()` splits and validates tokens |
+| Error handling | `ZeroDivisionError`, `ValueError` caught gracefully |
+| State | history list + memory float persist across operations |
+| No `eval()` | explicit `if/elif` per operator — safe and readable |
+
+---
+
+### To-Do App CLI
+> `proyectos/todo_app/todo.py`
+
+Task manager with three priority levels, status filters, and JSON persistence. Data survives between sessions.
+
+```bash
+python proyectos/todo_app/todo.py
+```
+
+```
+  todo › add Fix binary search bug -p high
+  ✓ Added [1] 'Fix binary search bug' (high)
+
+  todo › add Read OOP chapter
+  ✓ Added [2] 'Read OOP chapter' (medium)
+
+  todo › list pending
+  ID   St  Pri      Title                               Created
+  ────────────────────────────────────────────────────────────────────
+  1    ○   🔴 high  Fix binary search bug               2025-05-19 10:00
+  2    ○   🟡 med   Read OOP chapter                    2025-05-19 10:01
+```
+
+| Concept | Where |
+|---------|-------|
+| CRUD | `add_task`, `complete_task`, `delete_task` |
+| Filtering & sorting | `filter_tasks()` by status and priority |
+| JSON persistence | `load_tasks` / `save_tasks` on every change |
+| ID generation | `next_id()` — max existing ID + 1 |
+
+---
+
+### Hangman
+> `proyectos/hangman/hangman.py`
+
+Classic word-guessing game with ASCII art gallows, three difficulty levels, and a built-in word bank.
+
+```bash
+python proyectos/hangman/hangman.py
+```
+
+```
+       -----
+       |   |
+       |   O
+       |  /|
+       |
+       |
+    --------
+
+  Difficulty: MEDIUM  |  Wrong guesses left: 3
+
+  p y _ _ _ _
+
+  Wrong letters: a e i o s
+```
+
+| Concept | Where |
+|---------|-------|
+| Sets | `guessed` and `wrong` for O(1) membership checks |
+| String masking | `masked_word()` replaces unguessed letters with `_` |
+| Game loop | `play_round()` handles win/loss conditions |
+| ASCII art | 7 gallows stages indexed by wrong-guess count |
+
+---
+
+### Quiz App CLI
+> `proyectos/quiz/quiz.py`
+
+Multiple-choice quiz on Python fundamentals and Networking basics. 15-second timer per question, speed bonus for answers under 5 seconds.
+
+```bash
+python proyectos/quiz/quiz.py
+```
+
+```
+  Question 3/8   Score: 4   Time limit: 15s
+
+  What is the time complexity of accessing an element in a Python list by index?
+
+    [1] O(n)
+    [2] O(log n)
+    [3] O(1)
+    [4] O(n²)
+
+  Your answer (1-4): 3
+  ✓ Correct! (+1 speed bonus!)  (2.3s)
+  💡 Lists store elements in contiguous memory, so index access is always O(1).
+```
+
+| Concept | Where |
+|---------|-------|
+| Randomization | `random.sample()` shuffles questions each run |
+| Timer | `time.time()` measures response time per question |
+| Speed bonus | extra point for answering in under 5 seconds |
+| Score grading | percentage → A/B/C/F with feedback message |
 
 ---
 
@@ -71,8 +196,6 @@ Four pillars, four files, one integrating project.
 
 ### Featured OOP Project — Banking System
 
-A cohesive example that combines all four pillars:
-
 ```
 Account (ABC)              ← abstract class, encapsulation
 ├── SavingsAccount         ← inheritance, applies interest
@@ -82,20 +205,6 @@ Account (ABC)              ← abstract class, encapsulation
 ```bash
 python poo/herencia.py
 ```
-
-```
-══ Banking System ══════════════════════════════════
-
-Savings | MX00001 | Jordi Blanch | balance: $1,365.00
-
-  History:
-    [10:32:01] Account opened with initial balance $1000.00
-    [10:32:01] Deposit    +$    500.00  →  balance $1500.00
-    [10:32:01] Withdraw   -$    200.00  →  balance $1300.00
-    [10:32:01] Deposit    +$     65.00  →  balance $1365.00
-```
-
-**Concepts applied:**
 
 | Concept | Where |
 |---------|-------|
@@ -110,27 +219,12 @@ Savings | MX00001 | Jordi Blanch | balance: $1,365.00
 
 ## Networking Fundamentals — Second Semester
 
-Four progressive scripts covering how computers find each other, connect, and exchange data.
-No external libraries — Python's standard library only.
-
 | File | Concept | What it does |
 |------|---------|--------------|
 | `redes/01_network_info.py` | DNS & IP addressing | Resolves hostnames, reverse lookup |
 | `redes/02_tcp_client_server.py` | TCP sockets | Echo server + client over localhost |
 | `redes/03_http_client.py` | HTTP protocol | Real GET requests, status codes, JSON API |
 | `redes/04_port_scanner.py` | Ports & services | Concurrent scanner with thread pool |
-
-```bash
-# Terminal 1                               # Terminal 2
-python redes/02_tcp_client_server.py server  &  python redes/02_tcp_client_server.py client
-```
-
-```
-Server listening on 127.0.0.1:65432 ...        Connected to server at 127.0.0.1:65432
-Client connected from ('127.0.0.1', 54321)
-Received: 'hello from the client'              Sent:     'hello from the client'
-Sent:     'HELLO FROM THE CLIENT'              Received: 'HELLO FROM THE CLIENT'
-```
 
 ---
 
@@ -153,54 +247,17 @@ Sent:     'HELLO FROM THE CLIENT'              Received: 'HELLO FROM THE CLIENT'
 
 ### Recursion
 
-- **Factorial** — base case + recursive call
+- **Factorial** — base case + recursive call, O(n) stack space vs O(1) iterative
 - **Fibonacci** — naive O(2ⁿ) vs. memoized O(n) side by side
-
----
-
-## Featured project — Grade Manager CLI
-
-A command-line app to register and analyze student grades — built to demonstrate
-functions, data structures, loops, conditionals, file I/O, and error handling in one coherent tool.
-
-```bash
-cd proyectos/gestor_calificaciones
-python gestor.py
-```
-
-```
-╔══════════════════════════════╗
-║      Grade Manager CLI       ║
-╚══════════════════════════════╝
-
-  Student              Grades   Average   Grade
-  -----------------------------------------------
-  Ana García                3      88.3       B
-  Carlos López              4      91.5       A
-  María Martínez            2      74.0       C
-
-  Class average: 84.6
-```
-
-**Concepts applied:**
-
-| Concept            | Where                                      |
-|--------------------|--------------------------------------------|
-| Functions          | `load_data`, `calculate_average`, etc.     |
-| Dict / List        | Student and grade storage                  |
-| Loops              | Main menu loop, report rendering           |
-| Conditionals       | Input validation, letter grade logic       |
-| File I/O (JSON)    | Persistence with `json.load / json.dump`   |
-| Error handling     | `try/except` on grade input                |
 
 ---
 
 ## Data Structures
 
-| Structure | Type | Key operations         | Real-world demo              |
-|-----------|------|------------------------|------------------------------|
-| Stack     | LIFO | `push` / `pop`         | Balanced parentheses checker |
-| Queue     | FIFO | `enqueue` / `dequeue`  | Service queue simulation     |
+| Structure | Type | Key operations     | Real-world demo              |
+|-----------|------|--------------------|------------------------------|
+| Stack     | LIFO | `push` / `pop`     | Balanced parentheses checker |
+| Queue     | FIFO | `enqueue`/`dequeue`| Service queue simulation     |
 
 ---
 
@@ -213,25 +270,25 @@ python gestor.py
 - Designing with object hierarchies
 - Networking: IP addressing, DNS, TCP sockets, HTTP, port scanning
 - Concurrency: `ThreadPoolExecutor` for parallel I/O tasks
+- CLI app design: REPL loops, input validation, JSON persistence, CRUD
 
 **First semester**
 - Time and space complexity analysis
 - Sorting and searching algorithms from scratch
 - Recursion and memoization
 - Custom data structures (Stack, Queue)
-- File persistence with JSON and CSV
+- File persistence with JSON
 - Version control with Git & GitHub
-- Unix/Linux terminal and CLI workflows
 
 ---
 
 ## Background
 
-| Role              | Organization        | Relevant to SE                             |
-|-------------------|---------------------|--------------------------------------------|
-| QA / Broadcast Ops | K 102.7 FM         | Zero-error SLA, live system monitoring     |
-| Clinical QA       | San Jose Hospital   | Algorithm design, validation, documentation |
-| Tech Support      | Charter Spectrum    | Jira/Zendesk, ticket management, 15% FCR ↑ |
+| Role               | Organization      | Relevant to SE                              |
+|--------------------|-------------------|---------------------------------------------|
+| QA / Broadcast Ops | K 102.7 FM        | Zero-error SLA, live system monitoring      |
+| Clinical QA        | San Jose Hospital | Algorithm design, validation, documentation |
+| Tech Support       | Charter Spectrum  | Jira/Zendesk, ticket management, 15% FCR ↑  |
 
 ---
 
@@ -239,5 +296,7 @@ python gestor.py
 > Currently completing a Software Engineering degree at Hybridge · Certified in Git/GitHub & n8n automation.
 
 ---
+
+**Jordi Yashua Contreras Blanch** · [paastor.blanch@gmail.com](mailto:paastor.blanch@gmail.com) · [github.com/JordiBlanch666](https://github.com/JordiBlanch666)
 
 *Hybridge — Software Engineering · Second semester · 2025–2026*

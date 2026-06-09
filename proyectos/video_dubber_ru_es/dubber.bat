@@ -1,8 +1,8 @@
 @echo off
-:: setlocal: todas las variables son locales a esta ejecucion, sin residuos de corridas anteriores
+:: setlocal: variables locales a esta ejecucion, sin residuos de corridas anteriores
 setlocal
 chcp 65001 >nul
-:: Cambiar al directorio del .bat para que dubber.py siempre encuentre sus archivos
+:: Cambiar al directorio del .bat para que dubber.py encuentre sus archivos
 cd /d "%~dp0"
 
 echo ============================================
@@ -63,7 +63,7 @@ set /p BG="Volumen [0-100]: "
 if "%BG%"=="" set BG=15
 
 :: Convertir porcentaje entero a decimal que Python pueda leer
-:: Los valores de un digito necesitan cero adelante (5 -> 0.05, no 0.5)
+:: Valores de un digito necesitan cero adelante (ej: 5 -> 0.05, no 0.5)
 set /a BG_INT=%BG%
 if %BG_INT% equ 0   set BG_VOL=0.0
 if %BG_INT% equ 5   set BG_VOL=0.05
@@ -77,20 +77,9 @@ if %BG_INT% equ 100 set BG_VOL=1.0
 :: Fallback para valores de dos digitos no listados (ej: 35 -> 0.35)
 if not defined BG_VOL set BG_VOL=0.%BG_INT%
 
-:: Cookies: necesario si YouTube/VK pide autenticacion
-:: Chrome y Edge deben estar completamente cerrados para que yt-dlp pueda leer sus cookies
-echo.
-echo Cookies ^(Enter = usar cookies del navegador automaticamente^)
-echo  Si falla la descarga, exporta cookies.txt con la extension
-echo  'Get cookies.txt LOCALLY' y escribe aqui la ruta al archivo.
-set COOKIES=
-set /p COOKIES="Ruta a cookies.txt (o Enter para omitir): "
-
-:: Construir flags opcionales
+:: Construir flag --idioma-origen solo si el usuario ingreso algo
 set LANG_ARG=
 if not "%LANG%"=="" set LANG_ARG=--idioma-origen %LANG%
-set COOKIES_ARG=
-if not "%COOKIES%"=="" set COOKIES_ARG=--cookies "%COOKIES%"
 
 :: Resumen de configuracion antes de iniciar
 echo.
@@ -106,12 +95,11 @@ if "%LANG%"=="" (
 )
 echo  Salida: misma carpeta que este .bat
 echo  Nombre: ^<titulo^>_doblado_es_^<fecha_hora^>.mp4
-if not "%COOKIES%"=="" echo  Cookies: %COOKIES%
 echo ============================================
 echo.
 
 :: Lanzar el script con los parametros elegidos
-"C:\Users\paast\AppData\Local\Python\pythoncore-3.11-64\python.exe" dubber.py "%URL%" --voz %VOZ% --modelo %MODELO% --volumen-fondo %BG_VOL% %LANG_ARG% %COOKIES_ARG%
+"C:\Users\paast\AppData\Local\Python\pythoncore-3.11-64\python.exe" dubber.py "%URL%" --voz %VOZ% --modelo %MODELO% --volumen-fondo %BG_VOL% %LANG_ARG%
 
 echo.
 pause

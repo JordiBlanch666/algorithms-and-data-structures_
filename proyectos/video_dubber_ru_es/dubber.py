@@ -343,17 +343,22 @@ def build_dubbed_audio(segments: list, total_duration_s: float, tmp_dir: str) ->
     return out_wav
 
 
-def merge_video_audio(video_path: str, audio_path: str, output_path: str):
-    step("Combinando video con pista doblada")
-    # -c:v copy: copia el stream de video sin recodificar (rápido, sin pérdida de calidad)
-    # -map 0:v:0 / -map 1:a:0: toma video del original y audio de la pista doblada
+def merge_video_audio(video_path: str, audio_path: str, output_path: str, bg_volume: float = 0.15):
+    step(f"Combinando video con pista doblada (fondo original al {int(bg_volume*100)}%)")
+    # Mezcla el audio original a bajo volumen (fondo ambiental) con la pista TTS a volumen completo.
+    # normalize=0 evita que amix divida el volumen de cada input por la cantidad de entradas.
+    filter_complex = (
+        f"[0:a]volume={bg_volume}[bg];"
+        f"[bg][1:a]amix=inputs=2:duration=first:normalize=0[aout]"
+    )
     subprocess.run([
         'ffmpeg', '-y',
         '-i', video_path,
         '-i', audio_path,
-        '-c:v', 'copy',
+        '-filter_complex', filter_complex,
         '-map', '0:v:0',
-        '-map', '1:a:0',
+        '-map', '[aout]',
+        '-c:v', 'copy',
         '-shortest',
         output_path
     ], check=True, capture_output=True)
@@ -366,7 +371,7 @@ def merge_video_audio(video_path: str, audio_path: str, output_path: str):
 
 def dub(url: str, output_path: str = None, model_size: str = "base",
         voice: str = "es-MX-JorgeNeural", navegador: str = None, cookies: str = None,
-        source_lang: str = None):
+        source_lang: str = None, bg_volume: float = 0.15):
     check_ffmpeg()
 
     # Acepta tanto URLs como rutas a archivos locales
@@ -408,7 +413,7 @@ def dub(url: str, output_path: str = None, model_size: str = "base",
 
         dubbed_wav = build_dubbed_audio(segments, total_duration, tmp_dir)
 
-        merge_video_audio(video_path, dubbed_wav, output_path)
+        merge_video_audio(video_path, dubbed_wav, output_path, bg_volume=bg_volume)
 
     print(f"\n{'='*50}")
     print(f"  Doblaje completado -> {output_path}")
@@ -469,10 +474,15 @@ Voces latinoamericanas disponibles (Edge TTS):
         '--cookies', default=None,
         help='Ruta a un archivo cookies.txt exportado manualmente'
     )
+    parser.add_argument(
+        '--volumen-fondo', default=0.15, type=float, dest='volumen_fondo',
+        metavar='NIVEL',
+        help='Volumen del audio original de fondo (0.0=silencio, 0.15=15%% por defecto, 1.0=completo)'
+    )
 
     args = parser.parse_args()
     dub(args.url, args.output, args.modelo, args.voz, args.navegador, args.cookies,
-        source_lang=args.idioma_origen)
+        source_lang=args.idioma_origen, bg_volume=args.volumen_fondo)
 
 
 if __name__ == '__main__':

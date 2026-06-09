@@ -9,15 +9,17 @@ Pipeline:
   2. Extrae el audio en WAV mono 16 kHz (formato que exige Whisper)
   3. Transcribe con faster-whisper → lista de segmentos con timestamps
   4. Traduce cada segmento al español con Google Translate (deep-translator)
-  5. Genera audio TTS para cada segmento con Microsoft Edge TTS
-  6. Ensambla la pista doblada sobre una base silenciosa del mismo largo del video
-  7. Combina el video original con la nueva pista de audio (ffmpeg)
+  5. Genera audio TTS para cada segmento con Microsoft Edge TTS (voz latinoamericana)
+  6. Ensambla la pista doblada a velocidad natural sobre una base silenciosa (estilo documental)
+  7. Mezcla la pista doblada con el audio original a bajo volumen (música/ambiente de fondo)
+  8. Combina video original + pista mezclada en un nuevo archivo mp4 (sin recodificar video)
 
 Uso:
     python dubber.py <URL>
     python dubber.py <URL> -o video_doblado.mp4
     python dubber.py <URL> --modelo small --voz es-MX-JorgeNeural
     python dubber.py <URL> --idioma-origen ru
+    python dubber.py <URL> --volumen-fondo 0.20
     python dubber.py archivo_local.mp4
 """
 
@@ -372,6 +374,7 @@ def merge_video_audio(video_path: str, audio_path: str, output_path: str, bg_vol
 def dub(url: str, output_path: str = None, model_size: str = "base",
         voice: str = "es-MX-JorgeNeural", navegador: str = None, cookies: str = None,
         source_lang: str = None, bg_volume: float = 0.15):
+    # bg_volume: nivel del audio original mezclado de fondo (0.0=silencio, 1.0=volumen completo)
     check_ffmpeg()
 
     # Acepta tanto URLs como rutas a archivos locales

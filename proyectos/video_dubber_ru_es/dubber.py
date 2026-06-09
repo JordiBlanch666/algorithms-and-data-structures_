@@ -141,8 +141,11 @@ def download_video(url: str, output_dir: str, navegador: str = None, cookies: st
         for f in Path(output_dir).glob('original.*'):
             f.unlink(missing_ok=True)
 
-    # Opción 3: cookies del navegador (necesario para videos privados/de grupo en VK)
-    browsers_to_try = [navegador] if navegador else ['chrome', 'edge', 'firefox']
+    # Opción 3: cookies del navegador — Edge primero porque en Windows 11 siempre está instalado
+    # y su base de cookies es menos propensa al bloqueo que la de Chrome.
+    # IMPORTANTE: el navegador elegido debe estar completamente cerrado antes de ejecutar,
+    # de lo contrario Windows bloquea el archivo SQLite de cookies y la copia falla.
+    browsers_to_try = [navegador] if navegador else ['edge', 'chrome', 'firefox']
 
     last_exc = None
     for browser in browsers_to_try:
@@ -163,14 +166,21 @@ def download_video(url: str, output_dir: str, navegador: str = None, cookies: st
 
     error(
         f"No se pudo descargar el video.\n"
-        f"  Asegurate de estar logueado en VK en Chrome, Edge o Firefox.\n"
         f"  Ultimo error: {last_exc}\n"
         f"\n"
-        f"  Alternativa — exportar cookies manualmente:\n"
-        f"    1. Instala la extension 'Get cookies.txt LOCALLY' en Chrome/Edge\n"
-        f"    2. Ve a vk.com, abre la extension y exporta las cookies\n"
-        f"    3. Guarda el archivo como cookies.txt en esta carpeta\n"
-        f"    4. Ejecuta: python dubber.py <URL> --cookies cookies.txt"
+        f"  Soluciones:\n"
+        f"  1. Cierra completamente Chrome y Edge, luego vuelve a intentar.\n"
+        f"     (Windows bloquea el archivo de cookies mientras el navegador esta abierto)\n"
+        f"\n"
+        f"  2. Exporta las cookies manualmente:\n"
+        f"     a. Instala la extension 'Get cookies.txt LOCALLY' en Chrome o Edge\n"
+        f"     b. Visita youtube.com o vk.com con sesion iniciada\n"
+        f"     c. Abre la extension y exporta las cookies\n"
+        f"     d. Guarda el archivo como cookies.txt en la carpeta del script\n"
+        f"     e. Ejecuta: python dubber.py <URL> --cookies cookies.txt\n"
+        f"\n"
+        f"  3. Especifica el navegador manualmente:\n"
+        f"     python dubber.py <URL> --navegador edge"
     )
 
 

@@ -77,9 +77,20 @@ if %BG_INT% equ 100 set BG_VOL=1.0
 :: Fallback para valores de dos digitos no listados (ej: 35 -> 0.35)
 if not defined BG_VOL set BG_VOL=0.%BG_INT%
 
-:: Construir flag --idioma-origen solo si el usuario ingreso algo
+:: Cookies: necesario si YouTube/VK pide autenticacion
+:: Chrome y Edge deben estar completamente cerrados para que yt-dlp pueda leer sus cookies
+echo.
+echo Cookies ^(Enter = usar cookies del navegador automaticamente^)
+echo  Si falla la descarga, exporta cookies.txt con la extension
+echo  'Get cookies.txt LOCALLY' y escribe aqui la ruta al archivo.
+set COOKIES=
+set /p COOKIES="Ruta a cookies.txt (o Enter para omitir): "
+
+:: Construir flags opcionales
 set LANG_ARG=
 if not "%LANG%"=="" set LANG_ARG=--idioma-origen %LANG%
+set COOKIES_ARG=
+if not "%COOKIES%"=="" set COOKIES_ARG=--cookies "%COOKIES%"
 
 :: Resumen de configuracion antes de iniciar
 echo.
@@ -95,11 +106,12 @@ if "%LANG%"=="" (
 )
 echo  Salida: misma carpeta que este .bat
 echo  Nombre: ^<titulo^>_doblado_es_^<fecha_hora^>.mp4
+if not "%COOKIES%"=="" echo  Cookies: %COOKIES%
 echo ============================================
 echo.
 
 :: Lanzar el script con los parametros elegidos
-"C:\Users\paast\AppData\Local\Python\pythoncore-3.11-64\python.exe" dubber.py "%URL%" --voz %VOZ% --modelo %MODELO% --volumen-fondo %BG_VOL% %LANG_ARG%
+"C:\Users\paast\AppData\Local\Python\pythoncore-3.11-64\python.exe" dubber.py "%URL%" --voz %VOZ% --modelo %MODELO% --volumen-fondo %BG_VOL% %LANG_ARG% %COOKIES_ARG%
 
 echo.
 pause

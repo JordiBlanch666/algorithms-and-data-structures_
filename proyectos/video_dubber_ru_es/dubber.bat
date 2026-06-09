@@ -7,6 +7,7 @@ cd /d "%~dp0"
 
 echo ============================================
 echo   VIDEO DUBBER -- Espanol Latino
+echo   Doblaje automatico con IA estilo documental
 echo ============================================
 echo.
 
@@ -42,22 +43,27 @@ if "%VOZ_OPT%"=="4" set VOZ=es-AR-TomasNeural
 :: Modelo Whisper: mas grande = mejor transcripcion pero mas lento y mas RAM
 echo.
 echo Modelo Whisper ^(Enter = base^)
-echo  tiny=rapido/peor  base=equilibrado  small=mejor/lento
+echo  tiny = rapido pero menos preciso
+echo  base = equilibrio calidad/velocidad  [defecto]
+echo  small = mejor calidad, mas lento
 set MODELO=base
 set /p MODELO="Modelo: "
 if "%MODELO%"=="" set MODELO=base
 
-:: Volumen del audio original de fondo
+:: Volumen del audio original mezclado como fondo
 echo.
-echo Volumen de fondo ^(Enter = 15%% por defecto^)
-echo  0  = sin sonido de fondo
+echo Volumen de fondo ^(Enter = 15 por defecto^)
+echo  0  = sin sonido de fondo ^(solo voz doblada^)
 echo  10 = muy suave
 echo  15 = suave [defecto]
 echo  25 = moderado
+echo  50 = alto
 set BG=15
 set /p BG="Volumen [0-100]: "
 if "%BG%"=="" set BG=15
-:: Convertir porcentaje entero a decimal que Python pueda leer (ej: 15 -> 0.15, 5 -> 0.05)
+
+:: Convertir porcentaje entero a decimal que Python pueda leer
+:: Los valores de un digito necesitan cero adelante (5 -> 0.05, no 0.5)
 set /a BG_INT=%BG%
 if %BG_INT% equ 0   set BG_VOL=0.0
 if %BG_INT% equ 5   set BG_VOL=0.05
@@ -68,16 +74,17 @@ if %BG_INT% equ 25  set BG_VOL=0.25
 if %BG_INT% equ 30  set BG_VOL=0.30
 if %BG_INT% equ 50  set BG_VOL=0.50
 if %BG_INT% equ 100 set BG_VOL=1.0
-:: Si el usuario ingresó un valor no listado, usar el porcentaje dividido manualmente
+:: Fallback para valores de dos digitos no listados (ej: 35 -> 0.35)
 if not defined BG_VOL set BG_VOL=0.%BG_INT%
 
-:: Construir flags opcionales
+:: Construir flag --idioma-origen solo si el usuario ingreso algo
 set LANG_ARG=
 if not "%LANG%"=="" set LANG_ARG=--idioma-origen %LANG%
 
-:: Resumen de lo que se va a ejecutar
+:: Resumen de configuracion antes de iniciar
 echo.
-echo --------------------------------------------
+echo ============================================
+echo  CONFIGURACION
 echo  Voz:    %VOZ%
 echo  Modelo: %MODELO%
 echo  Fondo:  %BG_INT%%%
@@ -86,7 +93,9 @@ if "%LANG%"=="" (
 ) else (
     echo  Idioma: %LANG%
 )
-echo --------------------------------------------
+echo  Salida: misma carpeta que este .bat
+echo  Nombre: ^<titulo^>_doblado_es_^<fecha_hora^>.mp4
+echo ============================================
 echo.
 
 :: Lanzar el script con los parametros elegidos

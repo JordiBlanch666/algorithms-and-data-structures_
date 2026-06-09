@@ -1,26 +1,27 @@
 #!/usr/bin/env python3
 """
 Video Dubber: Cualquier idioma → Español Latino
-Descarga un video de VK/YouTube y genera un doblaje al español con IA.
-El idioma de origen se auto-detecta con Whisper, o se puede especificar.
+Descarga un video de YouTube (u otra plataforma soportada por yt-dlp) y genera
+una versión doblada al español latinoamericano usando IA.
+El idioma de origen se detecta automáticamente con Whisper.
 
 Pipeline:
-  1. Descarga el video (yt-dlp, con fallback de cookies para VK)
+  1. Descarga el video (yt-dlp, cliente Android para evitar bloqueo anti-bot)
   2. Extrae el audio en WAV mono 16 kHz (formato que exige Whisper)
   3. Transcribe con faster-whisper → lista de segmentos con timestamps
   4. Traduce cada segmento al español con Google Translate (deep-translator)
   5. Genera audio TTS para cada segmento con Microsoft Edge TTS (voz latinoamericana)
   6. Ensambla la pista doblada a velocidad natural sobre una base silenciosa (estilo documental)
   7. Mezcla la pista doblada con el audio original a bajo volumen (música/ambiente de fondo)
-  8. Combina video original + pista mezclada en un nuevo archivo mp4 (sin recodificar video)
+  8. Combina video original + pista mezclada en un nuevo mp4 (sin recodificar video)
 
 Uso:
     python dubber.py <URL>
     python dubber.py <URL> -o video_doblado.mp4
     python dubber.py <URL> --modelo small --voz es-MX-JorgeNeural
-    python dubber.py <URL> --idioma-origen ru
+    python dubber.py <URL> --idioma-origen en
     python dubber.py <URL> --volumen-fondo 0.20
-    python dubber.py archivo_local.mp4
+    python dubber.py ruta/al/video.mp4
 """
 
 import asyncio
@@ -54,8 +55,8 @@ def error(msg: str):
     sys.exit(1)
 
 def check_ffmpeg():
-    # ffmpeg se usa para extraer audio, ajustar velocidad (atempo) y mezclar pistas
-    # ffprobe se usa para leer la duración del video
+    # ffmpeg: extraer audio, ajustar velocidad (atempo) y mezclar pistas
+    # ffprobe: leer metadatos y duración del video
     if not shutil.which("ffmpeg") or not shutil.which("ffprobe"):
         error(
             "ffmpeg no está instalado o no está en el PATH.\n"
@@ -63,28 +64,25 @@ def check_ffmpeg():
             "  En Windows: https://www.gyan.dev/ffmpeg/builds/"
         )
 
-def get_audio_duration_ms(path: str) -> float:
-    # Lee la duración del primer stream que la tenga (audio o video)
-    result = subprocess.run(
-        ['ffprobe', '-v', 'quiet', '-print_format', 'json', '-show_streams', path],
-        capture_output=True, text=True, check=True
-    )
-    for stream in json.loads(result.stdout).get('streams', []):
-        if 'duration' in stream:
-            return float(stream['duration']) * 1000
-    return 0.0
+def run_ffmpeg(args: list, desc: str = "ffmpeg"):
+    # Ejecuta ffmpeg y muestra el stderr completo si falla, en lugar de error genérico
+    result = subprocess.run(['ffmpeg'] + args, capture_output=True, text=True)
+    if result.returncode != 0:
+        error(f"{desc} falló:\n{result.stderr.strip()}")
 
 def get_video_duration(path: str) -> float:
-    # Lee la duración total del contenedor (más fiable que la del stream individual)
+    # Lee la duración del contenedor (más fiable que la del stream individual)
     result = subprocess.run(
         ['ffprobe', '-v', 'quiet', '-print_format', 'json', '-show_format', path],
-        capture_output=True, text=True, check=True
+        capture_output=True, text=True
     )
+    if result.returncode != 0:
+        error(f"ffprobe no pudo leer el video:\n{result.stderr.strip()}")
     return float(json.loads(result.stdout)['format']['duration'])
 
 def build_atempo_filter(ratio: float) -> str:
     # ffmpeg limita cada filtro atempo al rango 0.5–2.0, así que se encadenan
-    # varios si el ratio queda fuera de ese rango (ej: ratio=3.0 → atempo=2.0,atempo=1.5)
+    # varios si el ratio queda fuera (ej: ratio=3.0 → atempo=2.0,atempo=1.5)
     filters = []
     while ratio > 2.0:
         filters.append("atempo=2.0")
@@ -100,7 +98,15 @@ def build_atempo_filter(ratio: float) -> str:
 # Pipeline
 # ─────────────────────────────────────────────
 
-def download_video(url: str, output_dir: str, navegador: str = None, cookies: str = None) -> str:
+class _YtdlpLogger:
+    # Suprime el ruido de progreso y debug; muestra solo advertencias y errores reales
+    def debug(self, msg): pass
+    def info(self, msg): pass
+    def warning(self, msg): print(f"    ⚠ {msg}", file=sys.stderr)
+    def error(self, msg): print(f"    ✗ {msg}", file=sys.stderr)
+
+
+def download_video(url: str, output_dir: str) -> str:
     step(f"Descargando video de {url}")
     try:
         import yt_dlp
@@ -109,89 +115,42 @@ def download_video(url: str, output_dir: str, navegador: str = None, cookies: st
 
     ydl_opts = {
         'outtmpl': os.path.join(output_dir, 'original.%(ext)s'),
-        # Preferir mp4+m4a para evitar conversiones extra; si no existe, usar el mejor disponible
+        # Preferir mp4+m4a para evitar conversiones extra; fallback al mejor disponible
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
         'merge_output_format': 'mp4',
+        # Cliente Android: evita el bloqueo anti-bot de YouTube sin necesitar cookies
+        'extractor_args': {'youtube': {'player_client': ['android', 'web']}},
+        'logger': _YtdlpLogger(),
         'quiet': True,
         'no_warnings': True,
     }
 
-    # Opción 1: archivo de cookies exportado manualmente (máxima compatibilidad)
-    if cookies:
-        try:
-            opts = dict(ydl_opts)
-            opts['cookiefile'] = cookies
-            with yt_dlp.YoutubeDL(opts) as ydl:
-                ydl.download([url])
-            for f in Path(output_dir).glob('original.*'):
-                ok(f"Descargado con {cookies}: {f.name}")
-                return str(f)
-        except Exception as e:
-            error(f"Fallo con el archivo de cookies '{cookies}': {e}")
-
-    # Opción 2: sin cookies (funciona para YouTube público y videos de VK sin restricción)
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
         for f in Path(output_dir).glob('original.*'):
             ok(f"Descargado: {f.name}")
             return str(f)
-    except Exception:
-        # Limpiar archivos parciales antes del siguiente intento
-        for f in Path(output_dir).glob('original.*'):
-            f.unlink(missing_ok=True)
-
-    # Opción 3: cookies del navegador — Edge primero porque en Windows 11 siempre está instalado
-    # y su base de cookies es menos propensa al bloqueo que la de Chrome.
-    # IMPORTANTE: el navegador elegido debe estar completamente cerrado antes de ejecutar,
-    # de lo contrario Windows bloquea el archivo SQLite de cookies y la copia falla.
-    browsers_to_try = [navegador] if navegador else ['edge', 'chrome', 'firefox']
-
-    last_exc = None
-    for browser in browsers_to_try:
-        try:
-            opts = dict(ydl_opts)
-            opts['cookiesfrombrowser'] = (browser,)
-            with yt_dlp.YoutubeDL(opts) as ydl:
-                ydl.download([url])
-
-            for f in Path(output_dir).glob('original.*'):
-                ok(f"Descargado con cookies de {browser}: {f.name}")
-                return str(f)
-        except Exception as e:
-            last_exc = e
-            for f in Path(output_dir).glob('original.*'):
-                f.unlink(missing_ok=True)
-            continue
-
-    error(
-        f"No se pudo descargar el video.\n"
-        f"  Ultimo error: {last_exc}\n"
-        f"\n"
-        f"  Soluciones:\n"
-        f"  1. Cierra completamente Chrome y Edge, luego vuelve a intentar.\n"
-        f"     (Windows bloquea el archivo de cookies mientras el navegador esta abierto)\n"
-        f"\n"
-        f"  2. Exporta las cookies manualmente:\n"
-        f"     a. Instala la extension 'Get cookies.txt LOCALLY' en Chrome o Edge\n"
-        f"     b. Visita youtube.com o vk.com con sesion iniciada\n"
-        f"     c. Abre la extension y exporta las cookies\n"
-        f"     d. Guarda el archivo como cookies.txt en la carpeta del script\n"
-        f"     e. Ejecuta: python dubber.py <URL> --cookies cookies.txt\n"
-        f"\n"
-        f"  3. Especifica el navegador manualmente:\n"
-        f"     python dubber.py <URL> --navegador edge"
-    )
+    except Exception as e:
+        error(
+            f"No se pudo descargar el video.\n"
+            f"  Error: {e}\n"
+            f"\n"
+            f"  Posibles soluciones:\n"
+            f"  - Verifica que la URL sea correcta y el video sea público\n"
+            f"  - Actualiza yt-dlp: pip install -U yt-dlp\n"
+            f"  - Usa un archivo local: python dubber.py ruta/al/video.mp4"
+        )
 
 
 def extract_audio(video_path: str, audio_path: str):
     step("Extrayendo audio")
     # WAV PCM 16 kHz mono: formato exacto que espera Whisper para transcripción óptima
-    subprocess.run([
-        'ffmpeg', '-y', '-i', video_path,
+    run_ffmpeg([
+        '-y', '-i', video_path,
         '-vn', '-acodec', 'pcm_s16le', '-ar', '16000', '-ac', '1',
         audio_path
-    ], check=True, capture_output=True)
+    ], "Extracción de audio")
     ok()
 
 
@@ -238,7 +197,7 @@ def translate(segments: list, source_lang: str) -> list:
 
 
 # Voces de Edge TTS garantizadas como español latinoamericano
-# Se usan como fallback en orden si la voz principal no está disponible
+# Se usan como fallback en orden si la voz principal no está disponible en la API
 VOICES_LATAM = [
     "es-MX-JorgeNeural",   # México, hombre
     "es-MX-DaliaNeural",   # México, mujer
@@ -249,13 +208,13 @@ VOICES_LATAM = [
 
 async def validate_voice(voice: str) -> str:
     # Consulta en tiempo real qué voces tiene disponibles la API de Edge TTS
-    # Así se evita que un nombre incorrecto cause fallo silencioso en todos los segmentos
+    # Evita que un nombre incorrecto cause fallo silencioso en todos los segmentos
     try:
         import edge_tts
         available = {v['ShortName'] for v in await edge_tts.list_voices()}
         if voice in available:
             return voice
-        print(f"    ⚠ Voz '{voice}' no disponible en edge-tts.", file=sys.stderr)
+        print(f"    ⚠ Voz '{voice}' no disponible.", file=sys.stderr)
         for v in VOICES_LATAM:
             if v in available:
                 print(f"    → Usando voz alternativa: {v}", file=sys.stderr)
@@ -287,7 +246,7 @@ async def _tts_save(text: str, path: str, voice: str, semaphore: asyncio.Semapho
 
 async def generate_all_tts(segments: list, tmp_dir: str, voice: str):
     voice = await validate_voice(voice)
-    step(f"Generando voz española con Edge TTS (voz: {voice})")
+    step(f"Generando voz con Edge TTS (voz: {voice})")
     # Semáforo de 10: limita las peticiones simultáneas a la API para evitar throttling
     semaphore = asyncio.Semaphore(10)
     tasks = []
@@ -321,29 +280,27 @@ def build_dubbed_audio(segments: list, total_duration_s: float, tmp_dir: str) ->
         if len(tts_audio) == 0:
             continue
 
+        start_ms = int(seg['start'] * 1000)
+
         # Gap disponible = tiempo hasta que empieza la siguiente frase (o fin del video)
-        # Esto define el límite máximo que puede ocupar este segmento sin tapar al siguiente
+        # Define el límite máximo para este segmento sin que tape al siguiente parlamento
         if i + 1 < len(segments):
             next_start_ms = int(segments[i + 1]['start'] * 1000)
         else:
             next_start_ms = total_ms
-        start_ms = int(seg['start'] * 1000)
-        gap_ms = next_start_ms - start_ms
+        gap_ms = max(next_start_ms - start_ms, 1)  # evitar división por cero
 
-        # Estilo documental: la voz siempre va a velocidad natural.
-        # Solo se comprime si el TTS supera el gap completo hasta la siguiente frase,
-        # para evitar que tape el inicio del siguiente parlamento.
+        # Estilo documental: voz a velocidad natural siempre.
+        # Solo se comprime si el TTS supera el gap completo hasta la siguiente frase.
         if len(tts_audio) > gap_ms and gap_ms > 200:
             ratio = len(tts_audio) / gap_ms
             tts_wav = os.path.join(tmp_dir, f'tts_{i}_raw.wav')
             tts_adj = os.path.join(tmp_dir, f'tts_{i}_adj.wav')
             tts_audio.export(tts_wav, format='wav')
             atempo = build_atempo_filter(ratio)
-            subprocess.run([
-                'ffmpeg', '-y', '-i', tts_wav,
-                '-filter:a', atempo,
-                tts_adj
-            ], check=True, capture_output=True)
+            run_ffmpeg([
+                '-y', '-i', tts_wav, '-filter:a', atempo, tts_adj
+            ], f"atempo segmento {i}")
             tts_audio = AudioSegment.from_wav(tts_adj)
 
         # Mezcla (overlay) el clip TTS sobre la base silenciosa en el timestamp correcto
@@ -356,15 +313,15 @@ def build_dubbed_audio(segments: list, total_duration_s: float, tmp_dir: str) ->
 
 
 def merge_video_audio(video_path: str, audio_path: str, output_path: str, bg_volume: float = 0.15):
-    step(f"Combinando video con pista doblada (fondo original al {int(bg_volume*100)}%)")
-    # Mezcla el audio original a bajo volumen (fondo ambiental) con la pista TTS a volumen completo.
-    # normalize=0 evita que amix divida el volumen de cada input por la cantidad de entradas.
+    step(f"Combinando video con pista doblada (fondo original al {int(bg_volume * 100)}%)")
+    # Mezcla el audio original reducido (fondo ambiental) con la pista TTS a volumen completo
+    # normalize=0: evita que amix divida el volumen de cada input por el número de entradas
     filter_complex = (
         f"[0:a]volume={bg_volume}[bg];"
         f"[bg][1:a]amix=inputs=2:duration=first:normalize=0[aout]"
     )
-    subprocess.run([
-        'ffmpeg', '-y',
+    run_ffmpeg([
+        '-y',
         '-i', video_path,
         '-i', audio_path,
         '-filter_complex', filter_complex,
@@ -373,7 +330,7 @@ def merge_video_audio(video_path: str, audio_path: str, output_path: str, bg_vol
         '-c:v', 'copy',
         '-shortest',
         output_path
-    ], check=True, capture_output=True)
+    ], "Mezcla de video y audio")
     ok(f"Video guardado: {output_path}")
 
 
@@ -382,8 +339,8 @@ def merge_video_audio(video_path: str, audio_path: str, output_path: str, bg_vol
 # ─────────────────────────────────────────────
 
 def dub(url: str, output_path: str = None, model_size: str = "base",
-        voice: str = "es-MX-JorgeNeural", navegador: str = None, cookies: str = None,
-        source_lang: str = None, bg_volume: float = 0.15):
+        voice: str = "es-MX-JorgeNeural", source_lang: str = None,
+        bg_volume: float = 0.15):
     # bg_volume: nivel del audio original mezclado de fondo (0.0=silencio, 1.0=volumen completo)
     check_ffmpeg()
 
@@ -397,12 +354,12 @@ def dub(url: str, output_path: str = None, model_size: str = "base",
             video_path = url
             ok()
         else:
-            video_path = download_video(url, tmp_dir, navegador=navegador, cookies=cookies)
+            video_path = download_video(url, tmp_dir)
 
         if not output_path:
             base = Path(video_path).stem
             ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-            # Timestamp en el nombre para nunca sobreescribir doblajes anteriores del mismo video
+            # Timestamp en el nombre para no sobreescribir doblajes anteriores del mismo video
             output_path = str(Path(__file__).parent / f"{base}_doblado_es_{ts}.mp4")
 
         audio_wav = os.path.join(tmp_dir, 'audio.wav')
@@ -435,31 +392,30 @@ def dub(url: str, output_path: str = None, model_size: str = "base",
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Dobla videos de VK/YouTube a español latino con IA (auto-detecta el idioma de origen)",
+        description="Dobla videos a español latino con IA (auto-detecta el idioma de origen)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Ejemplos:
-  python dubber.py https://vk.com/video-XXXX_XXXX
+  python dubber.py https://youtu.be/XXXX
   python dubber.py https://youtu.be/XXXX -o mi_video.mp4
-  python dubber.py <URL> --modelo small --voz es-MX-JorgeNeural
-  python dubber.py <URL> --idioma-origen ru      (ruso, sin auto-detectar)
-  python dubber.py <URL> --idioma-origen en      (inglés)
-  python dubber.py <URL> --idioma-origen fr      (francés)
-  python dubber.py <URL> --navegador edge
-  python dubber.py <URL> --cookies cookies.txt
+  python dubber.py <URL> --modelo small
+  python dubber.py <URL> --voz es-MX-DaliaNeural
+  python dubber.py <URL> --idioma-origen ru
+  python dubber.py <URL> --volumen-fondo 0.20
+  python dubber.py ruta/al/video.mp4 --idioma-origen fr
 
 Modelos Whisper (mejor calidad = mas lento):
   tiny | base | small | medium | large-v3
 
+Voces latinoamericanas disponibles (Edge TTS):
+  es-MX-JorgeNeural   (México, hombre)  <- por defecto
+  es-MX-DaliaNeural   (México, mujer)
+  es-US-AlonsoNeural  (EEUU, hombre)
+  es-AR-TomasNeural   (Argentina, hombre)
+
 Códigos de idioma ISO 639-1 comunes:
   ru (ruso)  en (inglés)  fr (francés)  de (alemán)
   zh (chino)  ja (japonés)  pt (portugués)  it (italiano)
-
-Voces latinoamericanas disponibles (Edge TTS):
-  es-MX-JorgeNeural       (México, hombre)  <- por defecto
-  es-MX-DaliaNeural       (México, mujer)
-  es-US-AlonsoNeural      (EEUU, hombre)
-  es-AR-TomasNeural       (Argentina, hombre)
         """
     )
     parser.add_argument('url', help='URL del video o ruta a archivo local')
@@ -471,21 +427,12 @@ Voces latinoamericanas disponibles (Edge TTS):
     )
     parser.add_argument(
         '--voz', default='es-MX-JorgeNeural',
-        help='Voz de Edge TTS para el español (default: es-MX-JorgeNeural)'
+        help='Voz de Edge TTS (default: es-MX-JorgeNeural)'
     )
     parser.add_argument(
         '--idioma-origen', default=None, dest='idioma_origen',
         metavar='CODIGO',
-        help='Código ISO 639-1 del idioma original (ej: ru, en, fr). Por defecto: auto-detectar con Whisper'
-    )
-    parser.add_argument(
-        '--navegador', default=None,
-        choices=['chrome', 'edge', 'firefox', 'brave', 'opera'],
-        help='Navegador del que tomar las cookies de VK (default: prueba chrome/edge/firefox)'
-    )
-    parser.add_argument(
-        '--cookies', default=None,
-        help='Ruta a un archivo cookies.txt exportado manualmente'
+        help='Código ISO 639-1 del idioma original (ej: ru, en, fr). Por defecto: auto-detectar'
     )
     parser.add_argument(
         '--volumen-fondo', default=0.15, type=float, dest='volumen_fondo',
@@ -494,7 +441,7 @@ Voces latinoamericanas disponibles (Edge TTS):
     )
 
     args = parser.parse_args()
-    dub(args.url, args.output, args.modelo, args.voz, args.navegador, args.cookies,
+    dub(args.url, args.output, args.modelo, args.voz,
         source_lang=args.idioma_origen, bg_volume=args.volumen_fondo)
 
 

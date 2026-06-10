@@ -4,11 +4,19 @@ setlocal
 chcp 65001 >nul
 :: Cambiar al directorio del .bat para que dubber.py encuentre sus archivos
 cd /d "%~dp0"
+cls
 
-echo ============================================
-echo   VIDEO DUBBER -- Espanol Latino
-echo   Doblaje automatico con IA estilo documental
-echo ============================================
+echo.
+echo      ██╗██████╗ ██╗       █████╗ ███╗  ██╗ ██████╗██╗  ██╗
+echo      ██║██╔══██╗██║      ██╔══██╗████╗ ██║██╔════╝██║  ██║
+echo      ██║██████╔╝██║      ███████║██╔██╗██║██║     ███████║
+echo  ██  ██║██╔══██╗██║      ██╔══██║██║╚████║██║     ██╔══██║
+echo  ╚████╔╝██████╔╝███████╗ ██║  ██║██║  ███║╚██████╗██║  ██║
+echo   ╚═══╝ ╚═════╝ ╚══════╝ ╚═╝  ╚═╝╚═╝  ╚══╝ ╚═════╝╚═╝  ╚═╝
+echo.
+echo             ════════  D U B B E R  ════════
+echo          Doblaje automatico de video con IA
+echo  ════════════════════════════════════════════════════════
 echo.
 
 :: Si se paso la URL como argumento la usa directamente, si no la pide

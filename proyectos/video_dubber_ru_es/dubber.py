@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """
 Video Dubber: Cualquier idioma → Español Latino
-Descarga un video de YouTube (u otra plataforma soportada por yt-dlp) y genera
-una versión doblada al español latinoamericano usando IA.
-El idioma de origen se detecta automáticamente con Whisper.
+Descarga un video de YouTube o VK y genera una versión doblada al español
+latinoamericano usando IA. El idioma de origen se detecta automáticamente.
+
+Plataformas:
+  - YouTube: usa cliente Android de yt-dlp para evitar bloqueo anti-bot
+  - VK:      intenta sin cookies primero; si falla, usa cookies del navegador
 
 Pipeline:
-  1. Descarga el video (yt-dlp, cliente Android para evitar bloqueo anti-bot)
+  1. Descarga el video (yt-dlp)
   2. Extrae el audio en WAV mono 16 kHz (formato que exige Whisper)
   3. Transcribe con faster-whisper → lista de segmentos con timestamps
   4. Traduce cada segmento al español con Google Translate (deep-translator)
@@ -16,10 +19,11 @@ Pipeline:
   8. Combina video original + pista mezclada en un nuevo mp4 (sin recodificar video)
 
 Uso:
-    python dubber.py <URL>
+    python dubber.py <URL_YouTube>
+    python dubber.py <URL_VK>
     python dubber.py <URL> -o video_doblado.mp4
     python dubber.py <URL> --modelo small --voz es-MX-JorgeNeural
-    python dubber.py <URL> --idioma-origen en
+    python dubber.py <URL> --idioma-origen ru
     python dubber.py <URL> --volumen-fondo 0.20
     python dubber.py ruta/al/video.mp4
 """
@@ -106,31 +110,42 @@ class _YtdlpLogger:
     def error(self, msg): print(f"    ✗ {msg}", file=sys.stderr)
 
 
-def download_video(url: str, output_dir: str) -> str:
-    step(f"Descargando video de {url}")
-    try:
-        import yt_dlp
-    except ImportError:
-        error("yt-dlp no está instalado. Ejecuta: pip install yt-dlp")
-
-    ydl_opts = {
+def _base_ydl_opts(output_dir: str) -> dict:
+    # Opciones comunes a todos los descargadores: formato mp4, sin spam en consola
+    return {
         'outtmpl': os.path.join(output_dir, 'original.%(ext)s'),
-        # Preferir mp4+m4a para evitar conversiones extra; fallback al mejor disponible
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
         'merge_output_format': 'mp4',
-        # Cliente Android: evita el bloqueo anti-bot de YouTube sin necesitar cookies
-        'extractor_args': {'youtube': {'player_client': ['android', 'web']}},
         'logger': _YtdlpLogger(),
         'quiet': True,
         'no_warnings': True,
     }
 
+
+def _collect_download(output_dir: str) -> str | None:
+    # Devuelve la ruta del archivo descargado o None si no existe todavía
+    for f in Path(output_dir).glob('original.*'):
+        return str(f)
+    return None
+
+
+def _download_youtube(url: str, output_dir: str) -> str:
+    # Cliente Android: evita el bloqueo anti-bot de YouTube sin necesitar cookies
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        import yt_dlp
+    except ImportError:
+        error("yt-dlp no está instalado. Ejecuta: pip install yt-dlp")
+
+    opts = _base_ydl_opts(output_dir)
+    opts['extractor_args'] = {'youtube': {'player_client': ['android', 'web']}}
+
+    try:
+        with yt_dlp.YoutubeDL(opts) as ydl:
             ydl.download([url])
-        for f in Path(output_dir).glob('original.*'):
-            ok(f"Descargado: {f.name}")
-            return str(f)
+        path = _collect_download(output_dir)
+        if path:
+            ok(f"Descargado: {Path(path).name}")
+            return path
     except Exception as e:
         error(
             f"No se pudo descargar el video.\n"
@@ -141,6 +156,66 @@ def download_video(url: str, output_dir: str) -> str:
             f"  - Actualiza yt-dlp: pip install -U yt-dlp\n"
             f"  - Usa un archivo local: python dubber.py ruta/al/video.mp4"
         )
+
+
+def _download_vk(url: str, output_dir: str) -> str:
+    # VK: intenta sin cookies primero (videos públicos), luego con cookies del navegador
+    # IMPORTANTE: el navegador debe estar completamente cerrado al usar cookies,
+    # de lo contrario Windows bloquea el archivo SQLite y la copia falla.
+    try:
+        import yt_dlp
+    except ImportError:
+        error("yt-dlp no está instalado. Ejecuta: pip install yt-dlp")
+
+    opts = _base_ydl_opts(output_dir)
+
+    # Intento 1: sin cookies (funciona para videos públicos de VK)
+    try:
+        with yt_dlp.YoutubeDL(opts) as ydl:
+            ydl.download([url])
+        path = _collect_download(output_dir)
+        if path:
+            ok(f"Descargado: {Path(path).name}")
+            return path
+    except Exception:
+        for f in Path(output_dir).glob('original.*'):
+            f.unlink(missing_ok=True)
+
+    # Intento 2: cookies del navegador (necesario para videos privados o de grupo)
+    # Edge se prueba primero porque en Windows 11 siempre está instalado
+    last_exc = None
+    for browser in ['edge', 'chrome', 'firefox']:
+        try:
+            browser_opts = dict(opts)
+            browser_opts['cookiesfrombrowser'] = (browser,)
+            with yt_dlp.YoutubeDL(browser_opts) as ydl:
+                ydl.download([url])
+            path = _collect_download(output_dir)
+            if path:
+                ok(f"Descargado con cookies de {browser}: {Path(path).name}")
+                return path
+        except Exception as e:
+            last_exc = e
+            for f in Path(output_dir).glob('original.*'):
+                f.unlink(missing_ok=True)
+
+    error(
+        f"No se pudo descargar el video de VK.\n"
+        f"  Error: {last_exc}\n"
+        f"\n"
+        f"  Soluciones:\n"
+        f"  1. Cierra completamente Edge y Chrome, luego vuelve a intentar\n"
+        f"     (Windows bloquea las cookies mientras el navegador está abierto)\n"
+        f"  2. Verifica que el video sea accesible y tengas sesión iniciada en VK"
+    )
+
+
+def download_video(url: str, output_dir: str) -> str:
+    # Enruta al descargador correcto según la plataforma
+    step(f"Descargando video de {url}")
+    if 'vk.com' in url or 'vkvideo.ru' in url:
+        return _download_vk(url, output_dir)
+    return _download_youtube(url, output_dir)
 
 
 def extract_audio(video_path: str, audio_path: str):
@@ -397,7 +472,8 @@ def main():
         epilog="""
 Ejemplos:
   python dubber.py https://youtu.be/XXXX
-  python dubber.py https://youtu.be/XXXX -o mi_video.mp4
+  python dubber.py https://vk.com/video-XXXXXXX_XXXXXXX
+  python dubber.py <URL> -o mi_video.mp4
   python dubber.py <URL> --modelo small
   python dubber.py <URL> --voz es-MX-DaliaNeural
   python dubber.py <URL> --idioma-origen ru

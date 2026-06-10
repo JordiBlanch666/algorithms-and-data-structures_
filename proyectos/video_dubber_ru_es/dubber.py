@@ -168,8 +168,11 @@ def _download_vk(url: str, output_dir: str) -> str:
         error("yt-dlp no está instalado. Ejecuta: pip install yt-dlp")
 
     opts = _base_ydl_opts(output_dir)
+    # Permitir que las advertencias de VK lleguen al logger (útil para diagnóstico)
+    opts.pop('no_warnings', None)
 
     # Intento 1: sin cookies (funciona para videos públicos de VK)
+    print("    → Intento 1: descarga directa sin cookies...")
     try:
         with yt_dlp.YoutubeDL(opts) as ydl:
             ydl.download([url])
@@ -177,7 +180,8 @@ def _download_vk(url: str, output_dir: str) -> str:
         if path:
             ok(f"Descargado: {Path(path).name}")
             return path
-    except Exception:
+    except Exception as e:
+        print(f"    ✗ Sin cookies: {e}", file=sys.stderr)
         for f in Path(output_dir).glob('original.*'):
             f.unlink(missing_ok=True)
 
@@ -185,6 +189,7 @@ def _download_vk(url: str, output_dir: str) -> str:
     # Edge se prueba primero porque en Windows 11 siempre está instalado
     last_exc = None
     for browser in ['edge', 'chrome', 'firefox']:
+        print(f"    → Intento con cookies de {browser}...")
         try:
             browser_opts = dict(opts)
             browser_opts['cookiesfrombrowser'] = (browser,)
@@ -196,12 +201,13 @@ def _download_vk(url: str, output_dir: str) -> str:
                 return path
         except Exception as e:
             last_exc = e
+            print(f"    ✗ {browser}: {e}", file=sys.stderr)
             for f in Path(output_dir).glob('original.*'):
                 f.unlink(missing_ok=True)
 
     error(
         f"No se pudo descargar el video de VK.\n"
-        f"  Error: {last_exc}\n"
+        f"  Último error: {last_exc}\n"
         f"\n"
         f"  Soluciones:\n"
         f"  1. Cierra completamente Edge y Chrome, luego vuelve a intentar\n"

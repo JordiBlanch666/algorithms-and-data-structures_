@@ -1,16 +1,16 @@
 # Video Dubber → Español Latino
 
-Herramienta de doblaje automático que descarga videos de VK, YouTube u otras plataformas y genera una versión doblada al **español latinoamericano** usando inteligencia artificial. El idioma de origen se detecta automáticamente — funciona con ruso, inglés, francés, alemán y cualquier idioma soportado por Whisper.
+Herramienta de doblaje automático que descarga videos de **YouTube** o **VK** y genera una versión doblada al **español latinoamericano** usando inteligencia artificial. El idioma de origen se detecta automáticamente — funciona con ruso, inglés, francés, alemán y cualquier idioma soportado por Whisper.
 
-El resultado suena como un **doblaje de documental**: la voz doblada va a velocidad natural sobre el video, mientras el audio original (música, ambiente) se conserva a bajo volumen de fondo.
+El resultado suena como un **doblaje de documental**: la voz doblada va a velocidad natural, mientras el audio original (música, ambiente) se conserva a bajo volumen de fondo.
 
 ## Pipeline
 
 ```
-URL del video (o archivo local)
+URL del video (YouTube o VK) — o archivo local
     │
-    ▼
-Descarga (yt-dlp)
+    ├─ youtube.com / youtu.be ──► cliente Android de yt-dlp (sin cookies)
+    └─ vk.com / vkvideo.ru ─────► sin cookies → cookies de Edge → Chrome → Firefox
     │
     ▼
 Extracción de audio WAV 16 kHz mono (ffmpeg)
@@ -62,11 +62,13 @@ pip install -r requirements.txt
 
 Doble clic en `dubber.bat`. El asistente interactivo pregunta paso a paso:
 
-1. URL o ruta del video
+1. URL del video (YouTube o VK) o ruta a un archivo local
 2. Idioma de origen (Enter = auto-detectar)
 3. Voz latinoamericana (menú 1–4)
 4. Modelo Whisper (calidad de transcripción)
 5. Volumen del audio de fondo (0–100%)
+
+> **VK con videos privados o de grupo:** si el script no puede descargar el video, cierra completamente Edge o Chrome y vuelve a intentar. Windows bloquea el archivo de cookies mientras el navegador está abierto.
 
 ## Uso por línea de comandos
 
@@ -77,7 +79,10 @@ python dubber.py <URL> [opciones]
 ### Ejemplos
 
 ```bash
-# Auto-detectar idioma (recomendado)
+# YouTube — auto-detectar idioma
+python dubber.py https://youtu.be/XXXX
+
+# VK — auto-detectar idioma
 python dubber.py https://vk.com/video-XXXXXXX_XXXXXXX
 
 # Forzar idioma de origen
@@ -85,7 +90,7 @@ python dubber.py https://youtu.be/XXXX --idioma-origen en
 python dubber.py https://vk.com/video-XXXX --idioma-origen ru
 
 # Especificar archivo de salida
-python dubber.py https://vk.com/video-XXXX -o mi_video_doblado.mp4
+python dubber.py <URL> -o mi_video_doblado.mp4
 
 # Mayor calidad de transcripción
 python dubber.py <URL> --modelo small
@@ -98,10 +103,6 @@ python dubber.py <URL> --volumen-fondo 0.20
 
 # Usar archivo local en vez de URL
 python dubber.py ruta/al/video.mp4 --idioma-origen fr
-
-# VK con cookies del navegador
-python dubber.py <URL> --navegador edge
-python dubber.py <URL> --cookies cookies.txt
 ```
 
 El primer uso descarga el modelo Whisper `base` (~150 MB).
@@ -112,14 +113,21 @@ El archivo de salida se guarda en la misma carpeta del script con el formato `<n
 
 | Argumento | Descripción | Por defecto |
 |-----------|-------------|-------------|
-| `url` | URL del video o ruta a archivo local | *(obligatorio)* |
+| `url` | URL del video (YouTube o VK) o ruta a archivo local | *(obligatorio)* |
 | `-o`, `--output` | Ruta del archivo de salida (`.mp4`) | `<nombre>_doblado_es_<timestamp>.mp4` |
 | `--modelo` | Modelo Whisper para transcripción | `base` |
 | `--voz` | Voz de Edge TTS para el doblaje | `es-MX-JorgeNeural` |
 | `--idioma-origen` | Código ISO 639-1 del idioma original (`ru`, `en`, `fr`…). Por defecto auto-detecta. | auto |
 | `--volumen-fondo` | Volumen del audio original mezclado de fondo (`0.0`–`1.0`) | `0.15` |
-| `--navegador` | Navegador del que tomar cookies de VK (`chrome`, `edge`, `firefox`…) | auto |
-| `--cookies` | Ruta a un archivo `cookies.txt` exportado manualmente | — |
+
+## Descarga de videos VK
+
+Para videos públicos de VK no se necesita ninguna configuración adicional.
+
+Para videos privados o de grupo, el script intenta automáticamente leer las cookies de Edge, Chrome y Firefox (en ese orden). Si falla:
+
+1. **Cierra completamente** Edge o Chrome antes de ejecutar el script
+2. Vuelve a intentar — yt-dlp podrá acceder al archivo de cookies sin que el navegador lo bloquee
 
 ## Idiomas de origen soportados
 
@@ -161,7 +169,7 @@ Cualquier idioma que reconozca Whisper. Códigos comunes:
 
 | Librería | Versión mínima | Función |
 |----------|---------------|---------|
-| `yt-dlp` | 2024.1.1 | Descarga videos de plataformas web |
+| `yt-dlp` | 2024.1.1 | Descarga videos de YouTube y VK |
 | `faster-whisper` | 1.0.0 | Transcripción y detección automática de idioma |
 | `deep-translator` | 1.11.4 | Traducción al español (Google Translate) |
 | `edge-tts` | 6.1.9 | Síntesis de voz en español latino |

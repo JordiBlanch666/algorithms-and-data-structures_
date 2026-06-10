@@ -12,7 +12,9 @@ echo ============================================
 echo.
 
 :: Si se paso la URL como argumento la usa directamente, si no la pide
+:: Plataformas soportadas: YouTube, VK (vk.com / vkvideo.ru) y archivos locales
 if "%~1"=="" (
+    echo Plataformas: YouTube, VK ^(vk.com^), archivo local
     set /p URL="URL o ruta del video: "
 ) else (
     set URL=%~1
@@ -95,6 +97,7 @@ if "%LANG%"=="" (
 )
 echo  Salida: misma carpeta que este .bat
 echo  Nombre: ^<titulo^>_doblado_es_^<fecha_hora^>.mp4
+echo  Nota VK: cierra Edge/Chrome si falla la descarga
 echo ============================================
 echo.
 

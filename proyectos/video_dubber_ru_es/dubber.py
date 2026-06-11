@@ -35,6 +35,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import argparse
 from datetime import datetime
 from pathlib import Path
@@ -193,8 +194,12 @@ def _download_vk(url: str, output_dir: str) -> str:
         'Referer': 'https://vk.com/',
     }
 
+    def _clean():
+        for f in Path(output_dir).glob('original.*'):
+            f.unlink(missing_ok=True)
+
     # Intento 1: sin cookies (funciona para videos públicos de VK)
-    print("    → Intento 1: descarga directa sin cookies...")
+    print("    → Intento 1: sin cookies...")
     try:
         with yt_dlp.YoutubeDL(opts) as ydl:
             ydl.download([url])
@@ -204,11 +209,34 @@ def _download_vk(url: str, output_dir: str) -> str:
             return path
     except Exception as e:
         print(f"    ✗ Sin cookies: {e}", file=sys.stderr)
-        for f in Path(output_dir).glob('original.*'):
-            f.unlink(missing_ok=True)
+        _clean()
 
-    # Intento 2: cookies del navegador (necesario para videos privados o de grupo)
-    # Edge se prueba primero porque en Windows 11 siempre está instalado
+    # Intento 2: archivo cookies.txt en el directorio del script (más fiable que cookies del navegador)
+    # Para exportarlo: extensión "Get cookies.txt LOCALLY" en Chrome/Edge, iniciar sesión en vk.com
+    cookies_file = Path(__file__).parent / 'cookies.txt'
+    if cookies_file.exists():
+        print(f"    → Intento con cookies.txt...")
+        try:
+            file_opts = dict(opts)
+            file_opts['cookiefile'] = str(cookies_file)
+            with yt_dlp.YoutubeDL(file_opts) as ydl:
+                ydl.download([url])
+            path = _collect_download(output_dir)
+            if path:
+                ok(f"Descargado con cookies.txt: {Path(path).name}")
+                return path
+        except Exception as e:
+            print(f"    ✗ cookies.txt: {e}", file=sys.stderr)
+            _clean()
+
+    # Intento 3: cookies del navegador
+    # En Windows 11, Edge corre en segundo plano aunque cierres la ventana
+    # Terminar el proceso libera el lock del archivo SQLite de cookies
+    print("    Terminando procesos de Edge/Chrome en segundo plano...")
+    for exe in ['msedge.exe', 'chrome.exe']:
+        subprocess.run(['taskkill', '/F', '/IM', exe], capture_output=True)
+    time.sleep(1)
+
     last_exc = None
     for browser in ['edge', 'chrome', 'firefox']:
         print(f"    → Intento con cookies de {browser}...")
@@ -224,18 +252,22 @@ def _download_vk(url: str, output_dir: str) -> str:
         except Exception as e:
             last_exc = e
             print(f"    ✗ {browser}: {e}", file=sys.stderr)
-            for f in Path(output_dir).glob('original.*'):
-                f.unlink(missing_ok=True)
+            _clean()
 
     error(
         f"No se pudo descargar el video de VK.\n"
         f"  Último error: {last_exc}\n"
         f"\n"
-        f"  Soluciones:\n"
-        f"  1. Cierra completamente Edge y Chrome, luego vuelve a intentar\n"
-        f"     (Windows bloquea las cookies mientras el navegador está abierto)\n"
-        f"  2. Actualiza yt-dlp: pip install -U yt-dlp\n"
-        f"  3. Verifica que el video sea accesible y tengas sesión iniciada en VK"
+        f"  Solución más fiable:\n"
+        f"  1. Instala la extensión 'Get cookies.txt LOCALLY' en Chrome o Edge\n"
+        f"  2. Abre vk.com con sesión iniciada\n"
+        f"  3. Exporta las cookies y guarda el archivo como 'cookies.txt'\n"
+        f"     en la misma carpeta que dubber.bat\n"
+        f"  4. Vuelve a ejecutar\n"
+        f"\n"
+        f"  Alternativas:\n"
+        f"  - Actualiza yt-dlp: pip install -U yt-dlp\n"
+        f"  - Verifica que el video sea accesible con tu cuenta de VK"
     )
 
 

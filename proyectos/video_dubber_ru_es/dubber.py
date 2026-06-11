@@ -110,6 +110,18 @@ class _YtdlpLogger:
     def error(self, msg): print(f"    ✗ {msg}", file=sys.stderr)
 
 
+def _ydlp_progress(d: dict):
+    # Hook de progreso: muestra porcentaje, velocidad y ETA en una sola línea dinámica
+    if d['status'] == 'downloading':
+        pct = d.get('_percent_str', '').strip()
+        speed = d.get('_speed_str', '').strip()
+        eta = d.get('_eta_str', '').strip()
+        print(f"\r    {pct:<7}  {speed:<14}  ETA: {eta:<6}", end='', flush=True)
+    elif d['status'] == 'finished':
+        size = (d.get('_total_bytes_str') or d.get('_downloaded_bytes_str') or '').strip()
+        print(f"\r    100%    {size} descargados{' ' * 20}")
+
+
 def _base_ydl_opts(output_dir: str) -> dict:
     # Opciones comunes a todos los descargadores: formato mp4, sin spam en consola
     return {
@@ -119,6 +131,7 @@ def _base_ydl_opts(output_dir: str) -> dict:
         'logger': _YtdlpLogger(),
         'quiet': True,
         'no_warnings': True,
+        'progress_hooks': [_ydlp_progress],
     }
 
 
@@ -167,9 +180,18 @@ def _download_vk(url: str, output_dir: str) -> str:
     except ImportError:
         error("yt-dlp no está instalado. Ejecuta: pip install yt-dlp")
 
+    # vkvideo.ru es un dominio alternativo — yt-dlp extrae formatos mejor desde vk.com
+    if 'vkvideo.ru' in url:
+        url = url.replace('vkvideo.ru', 'vk.com')
+        print(f"    URL normalizada: {url}")
+
     opts = _base_ydl_opts(output_dir)
-    # Permitir que las advertencias de VK lleguen al logger (útil para diagnóstico)
+    # Permitir advertencias de VK en el logger y simular navegador real
     opts.pop('no_warnings', None)
+    opts['http_headers'] = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Referer': 'https://vk.com/',
+    }
 
     # Intento 1: sin cookies (funciona para videos públicos de VK)
     print("    → Intento 1: descarga directa sin cookies...")
@@ -212,7 +234,8 @@ def _download_vk(url: str, output_dir: str) -> str:
         f"  Soluciones:\n"
         f"  1. Cierra completamente Edge y Chrome, luego vuelve a intentar\n"
         f"     (Windows bloquea las cookies mientras el navegador está abierto)\n"
-        f"  2. Verifica que el video sea accesible y tengas sesión iniciada en VK"
+        f"  2. Actualiza yt-dlp: pip install -U yt-dlp\n"
+        f"  3. Verifica que el video sea accesible y tengas sesión iniciada en VK"
     )
 
 

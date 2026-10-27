@@ -1,0 +1,268 @@
+:root { /* Guarda los colores principales para reutilizarlos. */
+  color-scheme: dark; /* Pide al navegador que use controles de aspecto oscuro. */
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; /* Elige una letra clara que suele estar instalada. */
+  background: #101a22; /* Pinta el fondo general de la página. */
+  color: #eef4ed; /* Define el color principal del texto. */
+} /* Termina la configuración general. */
+* { /* Aplica una regla base a todos los elementos. */
+  box-sizing: border-box; /* Incluye bordes y rellenos en el tamaño de cada elemento. */
+} /* Termina la regla base. */
+body { /* Da forma al espacio de la página. */
+  min-width: 320px; /* Evita que el contenido se rompa en pantallas muy estrechas. */
+  min-height: 100vh; /* Hace que el fondo cubra toda la altura de la ventana. */
+  margin: 0; /* Quita el margen que el navegador añade por defecto. */
+  display: grid; /* Activa la distribución sencilla de cuadrícula. */
+  place-items: center; /* Centra el juego horizontal y verticalmente. */
+  padding: 28px 16px; /* Deja un margen alrededor del juego. */
+  background: radial-gradient(ellipse at 50% 0%, #23332d 0%, #101a22 62%); /* Añade un resplandor verde discreto al fondo. */
+} /* Termina el diseño de la página. */
+button { /* Da un comportamiento uniforme a los botones. */
+  font: inherit; /* Hace que los botones usen la letra del resto de la página. */
+} /* Termina la regla de los botones. */
+.game-shell { /* Da tamaño y aspecto al panel principal. */
+  width: min(100%, 760px); /* Limita el ancho y permite que se adapte al móvil. */
+  padding: clamp(18px, 4vw, 34px); /* Ajusta el espacio interior según el ancho de pantalla. */
+  border: 1px solid #ffffff13; /* Dibuja un borde muy suave. */
+  border-radius: 24px; /* Redondea las esquinas del panel. */
+  background: #17242c; /* Diferencia el panel del fondo de la página. */
+  box-shadow: 0 24px 80px #00000042; /* Añade profundidad debajo del panel. */
+} /* Termina el panel principal. */
+.topbar { /* Coloca el título y el estado en la misma línea. */
+  display: flex; /* Distribuye los elementos uno al lado del otro. */
+  align-items: center; /* Centra verticalmente los elementos de la cabecera. */
+  justify-content: space-between; /* Separa el título del estado. */
+  gap: 16px; /* Deja espacio si la pantalla es estrecha. */
+  margin-bottom: 24px; /* Separa la cabecera de las estadísticas. */
+} /* Termina el diseño de la cabecera. */
+.eyebrow { /* Diseña la etiqueta pequeña de la cabecera. */
+  margin: 0 0 5px; /* Ajusta el espacio alrededor de la etiqueta. */
+  color: #84d39a; /* Le da un color verde de acento. */
+  font-size: 10px; /* Hace que la etiqueta sea discreta. */
+  font-weight: 800; /* Resalta la etiqueta con letra gruesa. */
+  letter-spacing: .2em; /* Separa un poco las letras. */
+} /* Termina el diseño de la etiqueta. */
+h1 { /* Da estilo al título principal. */
+  margin: 0; /* Quita el margen predeterminado del título. */
+  font-size: clamp(28px, 5vw, 38px); /* Ajusta el tamaño del título a la pantalla. */
+  line-height: 1; /* Evita espacio extra encima y debajo de las letras. */
+  letter-spacing: -.05em; /* Junta un poco las letras del título. */
+} /* Termina el diseño del título. */
+h1 span { /* Resalta el punto del título. */
+  color: #91e6a3; /* Usa el color verde de acento. */
+} /* Termina el acento del título. */
+.status-pill { /* Forma la etiqueta del estado de la partida. */
+  display: inline-flex; /* Alinea el punto y el texto en una línea. */
+  align-items: center; /* Centra el punto respecto al texto. */
+  gap: 8px; /* Separa el punto del texto. */
+  padding: 9px 12px; /* Deja espacio dentro de la etiqueta. */
+  border: 1px solid #ffffff12; /* Añade un borde suave a la etiqueta. */
+  border-radius: 999px; /* Hace que la etiqueta tenga forma de píldora. */
+  color: #b7c5c2; /* Suaviza el color del texto de estado. */
+  font-size: 12px; /* Mantiene el estado compacto. */
+} /* Termina la etiqueta de estado. */
+.status-dot { /* Dibuja el punto de estado. */
+  width: 7px; /* Define el ancho del punto. */
+  height: 7px; /* Define el alto del punto. */
+  border-radius: 50%; /* Convierte el punto en un círculo. */
+  background: #91e6a3; /* Usa verde para indicar que está listo. */
+  box-shadow: 0 0 12px #91e6a366; /* Añade un brillo al punto. */
+} /* Termina el punto de estado. */
+.stats { /* Distribuye las tres tarjetas de datos. */
+  display: grid; /* Usa una cuadrícula para las tarjetas. */
+  grid-template-columns: repeat(3, 1fr); /* Da el mismo ancho a cada tarjeta. */
+  gap: 12px; /* Separa las tarjetas entre sí. */
+  margin-bottom: 14px; /* Separa las estadísticas del tablero. */
+} /* Termina la cuadrícula de estadísticas. */
+.stat-card { /* Da aspecto a cada tarjeta de datos. */
+  display: flex; /* Organiza la etiqueta y su valor en vertical. */
+  flex-direction: column; /* Pone el valor debajo de la etiqueta. */
+  gap: 8px; /* Separa la etiqueta del valor. */
+  padding: 14px 16px; /* Deja espacio interior en la tarjeta. */
+  border: 1px solid #ffffff0d; /* Marca el borde de la tarjeta con suavidad. */
+  border-radius: 13px; /* Redondea las esquinas de la tarjeta. */
+  background: #ffffff05; /* Distingue la tarjeta sin distraer. */
+} /* Termina la tarjeta de datos. */
+.stat-label { /* Estiliza el nombre de cada dato. */
+  color: #81918f; /* Usa un tono apagado para las etiquetas. */
+  font-size: 9px; /* Mantiene pequeñas las etiquetas. */
+  font-weight: 800; /* Facilita la lectura de las etiquetas. */
+  letter-spacing: .16em; /* Da un aspecto ordenado a las etiquetas. */
+} /* Termina la etiqueta de datos. */
+.stat-card strong { /* Estiliza el número principal de cada dato. */
+  color: #f0f5ef; /* Hace que el valor se vea claramente. */
+  font-size: 21px; /* Da importancia al valor. */
+  line-height: 1; /* Quita espacio vertical sobrante. */
+  font-variant-numeric: tabular-nums; /* Mantiene los números alineados al cambiar. */
+} /* Termina el valor de datos. */
+.stat-card small { /* Estiliza la parte secundaria del nivel y las frutas. */
+  color: #83938f; /* Usa un tono tenue para la meta. */
+  font-size: 11px; /* Hace menor el texto secundario. */
+  font-weight: 600; /* Mantiene legible el texto secundario. */
+} /* Termina el texto secundario. */
+.board-wrap { /* Mantiene el tablero y el mensaje en la misma posición. */
+  position: relative; /* Sirve de referencia para colocar el mensaje flotante. */
+  overflow: hidden; /* Recorta cualquier elemento que salga del tablero. */
+  border: 1px solid #ffffff12; /* Dibuja el borde del tablero. */
+  border-radius: 16px; /* Redondea las esquinas del tablero. */
+  background: #101b20; /* Da un fondo oscuro a la zona de juego. */
+} /* Termina el contenedor del tablero. */
+canvas { /* Ajusta el tablero dibujado por JavaScript. */
+  display: block; /* Quita el espacio vacío que suele aparecer bajo un lienzo. */
+  width: 100%; /* Permite que el tablero use todo el ancho disponible. */
+  height: auto; /* Conserva la proporción original del tablero. */
+  aspect-ratio: 3 / 2; /* Mantiene el tablero en proporción de 600 por 400. */
+} /* Termina el estilo del tablero. */
+.overlay { /* Coloca una capa de mensaje encima del tablero. */
+  position: absolute; /* Permite superponer el mensaje al tablero. */
+  inset: 0; /* Extiende la capa por todo el tablero. */
+  display: grid; /* Facilita centrar el mensaje. */
+  place-items: center; /* Centra el mensaje en ambas direcciones. */
+  padding: 20px; /* Evita que el mensaje toque los bordes. */
+  background: #101b20cc; /* Oscurece el tablero bajo el mensaje. */
+  backdrop-filter: blur(3px); /* Suaviza el fondo detrás del mensaje. */
+  transition: opacity .2s ease; /* Hace suave la aparición y desaparición. */
+} /* Termina la capa flotante. */
+.overlay.is-hidden { /* Oculta la capa cuando la partida está en marcha. */
+  visibility: hidden; /* Evita que la capa escondida bloquee el tablero. */
+  opacity: 0; /* Hace transparente la capa escondida. */
+} /* Termina el estado oculto. */
+.overlay-card { /* Organiza el icono, el mensaje y el botón. */
+  max-width: 360px; /* Evita que el texto se extienda demasiado. */
+  text-align: center; /* Centra el mensaje dentro de la tarjeta. */
+} /* Termina la tarjeta del mensaje. */
+.overlay-icon { /* Da forma al símbolo del mensaje. */
+  display: grid; /* Permite centrar el símbolo. */
+  width: 48px; /* Fija el ancho del símbolo. */
+  height: 48px; /* Fija el alto del símbolo. */
+  margin: 0 auto 15px; /* Centra el símbolo y lo separa del título. */
+  place-items: center; /* Centra el dibujo dentro del círculo. */
+  border: 1px solid #91e6a344; /* Dibuja un borde verde tenue. */
+  border-radius: 15px; /* Redondea las esquinas del icono. */
+  background: #91e6a311; /* Pinta un fondo verde muy suave. */
+  color: #a4efb1; /* Da color al símbolo. */
+  font-size: 24px; /* Hace visible el símbolo. */
+} /* Termina el símbolo. */
+.overlay h2 { /* Estiliza el título del mensaje. */
+  margin: 0 0 8px; /* Ajusta el espacio debajo del título. */
+  font-size: clamp(20px, 4vw, 26px); /* Ajusta el título al tamaño de pantalla. */
+  letter-spacing: -.04em; /* Junta ligeramente las letras del título. */
+} /* Termina el título del mensaje. */
+.overlay p { /* Estiliza la explicación del mensaje. */
+  margin: 0 0 20px; /* Separa el texto del botón. */
+  color: #a5b3ae; /* Usa un color secundario fácil de leer. */
+  font-size: 14px; /* Mantiene el texto cómodo de leer. */
+  line-height: 1.6; /* Separa las líneas para facilitar la lectura. */
+} /* Termina el texto del mensaje. */
+.primary-button { /* Da estilo al botón principal. */
+  min-height: 44px; /* Hace el botón fácil de pulsar. */
+  padding: 0 20px; /* Deja espacio a los lados del texto. */
+  border: 0; /* Quita el borde predeterminado del navegador. */
+  border-radius: 10px; /* Redondea las esquinas del botón. */
+  background: #a4efb1; /* Usa verde para destacar la acción principal. */
+  color: #13231a; /* Asegura que el texto contraste con el botón. */
+  font-size: 13px; /* Define el tamaño del texto del botón. */
+  font-weight: 800; /* Hace que la acción sea fácil de distinguir. */
+  cursor: pointer; /* Indica que el botón se puede pulsar. */
+  transition: transform .15s ease, background .15s ease; /* Suaviza las reacciones del botón. */
+} /* Termina el botón principal. */
+.primary-button:hover { /* Cambia el botón cuando se apunta con el ratón. */
+  transform: translateY(-1px); /* Levanta el botón un poquito. */
+  background: #b8f5c2; /* Aclara el botón al pasar el ratón. */
+} /* Termina el efecto al pasar el ratón. */
+.primary-button:focus-visible, .mobile-controls button:focus-visible { /* Marca los botones al llegar con el teclado. */
+  outline: 3px solid #ffffff; /* Dibuja un borde visible para la accesibilidad. */
+  outline-offset: 3px; /* Separa el borde del botón. */
+} /* Termina el indicador de foco. */
+.controls { /* Coloca las indicaciones del teclado en la parte inferior. */
+  display: flex; /* Reparte las indicaciones en una línea. */
+  align-items: center; /* Centra verticalmente las indicaciones. */
+  justify-content: space-between; /* Deja espacio entre los dos grupos. */
+  gap: 12px; /* Deja espacio si los grupos se acercan. */
+  padding: 16px 2px 0; /* Separa las indicaciones del tablero. */
+} /* Termina la zona de indicaciones. */
+.keys-help, .control-hint { /* Alinea los controles y sus textos. */
+  display: flex; /* Pone los elementos en fila. */
+  align-items: center; /* Centra los elementos en altura. */
+  gap: 5px; /* Separa las teclas entre sí. */
+} /* Termina la alineación de controles. */
+.key { /* Dibuja una tecla pequeña. */
+  display: inline-grid; /* Permite centrar el símbolo dentro de la tecla. */
+  min-width: 25px; /* Da anchura suficiente al símbolo de flecha. */
+  height: 24px; /* Define la altura de la tecla. */
+  padding: 0 5px; /* Da un poco de espacio a los lados. */
+  place-items: center; /* Centra el contenido de la tecla. */
+  border: 1px solid #ffffff1a; /* Dibuja el borde de la tecla. */
+  border-radius: 6px; /* Redondea las esquinas de la tecla. */
+  background: #ffffff08; /* Pinta el fondo de la tecla. */
+  color: #bfcbc5; /* Da contraste al símbolo de la tecla. */
+  font-size: 12px; /* Ajusta el tamaño del símbolo. */
+} /* Termina la tecla pequeña. */
+.key-wide { /* Hace más ancha la tecla de espacio. */
+  min-width: auto; /* Permite que la tecla se ajuste a su texto. */
+  padding: 0 8px; /* Deja espacio a los lados de la palabra. */
+  font-size: 9px; /* Mantiene corta la etiqueta ESPACIO. */
+  font-weight: 700; /* Resalta el nombre de la tecla. */
+  letter-spacing: .04em; /* Separa un poco las letras. */
+} /* Termina la tecla ancha. */
+.help-text, .separator { /* Estiliza el texto de ayuda y su separador. */
+  color: #83918d; /* Usa un tono discreto para las instrucciones. */
+  font-size: 11px; /* Mantiene compactas las instrucciones. */
+} /* Termina el texto de ayuda. */
+.mobile-controls { /* Prepara los controles para pantallas táctiles. */
+  display: none; /* Oculta estos botones en pantallas grandes. */
+  margin-top: 16px; /* Separa los botones del tablero. */
+  text-align: center; /* Centra la fila de botones. */
+} /* Termina el contenedor táctil. */
+.mobile-controls div { /* Coloca los tres botones inferiores en una fila. */
+  display: flex; /* Organiza los botones horizontalmente. */
+  justify-content: center; /* Centra la fila de botones. */
+  gap: 8px; /* Separa los botones. */
+} /* Termina la fila táctil. */
+.mobile-controls button { /* Hace que los botones táctiles sean cómodos de usar. */
+  width: 48px; /* Da suficiente ancho al botón. */
+  height: 42px; /* Da suficiente alto al botón. */
+  margin: 0 0 8px; /* Separa la primera fila de la segunda. */
+  border: 1px solid #ffffff20; /* Dibuja un borde alrededor del botón. */
+  border-radius: 10px; /* Redondea el botón táctil. */
+  background: #ffffff09; /* Da un fondo discreto al botón. */
+  color: #e8f0e9; /* Hace visible la flecha. */
+  font-size: 19px; /* Agranda la flecha para facilitar su lectura. */
+} /* Termina el botón táctil. */
+.mobile-controls button:active { /* Da respuesta visual al tocar una flecha. */
+  background: #91e6a333; /* Ilumina el botón mientras se pulsa. */
+} /* Termina la respuesta táctil. */
+@media (max-width: 560px) { /* Cambia el diseño en pantallas pequeñas. */
+  body { /* Ajusta el fondo de los móviles. */
+    padding: 12px 10px; /* Reduce el margen para dejar sitio al juego. */
+  } /* Termina el ajuste de página móvil. */
+  .game-shell { /* Ajusta el panel en el móvil. */
+    padding: 17px 13px; /* Reduce el espacio interior del panel. */
+    border-radius: 18px; /* Reduce un poco las esquinas del panel. */
+  } /* Termina el ajuste del panel móvil. */
+  .topbar { /* Ajusta la cabecera en el móvil. */
+    margin-bottom: 17px; /* Reduce el espacio debajo de la cabecera. */
+  } /* Termina el ajuste de la cabecera móvil. */
+  .status-pill { /* Hace que el estado quepa en pantallas pequeñas. */
+    gap: 6px; /* Reduce el espacio entre el punto y el texto. */
+    padding: 8px 9px; /* Reduce el tamaño de la etiqueta. */
+    font-size: 10px; /* Reduce el tamaño del estado. */
+  } /* Termina el ajuste del estado móvil. */
+  .stats { /* Compacta las tarjetas de estadísticas. */
+    gap: 7px; /* Reduce el espacio entre tarjetas. */
+  } /* Termina el ajuste de las estadísticas móviles. */
+  .stat-card { /* Compacta el contenido de cada tarjeta. */
+    gap: 6px; /* Reduce el espacio entre etiqueta y valor. */
+    padding: 11px 9px; /* Reduce el espacio interior. */
+  } /* Termina el ajuste de las tarjetas móviles. */
+  .stat-card strong { /* Ajusta los números al ancho de móvil. */
+    font-size: 18px; /* Reduce un poco el tamaño del valor. */
+  } /* Termina el ajuste de los valores móviles. */
+  .controls { /* Prepara las ayudas para pantallas pequeñas. */
+    flex-direction: column; /* Pone las ayudas una debajo de la otra. */
+    align-items: flex-start; /* Alinea ambas ayudas a la izquierda. */
+    gap: 8px; /* Separa las dos filas de ayuda. */
+  } /* Termina el ajuste de las ayudas móviles. */
+  .mobile-controls { /* Muestra los botones para controlar con el tacto. */
+    display: block; /* Hace visibles los controles táctiles. */
+  } /* Termina el ajuste de los controles táctiles. */
+} /* Termina las reglas para pantallas pequeñas. */

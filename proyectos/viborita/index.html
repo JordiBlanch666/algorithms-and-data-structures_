@@ -1,0 +1,46 @@
+<!doctype html> <!-- Indica que esta página usa HTML moderno. -->
+<html lang="es"> <!-- Declara que el idioma de la página es español. -->
+<head> <!-- Abre la zona de configuración de la página. -->
+  <meta charset="utf-8"> <!-- Permite mostrar correctamente tildes y otros caracteres. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- Adapta el juego a pantallas pequeñas. -->
+  <meta name="theme-color" content="#101a22"> <!-- Da un color a la barra del navegador en móviles. -->
+  <title>Viborita — 20 niveles</title> <!-- Define el texto que aparece en la pestaña. -->
+  <link rel="stylesheet" href="style.css"> <!-- Carga los estilos visuales del juego. -->
+</head> <!-- Cierra la zona de configuración. -->
+<body> <!-- Abre el contenido que ve la persona que juega. -->
+  <main class="game-shell"> <!-- Agrupa el tablero y los controles en un solo panel. -->
+    <header class="topbar"> <!-- Presenta el título y el estado del juego. -->
+      <div> <!-- Agrupa el título y su pequeña descripción. -->
+        <p class="eyebrow">ARCADE CLÁSICO</p> <!-- Muestra una etiqueta decorativa encima del título. -->
+        <h1>Viborita<span>.</span></h1> <!-- Muestra el nombre del juego. -->
+      </div> <!-- Cierra el grupo del título. -->
+      <div class="status-pill"><span class="status-dot"></span><span id="status">Lista para jugar</span></div> <!-- Muestra el estado actual. -->
+    </header> <!-- Cierra la cabecera del juego. -->
+    <section class="stats" aria-label="Progreso de la partida"> <!-- Organiza los datos importantes de la partida. -->
+      <div class="stat-card"><span class="stat-label">NIVEL</span><strong id="level">01 <small>/ 20</small></strong></div> <!-- Enseña el nivel actual. -->
+      <div class="stat-card"><span class="stat-label">PUNTOS</span><strong id="score">000</strong></div> <!-- Enseña los puntos acumulados. -->
+      <div class="stat-card"><span class="stat-label">FRUTAS</span><strong id="fruit-count">0 <small>/ 4</small></strong></div> <!-- Enseña el avance del nivel. -->
+    </section> <!-- Cierra el panel de estadísticas. -->
+    <div class="board-wrap"> <!-- Coloca el tablero y el mensaje flotante en el mismo espacio. -->
+      <canvas id="board" width="600" height="400" aria-label="Tablero de la viborita"></canvas> <!-- Crea el tablero donde se dibuja el juego. -->
+      <div id="overlay" class="overlay"> <!-- Muestra instrucciones y mensajes encima del tablero. -->
+        <div class="overlay-card"> <!-- Da un fondo legible al mensaje del tablero. -->
+          <div class="overlay-icon" id="overlay-icon">↗</div> <!-- Muestra un símbolo para acompañar el mensaje. -->
+          <h2 id="overlay-title">¿Listo para jugar?</h2> <!-- Muestra el título del mensaje. -->
+          <p id="overlay-copy">Come 4 frutas para pasar de nivel. ¡Completa los 20!</p> <!-- Explica el objetivo de la partida. -->
+          <button id="start-button" class="primary-button">Empezar partida</button> <!-- Inicia o reanuda el juego. -->
+        </div> <!-- Cierra la tarjeta del mensaje. -->
+      </div> <!-- Cierra la capa de mensajes. -->
+    </div> <!-- Cierra el contenedor del tablero. -->
+    <footer class="controls"> <!-- Explica los controles disponibles. -->
+      <div class="keys-help"><span class="key">↑</span><span class="key">←</span><span class="key">↓</span><span class="key">→</span><span class="help-text">Mover la viborita</span></div> <!-- Enseña las teclas de dirección. -->
+      <div class="control-hint"><span class="key key-wide">ESPACIO</span><span class="help-text">Pausar</span><span class="separator">·</span><span class="help-text">Evita las paredes y tu cola</span></div> <!-- Enseña cómo pausar y cómo evitar perder. -->
+    </footer> <!-- Cierra la zona de controles. -->
+    <div class="mobile-controls" aria-label="Controles táctiles"> <!-- Crea botones grandes para jugar en una pantalla táctil. -->
+      <button data-direction="up" aria-label="Arriba">↑</button> <!-- Mueve la viborita hacia arriba. -->
+      <div><button data-direction="left" aria-label="Izquierda">←</button><button data-direction="down" aria-label="Abajo">↓</button><button data-direction="right" aria-label="Derecha">→</button></div> <!-- Permite mover la viborita en las otras direcciones. -->
+    </div> <!-- Cierra los botones táctiles. -->
+  </main> <!-- Cierra el panel principal del juego. -->
+  <script src="game.js"></script> <!-- Carga las reglas y el funcionamiento del juego. -->
+</body> <!-- Cierra el contenido visible de la página. -->
+</html> <!-- Cierra el documento HTML. -->

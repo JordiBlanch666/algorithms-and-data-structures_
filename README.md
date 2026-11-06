@@ -1,7 +1,8 @@
 # Hi, I'm Jordi Blanch 👋
 
-**QA Analyst & Software Engineering Student** · Hybridge · Mexico
+**IT Support · Service Desk · QA** · Software Engineering Student · Hybridge · Mexico
 
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-jordi--contreras--blanch-0A66C2?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/jordi-contreras-blanch/)
 [![Email](https://img.shields.io/badge/paastor.blanch@gmail.com-EA4335?style=flat&logo=gmail&logoColor=white)](mailto:paastor.blanch@gmail.com)
 [![GitHub](https://img.shields.io/badge/JordiBlanch666-181717?style=flat&logo=github&logoColor=white)](https://github.com/JordiBlanch666)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)
@@ -14,7 +15,7 @@
 
 I'm not your typical software engineering student.
 
-Before writing my first algorithm, I spent six years maintaining **zero-error metrics in live broadcast production** at K 102.7 FM — the closest real-world equivalent to a strict SLA. I designed **clinical decision algorithms in a hospital ICU** at San Jose Hospital, where documentation is non-negotiable and edge cases have consequences. At Charter Spectrum, I managed 50+ daily tickets using Jira and Zendesk while improving first-call resolution by 15%.
+Before writing my first algorithm, I spent six years maintaining **zero-error metrics in live broadcast production** at K 102.7 FM — the closest real-world equivalent to a strict SLA. I designed **clinical decision algorithms in a hospital ICU** at San Jose Hospital, where documentation is non-negotiable and edge cases have consequences. At Charter Spectrum, I resolved 50+ tickets a day using Jira and Zendesk, with a 90% first-call resolution rate.
 
 That background — broadcast ops, clinical QA, and enterprise tech support — is what brought me to Software Engineering. I'm formalizing what I already know about precision, documentation, and systems thinking into code.
 
@@ -288,7 +289,7 @@ python poo/herencia.py
 |--------------------|-------------------|---------------------------------------------|
 | QA / Broadcast Ops | K 102.7 FM        | Zero-error SLA, live system monitoring      |
 | Clinical QA        | San Jose Hospital | Algorithm design, validation, documentation |
-| Tech Support       | Charter Spectrum  | Jira/Zendesk, ticket management, 15% FCR ↑  |
+| Tech Support       | Charter Spectrum  | Jira/Zendesk, 50+ tickets/day, 90% FCR      |
 
 ---
 

@@ -1,0 +1,12 @@
+# Bases de datos generadas
+*.db
+*.sqlite
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# PyCharm
+.idea/

@@ -35,7 +35,14 @@ This repository tracks that transition, term by term. My main project today is a
  ├── 📂 fundamentos/             ← Functions, native data structures, file I/O
  ├── 📂 poo/                     ← OOP: the four pillars + banking system
  ├── 📂 redes/                   ← Networking: DNS, TCP, HTTP, port scanner
+ ├── 📂 data-science/            ← Data science & machine learning (3rd term)  ⬅ new
+ │   └── 📂 diabetes-progression/   ← EDA, model comparison, cross-validation
+ ├── 📂 sql/                     ← SQL & databases (3rd term)  ⬅ new
+ │   ├── 📂 sql-nutrition-clinic/    ← Nutrition clinic: BMI, progress, revenue
+ │   ├── 📂 sql-help-desk-tickets/   ← Help Desk: SLA, MTTR, CSAT, backlog
+ │   └── 📂 sql-streaming-analytics/ ← Streaming: MRR, churn, cohorts
  └── 📂 proyectos/
+     ├── 📂 sonora_player/       ← Desktop music player with synced lyrics  ⬅ new
      ├── 📂 calculadora/         ← Calculator with history & memory  ⬅ new
      ├── 📂 todo_app/            ← To-Do app with priorities & JSON  ⬅ new
      ├── 📂 hangman/             ← Hangman game with ASCII art       ⬅ new
@@ -52,6 +59,28 @@ python main.py
 ---
 
 ## Projects
+
+### Sonora — Desktop Music Player
+> [`proyectos/sonora_player`](proyectos/sonora_player)
+
+Desktop music player built with **Tkinter**. Plays MP3, WAV, OGG, FLAC, AIFF and **AAC/M4A**
+(iTunes purchases), with M3U playlists, search, shuffle and repeat, embedded cover art and
+**synced lyrics** from local `.lrc` files or the LRCLIB public API.
+
+```bash
+cd proyectos/sonora_player
+pip install -r requirements.txt
+python main.py
+```
+
+| Concept | Where |
+|---------|-------|
+| Modular design: UI separated from testable logic | `sonora/player.py` vs. `audio.py`, `lyrics.py`, `metadata.py` |
+| AAC decoding to WAV with PyAV (SDL_mixer can't play AAC) | `sonora/audio.py` |
+| Synced lyrics with binary search (`bisect`) over LRC timestamps | `sonora/player.py`, `sonora/lyrics.py` |
+| Background thread for HTTP requests without freezing the UI | `fetch_lyrics()` + `root.after()` |
+| Graceful error handling (offline, corrupted files, DRM-protected `.m4p`) | throughout |
+| Unit tests, including a real `.m4a` decode | `tests/test_sonora.py` |
 
 ### Calculator CLI
 > `proyectos/calculadora/calculadora.py`
@@ -184,6 +213,56 @@ python proyectos/quiz/quiz.py
 
 ---
 
+## Data Science — Third Term
+
+### Diabetes Progression Prediction
+> [`data-science/diabetes-progression`](data-science/diabetes-progression)
+
+End-to-end data science project on **442 real diabetes patients** (Efron et al., 2004):
+data validation, exploratory analysis, 5-fold cross-validated comparison of four models
+against a baseline, hold-out evaluation and permutation importance.
+
+![Model comparison](data-science/diabetes-progression/figures/04_model_comparison.png)
+
+| Result | Value |
+|--------|-------|
+| Strongest predictor | BMI (r = 0.59) |
+| Obesity vs. normal weight | Average progression 213 vs. 109 |
+| Best model | Ridge regression — R² 0.48 ± 0.04 (CV), 0.45 on unseen test data |
+| Baseline (predict the mean) | R² −0.03 |
+
+```bash
+cd data-science/diabetes-progression
+pip install -r requirements.txt
+python main.py
+```
+
+**Stack:** pandas · scikit-learn · matplotlib · unittest
+
+---
+
+## SQL & Databases — Third Term
+
+Three relational databases built in **SQLite**, each one with a normalized schema, constraints,
+triggers, views, analytical queries and automated tests. No installation needed — Python includes SQLite.
+
+| Project | Business question it answers | Highlights |
+|---------|------------------------------|------------|
+| [`sql/sql-nutrition-clinic`](sql/sql-nutrition-clinic) | Which patients are improving, who stopped coming, how much does the clinic bill per month? | 3NF schema, N:M relationship, validation trigger, `ROW_NUMBER`, `LAG`, `FIRST_VALUE` |
+| [`sql/sql-help-desk-tickets`](sql/sql-help-desk-tickets) | Are we meeting the SLA? Which agent resolves fastest? What should we automate? | Audit-trail triggers, SLA view, `RANK`, moving averages, backlog aging |
+| [`sql/sql-streaming-analytics`](sql/sql-streaming-analytics) | What is our MRR and churn? Do users keep watching after they sign up? | Recursive CTE calendar, partial unique index, cohort retention, simple recommender |
+
+```bash
+cd sql/sql-help-desk-tickets
+python run.py                      # builds the database and runs every query
+python run.py --list               # lists available queries
+python -m unittest discover tests  # runs the tests
+```
+
+Each project has its own README with an ER diagram and sample results.
+
+---
+
 ## OOP — Second Semester
 
 Four pillars, four files, one integrating project.
@@ -263,6 +342,16 @@ python poo/herencia.py
 ---
 
 ## What I've learned
+
+**Third term**
+- Relational database design: normalization, primary/foreign keys, N:M relationships
+- Constraints (`CHECK`, `UNIQUE`, partial indexes) and triggers for business rules
+- Views, CTEs (including recursive) and window functions (`ROW_NUMBER`, `RANK`, `LAG`, `SUM OVER`)
+- KPI analysis with SQL: SLA, MTTR, CSAT, MRR, churn, cohort retention
+- Testing database logic with Python `unittest`
+- Data science workflow: data validation, EDA, cross-validation, baseline comparison, model interpretation
+- pandas, scikit-learn pipelines and matplotlib visualizations
+- Desktop GUI with Tkinter, audio playback and decoding, threading for network calls
 
 **Second semester**
 - OOP: classes, encapsulation, inheritance, polymorphism

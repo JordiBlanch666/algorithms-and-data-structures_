@@ -1,0 +1,11 @@
+,importance
+log_triglycerides,0.404
+total_cholesterol,0.334
+bmi,0.223
+ldl,0.135
+sex,0.071
+mean_blood_pressure,0.048
+cholesterol_hdl_ratio,0.029
+hdl,0.017
+glucose,0.004
+age,-0.004

@@ -1,17 +1,21 @@
-# Viborita
+# Snake Game
 
-Juego clásico de viborita para navegador, creado sin dependencias externas.
+A classic browser snake game built with plain HTML, CSS and JavaScript — no external dependencies.
 
-## Cómo jugar
+## How to play
 
-Abre `index.html` en un navegador moderno. Usa las flechas o WASD para dirigir la viborita, y la barra espaciadora para pausar. En pantallas táctiles puedes usar los botones o deslizar un dedo sobre el tablero.
+Open `index.html` in any modern browser. Use the arrow keys or WASD to steer the snake and the
+space bar to pause. On touch screens you can use the on-screen buttons or swipe across the board.
 
-Come cuatro frutas para pasar de nivel. Cada nivel aumenta la velocidad; completa los veinte niveles para ganar. Evita las paredes y tu propio cuerpo.
+Eat four fruits to advance to the next level. Each level is faster than the last; clear all
+twenty levels to win. Avoid the walls and your own body.
 
-## Archivos
+## Files
 
-- `index.html`: estructura de la página y controles.
-- `style.css`: diseño adaptable a pantallas grandes y pequeñas.
-- `game.js`: movimiento, puntuación, niveles y dibujo del juego.
+- `index.html`: page structure and controls.
+- `style.css`: responsive layout for large and small screens.
+- `game.js`: movement, scoring, levels and rendering.
 
-#Jordi Blanch
+## Author
+
+**Jordi Blanch**

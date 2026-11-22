@@ -26,8 +26,6 @@ proyectos/gestor_calificaciones/calificaciones.json
 fundamentos/archivos/*.txt
 fundamentos/archivos/*.csv
 
-# Claude Code
-.claude/
 
 # Node
 node_modules/
@@ -38,3 +36,6 @@ package-lock.json
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Generated SQLite databases
+*.db

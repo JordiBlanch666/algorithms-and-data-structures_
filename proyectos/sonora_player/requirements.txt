@@ -1,0 +1,4 @@
+pygame-ce>=2.5.8
+mutagen>=1.47.0
+av>=14.0.0
+Pillow>=11.0.0

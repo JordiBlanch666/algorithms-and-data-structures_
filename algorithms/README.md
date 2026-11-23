@@ -1,19 +1,19 @@
-# Algoritmos
+# Algorithms
 
-Implementaciones desde cero en Python con análisis de complejidad.
+From-scratch Python implementations with complexity analysis.
 
-## Ordenamiento
+## Sorting
 
-- [`burbuja.py`](ordenamiento/burbuja.py) — O(n²), con optimización de corte temprano
-- [`seleccion.py`](ordenamiento/seleccion.py) — O(n²), mínimo de intercambios
-- [`insercion.py`](ordenamiento/insercion.py) — O(n) mejor caso, ideal para listas casi ordenadas
+- [`bubble_sort.py`](sorting/bubble_sort.py) — O(n²), with an early-exit optimization
+- [`selection_sort.py`](sorting/selection_sort.py) — O(n²), minimal number of swaps
+- [`insertion_sort.py`](sorting/insertion_sort.py) — O(n) best case, ideal for nearly sorted lists
 
-## Búsqueda
+## Searching
 
-- [`lineal.py`](busqueda/lineal.py) — O(n), funciona en cualquier lista
-- [`binaria.py`](busqueda/binaria.py) — O(log n), requiere lista ordenada
+- [`linear_search.py`](searching/linear_search.py) — O(n), works on any list
+- [`binary_search.py`](searching/binary_search.py) — O(log n), requires a sorted list
 
-## Recursión
+## Recursion
 
-- [`factorial.py`](recursion/factorial.py) — caso base + llamada recursiva
-- [`fibonacci.py`](recursion/fibonacci.py) — comparación recursivo O(2ⁿ) vs memoización O(n)
+- [`factorial.py`](recursion/factorial.py) — base case + recursive call
+- [`fibonacci.py`](recursion/fibonacci.py) — naive recursion O(2ⁿ) vs. memoization O(n)

@@ -1,10 +1,10 @@
-# Autor: Jordi Y Blanch
+# Author: Jordi Y Blanch
 """
-File Carver: escanea sectores crudos buscando firmas (magic bytes) de
-imágenes y vídeos, independientemente del sistema de ficheros.
+File Carver: scans raw sectors for the signatures (magic bytes) of
+images and videos, independently of the file system.
 
-Funciona incluso cuando la MFT está corrupta o el sistema de ficheros
-está formateado, ya que trabaja directamente sobre los datos del disco.
+It works even when the MFT is corrupted or the file system has been
+formatted, because it reads the disk data directly.
 """
 import logging
 import struct
@@ -18,7 +18,7 @@ from signatures import FileSignature, get_signatures
 log = logging.getLogger(__name__)
 
 DEFAULT_CHUNK_SECTORS = 2048
-STREAM_CHUNK = 4 * 1024 * 1024   # 4 MB por chunk al escribir a disco
+STREAM_CHUNK = 4 * 1024 * 1024   # 4 MB per chunk when writing to disk
 
 
 @dataclass
@@ -26,8 +26,8 @@ class CarvedFile:
     signature: FileSignature
     start_byte: int
     estimated_size: int
-    probe: bytes          # primer MB para validación (no se carga todo en RAM)
-    reader: object        # DiskReader para streaming al guardar
+    probe: bytes          # first MB, for validation (the whole file isn't loaded into RAM)
+    reader: object        # DiskReader used to stream the data when saving
 
     @property
     def suggested_name(self) -> str:
@@ -35,7 +35,7 @@ class CarvedFile:
         return f"carved_{mb:06d}MB.{self.signature.extension}"
 
     def write_to(self, dest_path: Path) -> int:
-        """Escribe el archivo al disco en chunks de 4 MB. Devuelve bytes escritos."""
+        """Write the file to disk in 4 MB chunks. Returns the bytes written."""
         written = 0
         remaining = self.estimated_size
         offset = self.start_byte
@@ -53,7 +53,7 @@ class CarvedFile:
         return written
 
 
-# ── Estimadores de tamaño por formato ────────────────────────────────────────
+# ── Size estimators per format ──────────────────────────────────────────────
 def _estimate_jpeg_size(data: bytes) -> int:
     end = data.find(b"\xFF\xD9")
     return (end + 2) if end != -1 else 0
@@ -123,7 +123,7 @@ SIZE_ESTIMATORS = {
 }
 
 
-# ── Verificación de firmas ────────────────────────────────────────────────────
+# ── Signature checks ─────────────────────────────────────────────────────────
 def _matches(sig: FileSignature, window: bytes, window_offset: int) -> bool:
     abs_hdr_start = sig.header_offset
     local = window_offset + abs_hdr_start
@@ -143,7 +143,7 @@ def _matches(sig: FileSignature, window: bytes, window_offset: int) -> bool:
     return True
 
 
-# ── Clase principal ───────────────────────────────────────────────────────────
+# ── Main class ────────────────────────────────────────────────────────────────
 class FileCarver:
     def __init__(
         self,
@@ -188,12 +188,12 @@ class FileCarver:
             prev_tail = chunk_data[-overlap_bytes:] if len(chunk_data) >= overlap_bytes else chunk_data
 
     def _extract(self, sig: FileSignature, start_byte: int) -> CarvedFile | None:
-        """Lee solo 1 MB para validar. Los datos se escriben en streaming al guardar."""
+        """Read only 1 MB to validate. The data is streamed when it's saved."""
         probe_size = min(sig.max_size, 1 * 1024 * 1024)
         try:
             probe = self.reader.read_bytes_at(start_byte, probe_size)
         except OSError as e:
-            log.debug(f"Error leyendo candidato en {start_byte:#x}: {e}")
+            log.debug(f"Error reading candidate at {start_byte:#x}: {e}")
             return None
 
         non_zero = sum(1 for b in probe[:256] if b != 0)

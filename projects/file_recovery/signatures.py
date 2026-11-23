@@ -1,7 +1,7 @@
-# Autor: Jordi Y Blanch
+# Author: Jordi Y Blanch
 """
-Base de datos de firmas de archivos (magic bytes) para imágenes y vídeos.
-Cada firma define cómo detectar, estimar tamaño y nombrar el archivo recuperado.
+Database of file signatures (magic bytes) for images and videos.
+Each signature defines how to detect, size and name the recovered file.
 """
 from dataclasses import dataclass, field
 from typing import Optional, Callable
@@ -11,17 +11,17 @@ from typing import Optional, Callable
 class FileSignature:
     extension: str
     category: str          # "image" | "video" | "raw"
-    header: bytes          # bytes de inicio obligatorios
-    header_offset: int     # offset dentro del sector donde aparece la firma
-    footer: Optional[bytes]  # bytes de fin (None = tamaño estimado)
-    max_size: int          # tamaño máximo esperado en bytes
+    header: bytes          # required header bytes
+    header_offset: int     # offset inside the sector where the signature appears
+    footer: Optional[bytes]  # footer bytes (None = estimated size)
+    max_size: int          # maximum expected size in bytes
     description: str
     extra_checks: dict[int, bytes] = field(default_factory=dict)
     validator: Optional[Callable[[bytes], bool]] = field(default=None, compare=False)
 
 
 # ─────────────────────────────────────────────
-# IMÁGENES
+# IMAGES
 # ─────────────────────────────────────────────
 IMAGE_SIGNATURES: list[FileSignature] = [
     FileSignature(
@@ -57,7 +57,7 @@ IMAGE_SIGNATURES: list[FileSignature] = [
         header=b"BM",
         header_offset=0,
         footer=None,
-        max_size=200 * 1024 * 1024,  # 200 MB (mapas de bits sin comprimir)
+        max_size=200 * 1024 * 1024,  # 200 MB (uncompressed bitmaps)
         description="Windows Bitmap",
     ),
     FileSignature(
@@ -86,19 +86,19 @@ IMAGE_SIGNATURES: list[FileSignature] = [
         footer=None,
         max_size=50 * 1024 * 1024,
         description="WebP",
-        extra_checks={8: b"WEBP"},   # bytes 8-11 deben ser "WEBP"
+        extra_checks={8: b"WEBP"},   # bytes 8-11 must be "WEBP"
     ),
     FileSignature(
         extension="heic",
         category="image",
         header=b"ftyp",
-        header_offset=4,             # los primeros 4 bytes son tamaño variable
+        header_offset=4,             # the first 4 bytes are a variable size
         footer=None,
         max_size=100 * 1024 * 1024,
         description="HEIC / HEIF",
         extra_checks={8: b"heic"},
     ),
-    # ── Formatos RAW de cámara ──────────────────────────────────────────
+    # ── Camera RAW formats ──────────────────────────────────────────────
     FileSignature(
         extension="cr2",
         category="raw",
@@ -126,8 +126,8 @@ IMAGE_SIGNATURES: list[FileSignature] = [
         footer=None,
         max_size=50 * 1024 * 1024,
         description="Nikon NEF (TIFF-based)",
-        # NEF se distingue del TIFF genérico por el IFD maker notes
-        # el carver lo guarda como .tif si no hay marca extra
+        # NEF differs from a generic TIFF by its maker-notes IFD;
+        # the carver saves it as .tif when there's no extra marker
     ),
     FileSignature(
         extension="arw",
@@ -168,7 +168,7 @@ IMAGE_SIGNATURES: list[FileSignature] = [
 ]
 
 # ─────────────────────────────────────────────
-# VÍDEOS
+# VIDEOS
 # ─────────────────────────────────────────────
 VIDEO_SIGNATURES: list[FileSignature] = [
     FileSignature(
@@ -292,7 +292,7 @@ VIDEO_SIGNATURES: list[FileSignature] = [
     FileSignature(
         extension="mts",
         category="video",
-        header=b"\x47",             # sync byte MPEG-TS (paquetes de 188 bytes)
+        header=b"\x47",             # MPEG-TS sync byte (188-byte packets)
         header_offset=0,
         footer=None,
         max_size=50 * 1024 * 1024 * 1024,

@@ -1,8 +1,8 @@
-# Autor: Jordi Y Blanch
+# Author: Jordi Y Blanch
 """
-Localiza en qué sectores del disco físico están almacenadas carpetas específicas.
-Usa FSCTL_GET_RETRIEVAL_POINTERS para obtener los clusters reales de cada ruta.
-Con eso el carving solo escanea las zonas relevantes en vez de todo el disco.
+Finds which sectors of the physical disk hold specific folders.
+Uses FSCTL_GET_RETRIEVAL_POINTERS to get the real clusters of each path.
+That way carving only scans the relevant areas instead of the whole disk.
 """
 import ctypes
 import ctypes.wintypes as wt
@@ -27,16 +27,16 @@ GENERIC_READ           = 0x80000000
 FILE_SHARE_READ        = 0x00000001
 FILE_SHARE_WRITE       = 0x00000002
 OPEN_EXISTING          = 3
-FILE_FLAG_BACKUP_SEMANTICS = 0x02000000   # necesario para abrir directorios
+FILE_FLAG_BACKUP_SEMANTICS = 0x02000000   # needed to open directories
 FSCTL_GET_RETRIEVAL_POINTERS = 0x00090073
 INVALID_HANDLE_VALUE   = ctypes.c_void_p(-1).value
 
-# Margen de escaneo alrededor de cada cluster encontrado (en clusters)
-SCAN_MARGIN_CLUSTERS = 50_000   # ~200 MB con clusters de 4 KB
+# Scan margin around each cluster found (in clusters)
+SCAN_MARGIN_CLUSTERS = 50_000   # ~200 MB with 4 KB clusters
 
 
 def _get_cluster_size(volume: str) -> int:
-    """Obtiene el tamaño de cluster del volumen (ej: 'C:\\')."""
+    """Get the volume's cluster size (e.g. 'C:\\')."""
     spc  = wt.DWORD(0)
     bps  = wt.DWORD(0)
     fc   = wt.DWORD(0)
@@ -51,8 +51,8 @@ def _get_cluster_size(volume: str) -> int:
 
 def _get_retrieval_pointers(path: str) -> list[tuple[int, int]]:
     """
-    Devuelve los extents (lcn_inicio, num_clusters) de un archivo o directorio.
-    Vacío si no se puede abrir o el path no existe.
+    Return the extents (start_lcn, num_clusters) of a file or folder.
+    Empty if it can't be opened or the path doesn't exist.
     """
     h = kernel32.CreateFileW(
         path,
@@ -89,7 +89,7 @@ def _get_retrieval_pointers(path: str) -> list[tuple[int, int]]:
             return []
 
         extent_count = struct.unpack_from("<I", raw, 0)[0]
-        # starting_vcn = struct.unpack_from("<q", raw, 8)[0]  # no necesario
+        # starting_vcn = struct.unpack_from("<q", raw, 8)[0]  # not needed
 
         extents = []
         pos = 16
@@ -100,7 +100,7 @@ def _get_retrieval_pointers(path: str) -> list[tuple[int, int]]:
             next_vcn = struct.unpack_from("<q", raw, pos)[0]
             lcn      = struct.unpack_from("<q", raw, pos + 8)[0]
             num_clusters = next_vcn - prev_vcn
-            if lcn >= 0:   # lcn = -1 significa sparse/sin asignar
+            if lcn >= 0:   # lcn = -1 means sparse/unallocated
                 extents.append((lcn, num_clusters))
             prev_vcn = next_vcn
             pos += 16
@@ -118,10 +118,10 @@ def get_scan_ranges(
     cluster_size: int | None = None,
 ) -> list[tuple[int, int]]:
     """
-    Para cada ruta, obtiene sus clusters y devuelve rangos de sectores a escanear
-    (con margen). Fusiona rangos solapados.
+    For each path, get its clusters and return the sector ranges to scan
+    (with a margin). Overlapping ranges are merged.
 
-    Devuelve lista de (sector_inicio, sector_fin).
+    Returns a list of (start_sector, end_sector).
     """
     cs = cluster_size or _get_cluster_size(volume_letter + "\\")
     sectors_per_cluster = cs // sector_size
@@ -130,12 +130,12 @@ def get_scan_ranges(
 
     for path in paths:
         if not os.path.exists(path):
-            log.debug(f"Ruta no existe, ignorada: {path}")
+            log.debug(f"Path does not exist, skipped: {path}")
             continue
 
         extents = _get_retrieval_pointers(path)
         if not extents:
-            log.debug(f"No se obtuvieron extents para: {path}")
+            log.debug(f"No extents found for: {path}")
             continue
 
         log.info(f"  {path}: {len(extents)} extent(s)")
@@ -151,7 +151,7 @@ def get_scan_ranges(
     if not raw_ranges:
         return []
 
-    # Fusionar rangos solapados
+    # Merge overlapping ranges
     raw_ranges.sort()
     merged: list[tuple[int, int]] = [raw_ranges[0]]
     for start, end in raw_ranges[1:]:
@@ -161,18 +161,18 @@ def get_scan_ranges(
             merged.append((start, end))
 
     total_sectors = sum(e - s for s, e in merged)
-    log.info(f"Rangos fusionados: {len(merged)}, total {total_sectors:,} sectores "
+    log.info(f"Merged ranges: {len(merged)}, total {total_sectors:,} sectores "
              f"({total_sectors * sector_size / (1024**3):.2f} GB)")
     return merged
 
 
 def build_hint_paths(username: str, extra_paths: list[str] | None = None) -> list[str]:
     """
-    Construye la lista de rutas relevantes para buscar vídeos eliminados:
-    - Carpeta Videos del usuario
-    - Papelera de reciclaje
-    - Carpetas temporales
-    - Rutas extra opcionales
+    Build the list of relevant paths to search for deleted videos:
+    - The user's Videos folder
+    - The Recycle Bin
+    - Temporary folders
+    - Optional extra paths
     """
     paths = [
         f"C:\\Users\\{username}\\Videos",

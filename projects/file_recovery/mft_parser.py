@@ -1,13 +1,13 @@
-# Autor: Jordi Y Blanch
+# Author: Jordi Y Blanch
 """
-Parser de la Master File Table (MFT) de NTFS.
-Detecta entradas de archivos eliminados (flag de "en uso" = 0) con
-extensiones de imagen y vídeo para recuperarlos.
+Parser for the NTFS Master File Table (MFT).
+Finds entries of deleted files ("in use" flag = 0) with image and
+video extensions so they can be recovered.
 
-Formato MFT:
-  - Cada entrada ocupa 1024 bytes (por defecto)
-  - Empieza con la firma b"FILE"
-  - El campo Flags indica si el archivo está activo o eliminado
+MFT format:
+  - Each entry takes 1024 bytes (by default)
+  - It starts with the signature b"FILE"
+  - The Flags field says whether the file is active or deleted
 """
 import struct
 import logging
@@ -20,45 +20,45 @@ from disk_reader import DiskReader
 log = logging.getLogger(__name__)
 
 
-# ── Constantes NTFS ───────────────────────────────────────────────────────────
+# ── NTFS constants ────────────────────────────────────────────────────────────
 MFT_SIGNATURE          = b"FILE"
-MFT_RECORD_SIZE        = 1024    # bytes por entrada MFT
-MFT_FLAG_IN_USE        = 0x0001  # archivo activo
+MFT_RECORD_SIZE        = 1024    # bytes per MFT entry
+MFT_FLAG_IN_USE        = 0x0001  # file in use
 MFT_FLAG_DIRECTORY     = 0x0002
 
-# Tipos de atributo NTFS relevantes
+# Relevant NTFS attribute types
 ATTR_STANDARD_INFORMATION = 0x10
 ATTR_FILE_NAME            = 0x30
 ATTR_DATA                 = 0x80
 ATTR_END                  = 0xFFFFFFFF
 
-# Extensiones objetivo
+# Target extensions
 TARGET_EXTENSIONS = {
-    # imágenes
+    # images
     "jpg", "jpeg", "png", "gif", "bmp", "tif", "tiff",
     "webp", "heic", "heif",
     # RAW
     "cr2", "cr3", "nef", "arw", "dng", "orf", "rw2",
-    # vídeo
+    # video
     "mp4", "m4v", "mov", "avi", "mkv", "wmv", "flv",
     "mpg", "mpeg", "3gp", "mts", "m2ts", "vob",
 }
 
 
-# ── Estructuras de datos ──────────────────────────────────────────────────────
+# ── Data structures ──────────────────────────────────────────────────────────
 @dataclass
 class MFTEntry:
     mft_index: int
     filename: str
     extension: str
-    size: int          # bytes lógicos del atributo $DATA
+    size: int          # logical bytes of the $DATA attribute
     is_deleted: bool
     data_runs: list[tuple[int, int]]  # (cluster_offset, cluster_count)
 
 
-# ── Funciones de decodificación MFT ──────────────────────────────────────────
+# ── MFT decoding functions ─────────────────────────────────────────────────
 def _apply_fixup(raw: bytes) -> bytes:
-    """Aplica el Update Sequence Array (USA) para corregir sectores MFT."""
+    """Apply the Update Sequence Array (USA) to fix MFT sectors."""
     if len(raw) < 48:
         return raw
     usa_offset = struct.unpack_from("<H", raw, 4)[0]
@@ -77,8 +77,8 @@ def _apply_fixup(raw: bytes) -> bytes:
 
 def _parse_filename_attr(attr_data: bytes) -> tuple[str, int]:
     """
-    Devuelve (nombre_archivo, tamaño_lógico) desde un atributo $FILE_NAME.
-    Offset 64 = tamaño lógico asignado, offset 80 = longitud del nombre.
+    Return (file_name, logical_size) from a $FILE_NAME attribute.
+    Offset 64 = allocated logical size, offset 80 = name length.
     """
     if len(attr_data) < 66:
         return "", 0
@@ -98,8 +98,8 @@ def _parse_filename_attr(attr_data: bytes) -> tuple[str, int]:
 
 def _parse_data_runs(run_bytes: bytes, cluster_size: int) -> list[tuple[int, int]]:
     """
-    Decodifica data runs NTFS. Devuelve lista de (cluster_inicio, num_clusters).
-    cluster_inicio = -1 indica datos no-residentes sin posición (sparse).
+    Decode NTFS data runs. Returns a list of (start_cluster, num_clusters).
+    start_cluster = -1 means non-resident data with no position (sparse).
     """
     runs = []
     pos  = 0
@@ -108,8 +108,8 @@ def _parse_data_runs(run_bytes: bytes, cluster_size: int) -> list[tuple[int, int
         header = run_bytes[pos]
         if header == 0:
             break
-        len_bytes = header & 0x0F   # nibble bajo: bytes de longitud
-        off_bytes = header >> 4     # nibble alto: bytes de offset
+        len_bytes = header & 0x0F   # low nibble: length bytes
+        off_bytes = header >> 4     # high nibble: offset bytes
         pos += 1
 
         if pos + len_bytes + off_bytes > len(run_bytes):
@@ -124,7 +124,7 @@ def _parse_data_runs(run_bytes: bytes, cluster_size: int) -> list[tuple[int, int
 
         run_offset_raw = run_bytes[pos: pos + off_bytes]
         pos += off_bytes
-        # El offset es con signo (relativo al run anterior)
+        # The offset is signed (relative to the previous run)
         run_offset = int.from_bytes(run_offset_raw, "little", signed=False)
         if run_offset_raw and (run_offset_raw[-1] & 0x80):
             run_offset -= 1 << (off_bytes * 8)
@@ -136,7 +136,7 @@ def _parse_data_runs(run_bytes: bytes, cluster_size: int) -> list[tuple[int, int
 
 
 def _parse_mft_record(raw: bytes, mft_index: int) -> MFTEntry | None:
-    """Intenta parsear una entrada MFT y devuelve MFTEntry o None si no es válida."""
+    """Try to parse an MFT entry; returns an MFTEntry, or None if it isn't valid."""
     if len(raw) < MFT_RECORD_SIZE or raw[:4] != MFT_SIGNATURE:
         return None
 
@@ -166,12 +166,12 @@ def _parse_mft_record(raw: bytes, mft_index: int) -> MFTEntry | None:
 
         if attr_type == ATTR_FILE_NAME and not non_resident:
             name, size = _parse_filename_attr(attr_body)
-            if name and "$" not in name:   # ignorar metaarchivos del sistema
+            if name and "$" not in name:   # skip system metafiles
                 filename  = name
                 file_size = size
 
         elif attr_type == ATTR_DATA and non_resident:
-            # Leer data runs desde el encabezado de atributo no-residente
+            # Read the data runs from the non-resident attribute header
             run_offset = struct.unpack_from("<H", raw, pos + 32)[0]
             run_data   = raw[pos + run_offset: pos + attr_len]
             alloc_size = struct.unpack_from("<Q", raw, pos + 40)[0]
@@ -199,13 +199,13 @@ def _parse_mft_record(raw: bytes, mft_index: int) -> MFTEntry | None:
     )
 
 
-# ── Clase principal ───────────────────────────────────────────────────────────
+# ── Main class ────────────────────────────────────────────────────────────────
 class MFTParser:
     """
-    Lee y parsea la MFT de un volumen NTFS para encontrar archivos
-    de imagen/vídeo eliminados.
+    Reads and parses the MFT of an NTFS volume to find deleted
+    image/video files.
 
-    Uso:
+    Usage:
         parser = MFTParser(disk_reader, cluster_size=4096, sector_size=512)
         for entry in parser.find_deleted():
             print(entry.filename, entry.size)
@@ -219,16 +219,16 @@ class MFTParser:
 
     def _find_mft_start(self) -> int:
         """
-        Lee el Boot Sector (sector 0) de NTFS para obtener el offset del $MFT.
-        Devuelve el offset en bytes o -1 si no es NTFS.
+        Read the NTFS Boot Sector (sector 0) to get the $MFT offset.
+        Returns the offset in bytes, or -1 if it isn't NTFS.
         """
         boot = self.reader.read_sectors(0, 1)
         if len(boot) < 512:
             return -1
 
-        # Firma OEM NTFS en offset 3
+        # NTFS OEM signature at offset 3
         if boot[3:11] != b"NTFS    ":
-            log.warning("El volumen no parece ser NTFS (firma OEM no encontrada).")
+            log.warning("The volume doesn't look like NTFS (OEM signature not found).")
             return -1
 
         bytes_per_sector  = struct.unpack_from("<H", boot, 11)[0]
@@ -239,18 +239,18 @@ class MFTParser:
         self.cluster_size = sectors_per_clust * self.sector_size
 
         mft_byte_offset = mft_cluster * self.cluster_size
-        log.info(f"MFT encontrada en offset {mft_byte_offset:#x} "
+        log.info(f"MFT found at offset {mft_byte_offset:#x} "
                  f"(cluster {mft_cluster})")
         return mft_byte_offset
 
     def find_deleted(self, include_active: bool = False) -> Iterator[MFTEntry]:
         """
-        Itera sobre todas las entradas MFT y devuelve archivos eliminados
-        (o activos si include_active=True) con extensiones de imagen/vídeo.
+        Iterate over every MFT entry and yield deleted files
+        (or active ones if include_active=True) with image/video extensions.
         """
         mft_offset = self._find_mft_start()
         if mft_offset < 0:
-            log.error("No se pudo localizar la MFT. ¿Es un volumen NTFS?")
+            log.error("Could not locate the MFT. Is this an NTFS volume?")
             return
 
         index = 0
@@ -260,13 +260,13 @@ class MFTParser:
             try:
                 raw = self.reader.read_bytes_at(offset, MFT_RECORD_SIZE)
             except OSError as e:
-                log.debug(f"Error leyendo MFT[{index}]: {e}")
+                log.debug(f"Error reading MFT[{index}]: {e}")
                 offset += MFT_RECORD_SIZE
                 index  += 1
                 continue
 
             if raw[:4] != MFT_SIGNATURE:
-                # Fin de la MFT o zona corrupta
+                # End of the MFT or a corrupted area
                 break
 
             entry = _parse_mft_record(raw, index)
@@ -278,8 +278,8 @@ class MFTParser:
 
     def read_file_data(self, entry: MFTEntry) -> bytes:
         """
-        Reconstruye el contenido de un archivo usando sus data runs.
-        Devuelve bytes (puede estar incompleto si hay sectores dañados).
+        Rebuild a file's contents from its data runs.
+        Returns bytes (may be incomplete if there are damaged sectors).
         """
         chunks: list[bytes] = []
         total_read = 0
@@ -297,7 +297,7 @@ class MFTParser:
                 chunks.append(data)
                 total_read += len(data)
             except OSError as e:
-                log.warning(f"Sector dañado al leer '{entry.filename}': {e}")
+                log.warning(f"Damaged sector while reading '{entry.filename}': {e}")
                 chunks.append(b"\x00" * to_read)
                 total_read += to_read
 

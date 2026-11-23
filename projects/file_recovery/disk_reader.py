@@ -1,8 +1,8 @@
-# Autor: Jordi Y Blanch
+# Author: Jordi Y Blanch
 """
-Acceso de bajo nivel a discos físicos y volúmenes lógicos en Windows.
-Usa la API Win32 directamente mediante ctypes para leer sectores crudos.
-Requiere: ejecutar como Administrador.
+Low-level access to physical disks and logical volumes on Windows.
+Uses the Win32 API directly through ctypes to read raw sectors.
+Requires: running as Administrator.
 """
 import ctypes
 import ctypes.wintypes as wt
@@ -10,7 +10,7 @@ import struct
 from pathlib import Path
 
 
-# ── Constantes Win32 ─────────────────────────────────────────────────────────
+# ── Win32 constants ──────────────────────────────────────────────────────────
 GENERIC_READ          = 0x80000000
 FILE_SHARE_READ       = 0x00000001
 FILE_SHARE_WRITE      = 0x00000002
@@ -53,18 +53,18 @@ class DiskInfo:
 
 class DiskReader:
     """
-    Lee sectores crudos de un disco físico o volumen lógico.
+    Reads raw sectors from a physical disk or logical volume.
 
-    Uso:
+    Usage:
         with DiskReader(r"\\\\.\\PhysicalDrive0") as dr:
             sector = dr.read_sectors(0, 1)
     """
 
     def __init__(self, path: str):
         """
-        path puede ser:
-          - r'\\.\\PhysicalDrive0'   (disco físico)
-          - r'\\.\\C:'               (volumen lógico)
+        path can be:
+          - r'\\.\\PhysicalDrive0'   (physical disk)
+          - r'\\.\\C:'               (logical volume)
         """
         self.path = path
         self._handle: int | None = None
@@ -94,8 +94,8 @@ class DiskReader:
         if handle == INVALID_HANDLE_VALUE:
             err = ctypes.get_last_error()
             raise PermissionError(
-                f"No se pudo abrir '{self.path}'. "
-                f"Error Win32 {err}. ¿Ejecutas como Administrador?"
+                f"Could not open '{self.path}'. "
+                f"Error Win32 {err}. Are you running as Administrator?"
             )
         self._handle = handle
         self._read_geometry()
@@ -105,7 +105,7 @@ class DiskReader:
             kernel32.CloseHandle(self._handle)
             self._handle = None
 
-    # ── Geometría del disco ───────────────────────────────────────────────────
+    # ── Disk geometry ─────────────────────────────────────────────────────────
     def _read_geometry(self):
         geo = DISK_GEOMETRY_EX()
         bytes_returned = wt.DWORD(0)
@@ -122,13 +122,13 @@ class DiskReader:
             self.total_bytes  = geo.DiskSize
             self.total_sectors = self.total_bytes // self.sector_size
         else:
-            # Fallback para volúmenes pequeños / discos virtuales
+            # Fallback for small volumes / virtual disks
             self.sector_size  = 512
             self.total_bytes  = self._probe_size()
             self.total_sectors = self.total_bytes // self.sector_size
 
     def _probe_size(self) -> int:
-        """Mueve el puntero al final para estimar el tamaño."""
+        """Move the pointer to the end to estimate the size."""
         high = wt.LONG(0)
         low  = kernel32.SetFilePointer(self._handle, 0, ctypes.byref(high), 2)  # FILE_END
         if low == 0xFFFFFFFF and ctypes.get_last_error():
@@ -138,50 +138,50 @@ class DiskReader:
     def info(self) -> DiskInfo:
         return DiskInfo(self.path, self.sector_size, self.total_sectors, self.total_bytes)
 
-    # ── Lectura de sectores ───────────────────────────────────────────────────
+    # ── Sector reading ────────────────────────────────────────────────────────
     def read_sectors(self, start_sector: int, count: int = 1) -> bytes:
-        """Lee `count` sectores consecutivos a partir de `start_sector`."""
+        """Read `count` consecutive sectors starting at `start_sector`."""
         if self._handle is None:
-            raise RuntimeError("El disco no está abierto.")
+            raise RuntimeError("The disk is not open.")
 
         offset = start_sector * self.sector_size
         size   = count * self.sector_size
 
-        # SetFilePointer (compatible con discos > 2 GB)
+        # SetFilePointer (works with disks > 2 GB)
         offset_low  = offset & 0xFFFFFFFF
         offset_high = offset >> 32
         high = wt.LONG(offset_high)
         result = kernel32.SetFilePointer(self._handle, wt.LONG(offset_low),
                                          ctypes.byref(high), 0)
         if result == 0xFFFFFFFF and ctypes.get_last_error():
-            raise OSError(f"Error al posicionar sector {start_sector}: "
+            raise OSError(f"Error seeking to sector {start_sector}: "
                           f"Win32 {ctypes.get_last_error()}")
 
         buf = ctypes.create_string_buffer(size)
         bytes_read = wt.DWORD(0)
         ok = kernel32.ReadFile(self._handle, buf, size, ctypes.byref(bytes_read), None)
         if not ok:
-            raise OSError(f"Error de lectura en sector {start_sector}: "
+            raise OSError(f"Read error at sector {start_sector}: "
                           f"Win32 {ctypes.get_last_error()}")
 
         return buf.raw[: bytes_read.value]
 
     def read_bytes_at(self, byte_offset: int, length: int) -> bytes:
-        """Lee `length` bytes a partir de `byte_offset` (alineado a sector)."""
+        """Read `length` bytes starting at `byte_offset` (sector-aligned)."""
         sector_size  = self.sector_size
         start_sector = byte_offset // sector_size
         sector_off   = byte_offset % sector_size
 
-        # Leer suficientes sectores para cubrir length + desplazamiento interno
+        # Read enough sectors to cover length + the inner offset
         sectors_needed = (sector_off + length + sector_size - 1) // sector_size
         data = self.read_sectors(start_sector, sectors_needed)
         return data[sector_off: sector_off + length]
 
-    # ── Iterador de sectores ──────────────────────────────────────────────────
+    # ── Sector iterator ──────────────────────────────────────────────────────
     def iter_sectors(self, chunk_sectors: int = 2048, start: int = 0,
                      end: int | None = None):
         """
-        Genera bloques de `chunk_sectors` sectores para escaneo secuencial.
+        Yield blocks of `chunk_sectors` sectors for a sequential scan.
         Yields: (sector_index, raw_bytes)
         """
         end = end or self.total_sectors
@@ -191,7 +191,7 @@ class DiskReader:
             try:
                 data = self.read_sectors(current, count)
             except OSError:
-                # Sector ilegible (bad sector) → saltar
+                # Unreadable sector (bad sector) → skip it
                 current += count
                 continue
             yield current, data
@@ -200,7 +200,7 @@ class DiskReader:
 
 # ── Utilidades ────────────────────────────────────────────────────────────────
 def list_physical_drives(max_drives: int = 16) -> list[str]:
-    """Devuelve los discos físicos disponibles en el sistema."""
+    """Return the physical disks available on the system."""
     found = []
     for i in range(max_drives):
         path = f"\\\\.\\PhysicalDrive{i}"
@@ -216,7 +216,7 @@ def list_physical_drives(max_drives: int = 16) -> list[str]:
 
 
 def list_logical_volumes() -> list[str]:
-    """Devuelve letras de unidades lógicas accesibles (C:, D:, etc.)."""
+    """Return the accessible logical drive letters (C:, D:, etc.)."""
     import string
     found = []
     for letter in string.ascii_uppercase:

@@ -1,7 +1,7 @@
-# Autor: Jordi Y Blanch
+# Author: Jordi Y Blanch
 """
-Motor de recuperación principal.
-Coordina MFTParser + FileCarver, elimina duplicados y guarda los archivos.
+Main recovery engine.
+Coordinates MFTParser + FileCarver, removes duplicates and saves the files.
 """
 import hashlib
 import logging
@@ -34,24 +34,24 @@ class RecoveryOptions:
     output_dir: Path
     images: bool         = True
     videos: bool         = True
-    use_mft: bool        = True  # método 1: parsear MFT de NTFS
-    use_carving: bool    = True  # método 2: file carving por sectores
-    min_size: int        = 10_000        # 10 KB mínimo
-    max_size: int        = 100 * 1024**3 # 100 GB máximo
-    deduplicate: bool    = True          # no guardar dos archivos idénticos
+    use_mft: bool        = True  # method 1: parse the NTFS MFT
+    use_carving: bool    = True  # method 2: sector-level file carving
+    min_size: int        = 10_000        # 10 KB minimum
+    max_size: int        = 100 * 1024**3 # 100 GB maximum
+    deduplicate: bool    = True          # don't save two identical files
     overwrite: bool      = False
-    hint_paths: list[str] | None = None  # rutas para limitar el área de carving
+    hint_paths: list[str] | None = None  # paths that narrow down the carving area
     progress_cb: Callable[[str, int, int], None] | None = None
 
 
 class RecoveryEngine:
     """
-    Orquesta la recuperación de imágenes y vídeos eliminados.
+    Orchestrates the recovery of deleted images and videos.
 
-    Ejemplo de uso:
+    Example:
         opts = RecoveryOptions(
             disk_path=r'\\.\\C:',
-            output_dir=Path('C:/Recuperados'),
+            output_dir=Path('C:/Recovered'),
         )
         engine = RecoveryEngine(opts)
         stats  = engine.run()
@@ -63,15 +63,15 @@ class RecoveryEngine:
         self.stats  = RecoveryStats()
         self._seen_hashes: set[str] = set()
 
-    # ── Punto de entrada ──────────────────────────────────────────────────────
+    # ── Entry point ──────────────────────────────────────────────────────────
     def run(self) -> RecoveryStats:
         opts = self.opts
         opts.output_dir.mkdir(parents=True, exist_ok=True)
 
-        log.info(f"Abriendo disco: {opts.disk_path}")
+        log.info(f"Opening disk: {opts.disk_path}")
         with DiskReader(opts.disk_path) as reader:
             info = reader.info()
-            log.info(f"Disco: {info}")
+            log.info(f"Disk: {info}")
             self.stats.scanned_bytes = info.total_bytes
 
             if opts.use_mft:
@@ -80,17 +80,17 @@ class RecoveryEngine:
                 self._run_carving(reader)
 
         log.info(
-            f"Recuperación completada — "
+            f"Recovery finished — "
             f"MFT: {self.stats.mft_found}, "
             f"Carving: {self.stats.carved_found}, "
-            f"Guardados: {self.stats.saved}, "
-            f"Omitidos: {self.stats.skipped}"
+            f"Saved: {self.stats.saved}, "
+            f"Skipped: {self.stats.skipped}"
         )
         return self.stats
 
-    # ── Método 1: MFT ─────────────────────────────────────────────────────────
+    # ── Method 1: MFT ─────────────────────────────────────────────────────────
     def _run_mft(self, reader: DiskReader):
-        log.info("── Iniciando análisis MFT ──")
+        log.info("── Starting MFT analysis ──")
         parser = MFTParser(reader, cluster_size=4096, sector_size=reader.sector_size)
 
         for entry in parser.find_deleted():
@@ -105,7 +105,7 @@ class RecoveryEngine:
                 data = parser.read_file_data(entry)
                 self._save_from_mft(entry, data)
             except Exception as e:
-                log.warning(f"Error recuperando '{entry.filename}': {e}")
+                log.warning(f"Error recovering '{entry.filename}': {e}")
                 self.stats.errors += 1
 
     def _save_from_mft(self, entry: MFTEntry, data: bytes):
@@ -124,29 +124,29 @@ class RecoveryEngine:
         dest = _unique_path(dest, self.opts.overwrite)
         dest.write_bytes(data)
         self.stats.saved += 1
-        log.info(f"  Guardado (MFT): {dest}")
+        log.info(f"  Saved (MFT): {dest}")
 
-    # ── Método 2: File carving ────────────────────────────────────────────────
+    # ── Method 2: File carving ────────────────────────────────────────────────
     def _run_carving(self, reader: DiskReader):
-        log.info("── Iniciando file carving ──")
+        log.info("── Starting file carving ──")
 
         scan_ranges: list[tuple[int, int]] = []
         if self.opts.hint_paths:
             from cluster_locator import get_scan_ranges
             volume = self.opts.disk_path.replace("\\\\.\\", "")
-            log.info(f"Localizando clusters de {len(self.opts.hint_paths)} rutas...")
+            log.info(f"Locating clusters for {len(self.opts.hint_paths)} paths...")
             scan_ranges = get_scan_ranges(
                 self.opts.hint_paths, volume,
                 sector_size=reader.sector_size,
             )
             if scan_ranges:
                 total_gb = sum(e - s for s, e in scan_ranges) * reader.sector_size / 1024**3
-                log.info(f"Escaneo reducido a {total_gb:.2f} GB en {len(scan_ranges)} zona(s)")
+                log.info(f"Scan narrowed to {total_gb:.2f} GB in {len(scan_ranges)} area(s)")
             else:
-                log.warning("No se pudieron localizar los clusters — escaneo completo")
+                log.warning("Could not locate the clusters — running a full scan")
 
         if scan_ranges:
-            # Escanear solo los rangos encontrados
+            # Scan only the ranges that were found
             for start_sector, end_sector in scan_ranges:
                 carver = FileCarver(
                     reader,
@@ -191,9 +191,9 @@ class RecoveryEngine:
             self.stats.skipped += 1
             return
         self.stats.saved += 1
-        log.info(f"  Guardado (carving): {dest} ({written // 1024} KB)")
+        log.info(f"  Saved (carving): {dest} ({written // 1024} KB)")
 
-    # ── Utilidades internas ───────────────────────────────────────────────────
+    # ── Internal helpers ──────────────────────────────────────────────────────
     def _size_ok(self, size: int) -> bool:
         return self.opts.min_size <= size <= self.opts.max_size
 

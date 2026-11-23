@@ -1,34 +1,34 @@
-# MediaRecover — Recuperador profundo de imágenes y vídeos eliminados
+# MediaRecover — Deep Recovery of Deleted Images and Videos
 
-> **Autor:** Jordi Y Blanch
+> **Author:** Jordi Y Blanch
 
-Herramienta de recuperación forense escrita en Python puro (sin dependencias externas).  
-Trabaja directamente sobre los sectores crudos del disco mediante la API Win32.
+A forensic recovery tool written in pure Python (no external dependencies).
+It works directly on the disk's raw sectors through the Win32 API.
 
-## Cómo funciona
+## How it works
 
-### Método 1 — Análisis del MFT (NTFS)
-Lee la **Master File Table** del sistema de archivos NTFS para encontrar
-entradas de archivos marcados como eliminados. Si los data runs (clusters de datos)
-aún no han sido sobreescritos, reconstruye el archivo completo.
-
-```
-Disco → Boot Sector → MFT offset → Entradas FILE → Data Runs → Archivo
-```
-
-### Método 2 — File Carving
-Escanea **cada sector del disco** en busca de firmas (magic bytes) conocidas,
-completamente independiente del sistema de archivos. Funciona incluso en
-discos formateados o con MFT dañada.
+### Method 1 — MFT analysis (NTFS)
+Reads the **Master File Table** of the NTFS file system to find entries for
+files marked as deleted. If their data runs (data clusters) haven't been
+overwritten yet, it rebuilds the complete file.
 
 ```
-Disco → Sectores crudos → Magic bytes → Estimación de tamaño → Archivo
+Disk → Boot Sector → MFT offset → FILE entries → Data Runs → File
 ```
 
-## Formatos soportados
+### Method 2 — File carving
+Scans **every sector of the disk** for known signatures (magic bytes),
+completely independent of the file system. It works even on formatted
+disks or disks with a damaged MFT.
 
-### Imágenes
-| Extensión | Descripción |
+```
+Disk → Raw sectors → Magic bytes → Size estimate → File
+```
+
+## Supported formats
+
+### Images
+| Extension | Description |
 |-----------|-------------|
 | JPG/JPEG  | JPEG / JFIF / EXIF |
 | PNG       | Portable Network Graphics |
@@ -44,95 +44,107 @@ Disco → Sectores crudos → Magic bytes → Estimación de tamaño → Archivo
 | ORF       | Olympus RAW |
 | RW2       | Panasonic RAW |
 
-### Vídeos
-| Extensión | Descripción |
+### Videos
+| Extension | Description |
 |-----------|-------------|
-| MP4       | MPEG-4 (múltiples variantes) |
+| MP4       | MPEG-4 (several variants) |
 | MOV       | Apple QuickTime |
 | AVI       | Audio Video Interleave |
 | MKV       | Matroska / WebM |
 | WMV       | Windows Media Video |
 | FLV       | Flash Video |
 | MPG/MPEG  | MPEG-1/2 |
-| 3GP       | Mobile Video |
-| MTS/M2TS  | AVCHD (cámaras Sony/Panasonic) |
+| 3GP       | Mobile video |
+| MTS/M2TS  | AVCHD (Sony/Panasonic cameras) |
 | VOB       | DVD Video Object |
 
-## Requisitos
+## Requirements
 
 - Python 3.11+
-- Windows (usa API Win32 directamente)
-- **Ejecutar como Administrador** (necesario para leer sectores crudos)
+- Windows (uses the Win32 API directly)
+- **Run as Administrator** (needed to read raw sectors)
 
-## Instalación
+## Installation
 
-No requiere instalar ninguna librería externa.
+No external libraries to install.
 
 ```bash
-git clone <repositorio>
-cd projects/file_recovery
+git clone https://github.com/JordiBlanch666/algorithms-and-data-structures_.git
+cd algorithms-and-data-structures_/projects/file_recovery
 ```
 
-## Uso
+## Usage
 
-### Listar discos disponibles
+### List the available disks
 ```bash
 python main.py --list-disks
 ```
 
-### Recuperar todo de la unidad C:
+### Recover everything from drive C:
 ```bash
-python main.py --disk C: --output D:\Recuperados
+python main.py --disk C: --output D:\Recovered
 ```
 
-### Solo imágenes, solo file carving (más profundo)
+### Images only, file carving only (deeper)
 ```bash
-python main.py --disk C: --output D:\Recuperados --only-images --only-carving
+python main.py --disk C: --output D:\Recovered --only-images --only-carving
 ```
 
-### Disco físico completo (incluye espacio no particionado)
+### Whole physical disk (includes unpartitioned space)
 ```bash
-python main.py --disk PhysicalDrive0 --output D:\Recuperados
+python main.py --disk PhysicalDrive0 --output D:\Recovered
 ```
 
-### Solo vídeos grandes (mínimo 10 MB)
+### Large videos only (at least 10 MB)
 ```bash
-python main.py --disk C: --output D:\Recuperados --only-videos --min-size 10000000
+python main.py --disk C: --output D:\Recovered --only-videos --min-size 10000000
 ```
 
-## Estructura del proyecto
+### Focus the scan on a user's folders (much faster)
+```bash
+python main.py --disk C: --output D:\Recovered --hint-user YourUser
+```
+
+### Check which recovered videos can play
+```bash
+python verify.py D:\Recovered --viable-only
+```
+
+## Project structure
 
 ```
 file_recovery/
-├── main.py             # CLI y punto de entrada
-├── disk_reader.py      # Acceso de bajo nivel al disco (Win32 API)
-├── mft_parser.py       # Parser de la Master File Table NTFS
-├── file_carver.py      # Escáner de firmas por sectores crudos
-├── signatures.py       # Base de datos de magic bytes (imágenes + vídeos)
-├── recovery_engine.py  # Orquestador: coordina ambos métodos
+├── main.py             # CLI and entry point
+├── disk_reader.py      # Low-level disk access (Win32 API)
+├── mft_parser.py       # NTFS Master File Table parser
+├── file_carver.py      # Raw-sector signature scanner
+├── signatures.py       # Magic-byte database (images + videos)
+├── cluster_locator.py  # Maps folders to disk sectors to narrow the scan
+├── recovery_engine.py  # Orchestrator: coordinates both methods
+├── verify.py           # Checks whether recovered videos are playable
 └── README.md
 ```
 
-## Estructura de salida
+## Output structure
 
 ```
-D:\Recuperados\
+D:\Recovered\
 ├── mft\
-│   ├── images\     ← archivos recuperados por MFT
+│   ├── images\     ← files recovered from the MFT
 │   └── videos\
 └── carving\
-    ├── images\     ← archivos recuperados por carving
+    ├── images\     ← files recovered by carving
     ├── videos\
     └── raw\
 ```
 
-## Consideraciones importantes
+## Important notes
 
-- **Actúa rápido**: cuanto más tiempo pase desde el borrado, mayor es la
-  probabilidad de que los sectores hayan sido sobreescritos.
-- **No escribas en el disco a recuperar**: instala Python y ejecuta el script
-  desde otro disco o live USB.
-- El carving puede generar **falsos positivos** (archivos corruptos o parciales).
-  Es normal; revisa los resultados con un visor de imágenes.
-- Los archivos RAW de cámara (CR2, NEF, ARW) son similares a TIFF y pueden
-  requerir Adobe Camera Raw o el software de la cámara para abrirse.
+- **Act fast**: the longer it's been since the deletion, the more likely it is
+  that the sectors have been overwritten.
+- **Don't write to the disk you're recovering from**: install Python and run the
+  script from another disk or a live USB.
+- Carving can produce **false positives** (corrupted or partial files).
+  That's normal; review the results with an image viewer.
+- Camera RAW files (CR2, NEF, ARW) are similar to TIFF and may need
+  Adobe Camera Raw or the camera's own software to open.

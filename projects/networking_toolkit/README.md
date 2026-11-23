@@ -1,27 +1,27 @@
-# Redes Toolkit
+# Networking Toolkit
 
-Herramienta de línea de comandos (CLI) en Python para estudiar y practicar **Fundamentos de Redes Computacionales** de forma interactiva. Cubre los 8 módulos del curso con herramientas funcionales: calculadora de subredes, consultas DNS reales, hashing criptográfico, y 12 guías de troubleshooting paso a paso.
-
----
-
-## Módulos incluidos
-
-| # | Módulo | Herramientas |
-|---|--------|-------------|
-| M1 | Historia y topologías | Bus, Estrella, Anillo, Malla, Árbol, modelo 3 capas Cisco |
-| M2 | Modelos OSI y TCP/IP | 7 capas OSI, encapsulación, comparación OSI vs TCP/IP |
-| M3 | Protocolos de comunicación | HTTP/S, DNS, DHCP, FTP, SMTP, SSH, TCP, UDP con pasos detallados |
-| M3b | DNS y resolución de nombres | Resolución real, DNS inverso, jerarquía, tipos de registros |
-| M4 | Direccionamiento IP y Subnetting | Calculadora IPv4/IPv6, divisor de subredes, conversores binario/CIDR |
-| M6 | Ciberseguridad | Tríada CIA, tipos de ataques, TLS handshake paso a paso, VLANs |
-| M7 | Criptografía | SHA-256/MD5/BLAKE2, HMAC, cifrado César, RSA conceptual, Base64 |
-| TS | Troubleshooting (12 guías) | Diagnóstico interactivo desde sin conectividad hasta comandos avanzados |
+An interactive command-line (CLI) tool in Python for studying and practicing **Computer Networking Fundamentals**. It covers the 8 course modules with working tools: a subnet calculator, real DNS lookups, cryptographic hashing and 12 step-by-step troubleshooting guides.
 
 ---
 
-## Instalación y uso
+## Modules
 
-No requiere dependencias externas. Solo Python 3.8+.
+| # | Module | Tools |
+|---|--------|-------|
+| M1 | History and topologies | Bus, Star, Ring, Mesh, Tree, Cisco 3-layer model |
+| M2 | OSI and TCP/IP models | 7 OSI layers, encapsulation, OSI vs TCP/IP comparison |
+| M3 | Communication protocols | HTTP/S, DNS, DHCP, FTP, SMTP, SSH, TCP, UDP with detailed steps |
+| M3b | DNS and name resolution | Real resolution, reverse DNS, hierarchy, record types |
+| M4 | IP addressing and subnetting | IPv4/IPv6 calculator, subnet splitter, binary/CIDR converters |
+| M6 | Cybersecurity | CIA triad, attack types, step-by-step TLS handshake, VLANs |
+| M7 | Cryptography | SHA-256/MD5/BLAKE2, HMAC, Caesar cipher, RSA concepts, Base64 |
+| TS | Troubleshooting (12 guides) | Interactive diagnosis, from no connectivity to advanced commands |
+
+---
+
+## Installation and usage
+
+No external dependencies. Just Python 3.8+.
 
 ```bash
 git clone https://github.com/JordiBlanch666/algorithms-and-data-structures_.git
@@ -31,104 +31,104 @@ python main.py
 
 ---
 
-## Ejemplos de uso
+## Examples
 
-### Calculadora de subredes
+### Subnet calculator
 
 ```
-Entrada: 192.168.10.45/26
+Input: 192.168.10.45/26
 
-Dirección de red:       192.168.10.0
+Network address:        192.168.10.0
 Broadcast:              192.168.10.63
-Primera IP de host:     192.168.10.1
-Última IP de host:      192.168.10.62
-Máscara de subred:      255.255.255.192
+First host IP:          192.168.10.1
+Last host IP:           192.168.10.62
+Subnet mask:            255.255.255.192
 Wildcard:               0.0.0.63
-Hosts utilizables:      62
+Usable hosts:           62
 
-IP (binario):  11000000.10101000.00001010.00101101
-Máscara:       11111111.11111111.11111111.11000000
+IP (binary):   11000000.10101000.00001010.00101101
+Mask:          11111111.11111111.11111111.11000000
 ```
 
-### Resolución DNS real
+### Real DNS resolution
 
 ```
-Dominio: github.com
+Domain: github.com
 
-IPv4 (registro A):      140.82.112.4
-Tiempo de resolución:   12.3 ms
+IPv4 (A record):        140.82.112.4
+Resolution time:        12.3 ms
 
-Proceso:
-  [1] Caché local — buscó en caché del SO
-  [2] Resolver recursivo — consultó al DNS configurado
-  [3] Servidor raíz — preguntó quién maneja .com
-  [4] Servidor TLD — indicó el autoritativo de github.com
-  [5] Respuesta final — 140.82.112.4
+Process:
+  [1] Local cache — checked the OS cache
+  [2] Recursive resolver — asked the configured DNS server
+  [3] Root server — asked who handles .com
+  [4] TLD server — pointed to github.com's authoritative server
+  [5] Final answer — 140.82.112.4
 ```
 
-### Calculadora de hashes
+### Hash calculator
 
 ```
-Texto: Hola mundo
+Text: Hello world
 
-MD5:     ac5af69e4a3afd07fbbfd09955e06ef7
-SHA-1:   f3a55620975aaac73ec05cba64e58ffe21c7734f
-SHA-256: ca8f60b2cc7f05837d98b208b57fb6481553fc5...
-SHA-512: 17e71f6ae96ae0e890b1e40b1f93d7d3...
+MD5:     3e25960a79dbc69b674cd4ec67a72c62
+SHA-1:   7b502c3a1f48c8609ae212cdfb639dee39673f5e
+SHA-256: 64ec88ca00b268e5ba1a35678a1b5316d212f4f3...
+SHA-512: b7f783baed8297f0db917462184ff4f0...
 ```
 
 ---
 
-## Estructura del proyecto
+## Project structure
 
 ```
-redes_toolkit/
-├── main.py                   # Menú principal
+networking_toolkit/
+├── main.py                   # Main menu
 └── modules/
-    ├── utils.py              # Colores, menús, impresión estándar
-    ├── topologias.py         # M1: Topologías de red
-    ├── osi_model.py          # M2: Modelo OSI y TCP/IP
-    ├── protocolos.py         # M3: Protocolos de comunicación
-    ├── dns_tool.py           # M3b: DNS y resolución de nombres
-    ├── subnetting.py         # M4: IP y subnetting
-    ├── seguridad.py          # M6: Ciberseguridad
-    ├── criptografia.py       # M7: Criptografía
-    └── troubleshooting.py    # T1–T12: Guías de diagnóstico
+    ├── utils.py              # Colors, menus, standard output helpers
+    ├── topologies.py         # M1: Network topologies
+    ├── osi_model.py          # M2: OSI and TCP/IP models
+    ├── protocols.py          # M3: Communication protocols
+    ├── dns_tool.py           # M3b: DNS and name resolution
+    ├── subnetting.py         # M4: IP addressing and subnetting
+    ├── security.py           # M6: Cybersecurity
+    ├── crypto_basics.py      # M7: Cryptography
+    └── troubleshooting.py    # T1–T12: Diagnostic guides
 ```
 
 ---
 
-## Guías de Troubleshooting
+## Troubleshooting guides
 
-| # | Guía | Qué cubre |
-|---|------|-----------|
-| T1 | Sin conectividad | Árbol interactivo: físico → IP → gateway → DNS |
-| T2 | Red lenta | Latencia, traceroute, pérdida de paquetes, QoS |
-| T3 | IP / DHCP | DORA, conflictos de IP, IP estática manual |
-| T4 | DNS | Flush caché, DNS alternativo, nslookup, dig |
-| T5 | HTTP / HTTPS | Códigos de error, curl, cabeceras de seguridad |
-| T6 | Seguridad | nmap, netstat, tcpdump, firewall, logs |
-| T7 | Certificados SSL | Vencimiento, cadena CA, Let's Encrypt, TLS 1.3 |
-| T8 | WiFi y señal | dBm, canales, 2.4 vs 5 GHz, interferencias |
-| T9 | Correo / spam | SPF, DKIM, DMARC, blacklists, logs SMTP |
-| T10 | Problemas cotidianos | VPN, conflictos IP, sitio caído, SSH |
-| T11 | Seguridad práctica | Checklist: 2FA, contraseñas, backups 3-2-1 |
-| T12 | Comandos avanzados | ping, traceroute, nmap, tcpdump, iperf3 |
+| # | Guide | What it covers |
+|---|-------|----------------|
+| T1 | No connectivity | Interactive tree: physical → IP → gateway → DNS |
+| T2 | Slow network | Latency, traceroute, packet loss, QoS |
+| T3 | IP / DHCP | DORA, IP conflicts, manual static IP |
+| T4 | DNS | Cache flush, alternative DNS, nslookup, dig |
+| T5 | HTTP / HTTPS | Error codes, curl, security headers |
+| T6 | Security | nmap, netstat, tcpdump, firewall, logs |
+| T7 | SSL certificates | Expiry, CA chain, Let's Encrypt, TLS 1.3 |
+| T8 | WiFi and signal | dBm, channels, 2.4 vs 5 GHz, interference |
+| T9 | Email / spam | SPF, DKIM, DMARC, blacklists, SMTP logs |
+| T10 | Everyday problems | VPN, IP conflicts, site down, SSH |
+| T11 | Practical security | Checklist: 2FA, passwords, 3-2-1 backups |
+| T12 | Advanced commands | ping, traceroute, nmap, tcpdump, iperf3 |
 
 ---
 
-## Tecnologías
+## Technologies
 
-- **Python 3.8+** — sin dependencias externas
-- `ipaddress` — cálculos IPv4/IPv6
+- **Python 3.8+** — no external dependencies
+- `ipaddress` — IPv4/IPv6 calculations
 - `hashlib` — MD5, SHA-1, SHA-256, SHA-512, SHA-3, BLAKE2
-- `socket` — resolución DNS real
-- `hmac` — autenticación de mensajes
-- `base64` — codificación
+- `socket` — real DNS resolution
+- `hmac` — message authentication
+- `base64` — encoding
 
 ---
 
-## Autor
+## Author
 
 **Jordi Yashua Contreras Blanch**  
-Ingeniería en Software · Fundamentos de Redes Computacionales
+Software Engineering · Computer Networking Fundamentals

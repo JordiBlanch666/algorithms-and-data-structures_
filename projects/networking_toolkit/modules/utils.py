@@ -31,12 +31,12 @@ class C:
 def _supports_color():
     return sys.stdout.isatty() and os.name != "nt" or os.environ.get("FORCE_COLOR")
 
-USE_COLOR = True  # Windows Terminal / VS Code soportan ANSI
+USE_COLOR = True  # Windows Terminal / VS Code support ANSI
 
 def cc(color, text):
     return f"{color}{text}{C.RESET}" if USE_COLOR else text
 
-# ── Impresión estandarizada ───────────────────────────────────────────────────
+# ── Standardized output ───────────────────────────────────────────────────────
 SEP = "─" * 64
 
 def header(title, subtitle=""):
@@ -84,21 +84,21 @@ def ask(prompt, options=None):
             print(f"    {cc(C.BCYAN, str(i)+'.')} {opt}")
         while True:
             try:
-                raw = input(f"\n  {cc(C.BYELLOW, '›')} Opción: ").strip()
+                raw = input(f"\n  {cc(C.BYELLOW, '›')} Option: ").strip()
                 idx = int(raw) - 1
                 if 0 <= idx < len(options):
                     return idx, options[idx]
             except (ValueError, KeyboardInterrupt):
                 pass
-            warn("Opción inválida, intenta de nuevo.")
+            warn("Invalid option, please try again.")
     else:
         try:
             return input(f"\n  {cc(C.BYELLOW, '›')} {prompt}: ").strip()
         except KeyboardInterrupt:
             return ""
 
-def menu(title, options, back_label="Volver al menú principal"):
-    """Muestra menú y retorna el índice seleccionado (0-based). -1 = volver."""
+def menu(title, options, back_label="Back to main menu"):
+    """Show a menu and return the selected index (0-based). -1 = go back."""
     all_opts = options + [back_label]
     header(title)
     for i, opt in enumerate(all_opts, 1):
@@ -108,17 +108,17 @@ def menu(title, options, back_label="Volver al menú principal"):
             print(f"    {cc(C.BCYAN, str(i) + '.')} {opt}")
     while True:
         try:
-            raw = input(f"\n  {cc(C.BYELLOW, '›')} Selecciona: ").strip()
+            raw = input(f"\n  {cc(C.BYELLOW, '›')} Select: ").strip()
             idx = int(raw) - 1
             if 0 <= idx < len(all_opts):
                 return idx if idx < len(options) else -1
         except (ValueError, KeyboardInterrupt):
             return -1
-        warn("Opción inválida.")
+        warn("Invalid option.")
 
 def pause():
     try:
-        input(f"\n  {cc(C.DIM, '[Presiona Enter para continuar...]')}")
+        input(f"\n  {cc(C.DIM, '[Press Enter to continue...]')}")
     except KeyboardInterrupt:
         pass
 

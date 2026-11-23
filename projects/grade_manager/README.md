@@ -1,48 +1,48 @@
-# Gestor de Calificaciones
+# Grade Manager
 
-CLI en Python para registrar y analizar calificaciones de alumnos.
+A Python CLI to record and analyze student grades.
 
-## Funcionalidades
+## Features
 
-- Agregar alumnos
-- Registrar múltiples calificaciones por alumno
-- Ver reporte con promedio y letra (A–F)
-- Persistencia automática en JSON
+- Add students
+- Record multiple grades per student
+- View a report with the average and letter grade (A–F)
+- Automatic JSON persistence
 
-## Cómo ejecutar
+## How to run
 
 ```bash
-python gestor.py
+python grade_manager.py
 ```
 
-## Ejemplo de uso
+## Sample session
 
 ```
 ╔══════════════════════════════╗
-║   Gestor de Calificaciones   ║
+║        Grade Manager         ║
 ╚══════════════════════════════╝
 
-  [1] Agregar alumno
-  [2] Registrar calificación
-  [3] Ver reporte
-  [4] Salir
+  [1] Add student
+  [2] Record grade
+  [3] View report
+  [4] Exit
 
-  Alumno             Califs  Promedio  Letra
+  Student              Grades   Average Letter
   ---------------------------------------------
-  Ana García              3      88.3      B
-  Carlos López            4      91.5      A
-  María Martínez          2      74.0      C
+  Ana García                3      88.3      B
+  Carlos López              4      91.5      A
+  María Martínez            2      74.0      C
 
-  Promedio del grupo: 84.6
+  Class average: 84.6
 ```
 
-## Conceptos aplicados
+## Concepts applied
 
-| Concepto           | Dónde se usa                              |
-|--------------------|-------------------------------------------|
-| Funciones          | `cargar_datos`, `calcular_promedio`, etc. |
-| Estructuras (dict) | Almacenamiento de alumnos y calificaciones |
-| Bucles             | Ciclo principal del menú, reporte         |
-| Condicionales      | Validaciones, cálculo de letra            |
-| Archivos (JSON)    | Persistencia con `json.load / json.dump`  |
-| Manejo de errores  | `try/except` en entrada de calificación   |
+| Concept            | Where it's used                               |
+|--------------------|-----------------------------------------------|
+| Functions          | `load_data`, `calculate_average`, etc.        |
+| Data structures    | A dict stores students and their grades       |
+| Loops              | Main menu loop and the report                 |
+| Conditionals       | Input validation and letter-grade calculation |
+| Files (JSON)       | Persistence with `json.load` / `json.dump`    |
+| Error handling     | `try/except` when entering a grade            |

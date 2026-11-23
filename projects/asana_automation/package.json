@@ -1,0 +1,15 @@
+{
+  "name": "asana-automation-guide",
+  "version": "1.0.0",
+  "description": "Builds the Automation 101 Word guide for the Asana board setup script",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build_guide.mjs"
+  },
+  "author": "Jordi Blanch",
+  "license": "ISC",
+  "dependencies": {
+    "docx": "^9.6.1"
+  }
+}

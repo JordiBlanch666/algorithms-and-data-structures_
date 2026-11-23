@@ -1,5 +1,5 @@
 """
-Asana Logic Mapping: 'The Hearth & Loom' — Automatización 101
+Asana Logic Mapping: 'The Hearth & Loom' — Automation 101
 Creates the full board-view project via the Asana REST API.
 
 Setup:
@@ -15,7 +15,7 @@ import requests
 # ── Config ────────────────────────────────────────────────────────────────────
 ASANA_PAT          = os.environ.get("ASANA_PAT", "PASTE_YOUR_PAT_HERE")
 WORKSPACE_GID      = os.environ.get("ASANA_WORKSPACE_GID", "PASTE_YOUR_WORKSPACE_GID_HERE")
-PROJECT_NAME       = "Automatización 101"
+PROJECT_NAME       = "Automation 101"
 PROJECT_COLOR      = "light-orange"
 # ──────────────────────────────────────────────────────────────────────────────
 
@@ -45,8 +45,8 @@ project = api("POST", "/projects", json={
         "color": PROJECT_COLOR,
         "public": True,
         "notes": (
-            "Blueprint visual del flujo de automatización de cumplimiento de pedidos "
-            "de The Hearth & Loom. Cada tarjeta representa un paso lógico de Shopify → ShipStation."
+            "Visual blueprint of The Hearth & Loom's order fulfillment automation flow. "
+            "Each card is one logical step from Shopify → ShipStation."
         ),
     }
 })
@@ -104,7 +104,7 @@ prio_opts  = {n: get_option_gid(step_priority_gid, n) for n in ["Critical", "Sec
 # ── 3. Create sections ────────────────────────────────────────────────────────
 print("Creating sections…")
 sections = {}
-for name in ["1. Trigger", "2. Acción", "3. Prueba", "4. Activo"]:
+for name in ["1. Trigger", "2. Action", "3. Test", "4. Live"]:
     sec = api("POST", f"/projects/{project_gid}/sections", json={"data": {"name": name}})
     sections[name] = sec["gid"]
     time.sleep(0.3)
@@ -143,104 +143,104 @@ TASKS = [
         "Google Sheets", "Data Input", "Secondary",
     ),
 
-    # ── 2. Acción
+    # ── 2. Action
     (
-        "2. Acción",
+        "2. Action",
         "Filter: Subscription Kit SKU",
         "Success Criteria: Only orders containing at least one line item with SKU prefix 'WKIT-' "
         "pass through. All other orders halt the scenario without error.",
         "Make.com", "Condition/Filter", "Critical",
     ),
     (
-        "2. Acción",
+        "2. Action",
         "Filter: Domestic vs. International Shipping",
         "Success Criteria: Orders with a US shipping address route to the standard ShipStation flow; "
         "international orders are diverted to a separate manual-review path.",
         "Make.com", "Condition/Filter", "Secondary",
     ),
     (
-        "2. Acción",
+        "2. Action",
         "Make.com: Map Order Fields to ShipStation Schema",
         "Success Criteria: All required ShipStation fields (recipient name, address, weight, "
         "dimensions, service code) are populated correctly before the create-label call.",
         "Make.com", "Data Input", "Critical",
     ),
     (
-        "2. Acción",
+        "2. Action",
         "ShipStation: Create Shipment Order",
         "Success Criteria: ShipStation returns HTTP 200 with a valid shipment ID. The shipment "
         "appears in the 'Awaiting Shipment' queue within ShipStation.",
         "ShipStation", "Output Action", "Critical",
     ),
     (
-        "2. Acción",
+        "2. Action",
         "ShipStation: Create Shipping Label",
         "Success Criteria: A USPS/UPS label PDF is generated and the tracking number is returned "
         "in the API response. Label must match the selected service level.",
         "ShipStation", "Output Action", "Critical",
     ),
     (
-        "2. Acción",
+        "2. Action",
         "Make.com: Parse Tracking Number from Response",
         "Success Criteria: The tracking number string is extracted from the ShipStation response "
         "and stored in a Make.com variable for downstream Klaviyo and Sheets steps.",
         "Make.com", "Data Input", "Critical",
     ),
     (
-        "2. Acción",
+        "2. Action",
         "Klaviyo: Send Shipping Confirmation",
         "Success Criteria: The 'Order Shipped' Klaviyo flow is triggered with the customer's email, "
         "order ID, and tracking number. Email delivers within 5 minutes of label creation.",
         "Klaviyo", "Output Action", "Critical",
     ),
     (
-        "2. Acción",
+        "2. Action",
         "Shopify: Update Order Fulfillment Status",
         "Success Criteria: The Shopify order transitions from 'unfulfilled' to 'fulfilled' and the "
         "tracking number is visible to the customer in their order status page.",
         "Shopify", "Output Action", "Critical",
     ),
 
-    # ── 3. Prueba
+    # ── 3. Test
     (
-        "3. Prueba",
+        "3. Test",
         "Google Sheets: Log Fulfillment Result",
         "Success Criteria: After a successful label creation, the 'Fulfillments' tab receives a new "
         "row with order ID, tracking number, carrier, service, and UTC timestamp.",
         "Google Sheets", "Output Action", "Secondary",
     ),
     (
-        "3. Prueba",
+        "3. Test",
         "Make.com: Error Handler — ShipStation Failure",
         "Success Criteria: If ShipStation returns a non-200 response, the error handler logs the "
         "payload to the 'Errors' Google Sheet tab and sends an internal Slack alert.",
         "Make.com", "Condition/Filter", "Secondary",
     ),
     (
-        "3. Prueba",
+        "3. Test",
         "Filter: Duplicate Order Guard",
         "Success Criteria: Before creating a ShipStation order, the scenario checks the Google Sheet "
         "for an existing row with the same Shopify order ID. Duplicates skip label creation.",
         "Make.com", "Condition/Filter", "Secondary",
     ),
 
-    # ── 4. Activo
+    # ── 4. Live
     (
-        "4. Activo",
+        "4. Live",
         "Make.com: Scenario Set to Active & Scheduled",
         "Success Criteria: The Make.com scenario is toggled ON and has no scheduling gaps. "
         "Scenario history shows no consecutive errors in the last 7 days.",
         "Make.com", "Data Input", "Critical",
     ),
     (
-        "4. Activo",
+        "4. Live",
         "Klaviyo: Production Flow Published",
         "Success Criteria: The 'Order Shipped' Klaviyo flow status is 'Live'. A/B test variant "
         "is disabled for the initial production release.",
         "Klaviyo", "Output Action", "Critical",
     ),
     (
-        "4. Activo",
+        "4. Live",
         "ShipStation: Production Store Connected",
         "Success Criteria: The Shopify store is connected to ShipStation in production mode (not "
         "sandbox). At least one successful label has been printed under the production credentials.",
@@ -292,7 +292,7 @@ print(
 print("""
 RULE_INSTRUCTIONS (manual step — Asana Rules API is workspace-plan-locked):
 ─────────────────────────────────────────────────────────────────────────────
-Trigger : Task is moved to section  →  "4. Activo"
+Trigger : Task is moved to section  →  "4. Live"
 Action 1: Set custom field          →  Step Priority = "Critical"
 Action 2: Add comment               →  "This logic step is now live in production."
 ─────────────────────────────────────────────────────────────────────────────

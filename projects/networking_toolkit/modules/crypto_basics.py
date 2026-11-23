@@ -1,33 +1,32 @@
 import hashlib
 import hmac
 import base64
-import os
 import secrets
 from .utils import (header, section, step, result, sep, info, warn, ok,
                     callout, ask, pause, C, cc, menu)
 
-# ── Módulo 7: Criptografía ────────────────────────────────────────────────────
+# ── Module 7: Cryptography ────────────────────────────────────────────────────
 
-def calcular_hash():
-    header("Calculadora de Hashes", "Módulo 7 · Integridad de datos")
-    info("El hashing convierte cualquier dato en un resumen de tamaño fijo. Es de una sola vía.")
+def hash_calculator():
+    header("Hash Calculator", "Module 7 · Data integrity")
+    info("Hashing turns any data into a fixed-size digest. It only works one way.")
     sep()
 
-    texto = ask("Texto a hashear")
-    if not texto:
+    text = ask("Text to hash")
+    if not text:
         return
 
-    data = texto.encode("utf-8")
+    data = text.encode("utf-8")
     sep()
-    section("Resultados")
+    section("Results")
 
     algos = [
-        ("MD5",     hashlib.md5,    "128 bits · INSEGURO para contraseñas, útil para checksums rápidos"),
-        ("SHA-1",   hashlib.sha1,   "160 bits · Obsoleto (vulnerable a colisiones desde 2017)"),
-        ("SHA-256", hashlib.sha256, "256 bits · Estándar actual · Bitcoin, TLS, código firmado"),
-        ("SHA-512", hashlib.sha512, "512 bits · Mayor seguridad, más lento"),
-        ("SHA3-256",hashlib.sha3_256,"256 bits · Sucesor de SHA-2, diferente diseño interno (Keccak)"),
-        ("BLAKE2b", hashlib.blake2b, "Variable · Más rápido que SHA-256, seguro, usado en archivos"),
+        ("MD5",      hashlib.md5,      "128 bits · INSECURE for passwords, fine for quick checksums"),
+        ("SHA-1",    hashlib.sha1,     "160 bits · Obsolete (vulnerable to collisions since 2017)"),
+        ("SHA-256",  hashlib.sha256,   "256 bits · Current standard · Bitcoin, TLS, code signing"),
+        ("SHA-512",  hashlib.sha512,   "512 bits · More security, slower"),
+        ("SHA3-256", hashlib.sha3_256, "256 bits · SHA-2's successor, different internal design (Keccak)"),
+        ("BLAKE2b",  hashlib.blake2b,  "Variable · Faster than SHA-256, secure, used for files"),
     ]
 
     for name, fn, note in algos:
@@ -37,58 +36,58 @@ def calcular_hash():
         print(f"    {cc(C.DIM, note)}")
         print()
 
-    callout("info", "Propiedad de avalancha",
-            "Cambia UNA letra en el texto y el hash cambia COMPLETAMENTE.\n"
-            "Prueba: 'hola' vs 'Hola' → hashes totalmente distintos.\n"
-            "Esto garantiza que no puedes adivinar el texto original desde el hash.")
+    callout("info", "Avalanche effect",
+            "Change ONE letter of the text and the hash changes COMPLETELY.\n"
+            "Try it: 'hello' vs 'Hello' → totally different hashes.\n"
+            "That's why you can't work out the original text from the hash.")
     pause()
 
 
-def verificar_integridad():
-    header("Verificar Integridad de Archivo / Texto", "Módulo 7 · Comparación de hashes")
-    info("Comprueba si dos textos (o el hash de un archivo) son idénticos.")
+def verify_integrity():
+    header("Verify File / Text Integrity", "Module 7 · Hash comparison")
+    info("Checks whether two texts (or a file's hash) are identical.")
     sep()
-    t1 = ask("Texto / hash original")
-    t2 = ask("Texto / hash a comparar")
+    t1 = ask("Original text / hash")
+    t2 = ask("Text / hash to compare")
     if not t1 or not t2:
         return
 
-    # Comparar como hashes directos
+    # Compare them directly as hashes
     if hmac.compare_digest(t1.lower().strip(), t2.lower().strip()):
-        ok("Los hashes SON idénticos. Integridad verificada.")
+        ok("The hashes ARE identical. Integrity verified.")
     else:
-        # Hashear ambos con SHA-256 y comparar
+        # Hash both with SHA-256 and compare
         h1 = hashlib.sha256(t1.encode()).hexdigest()
         h2 = hashlib.sha256(t2.encode()).hexdigest()
         if hmac.compare_digest(h1, h2):
-            ok("Los textos son idénticos (SHA-256 coincide).")
+            ok("The texts are identical (SHA-256 matches).")
         else:
-            warn("Los datos son DIFERENTES. El contenido fue modificado o los hashes no coinciden.")
-            result("SHA-256 de entrada 1", h1)
-            result("SHA-256 de entrada 2", h2)
+            warn("The data is DIFFERENT. The content was modified or the hashes don't match.")
+            result("SHA-256 of input 1", h1)
+            result("SHA-256 of input 2", h2)
 
-    callout("info", "¿Por qué hmac.compare_digest?",
-            "Previene timing attacks: comparar carácter a carácter puede revelar info\n"
-            "al medir cuánto tarda la comparación. compare_digest tarda siempre lo mismo.")
+    callout("info", "Why hmac.compare_digest?",
+            "It prevents timing attacks: comparing character by character can leak information\n"
+            "through how long the comparison takes. compare_digest always takes the same time.")
     pause()
 
 
-def cifrado_cesar():
-    header("Cifrado César (educativo)", "Módulo 7 · Criptografía clásica")
-    info("El cifrado César desplaza cada letra N posiciones en el alfabeto.")
-    info("Ejemplo con desplazamiento 3: A→D, B→E, Z→C")
-    info("Históricamente usado por Julio César para mensajes militares.")
-    callout("warn", "Advertencia",
-            "Este cifrado es trivialmente rompible (solo 25 combinaciones posibles).\n"
-            "Se muestra solo para ilustrar el concepto de sustitución monoalfabética.")
+def caesar_cipher():
+    header("Caesar Cipher (educational)", "Module 7 · Classical cryptography")
+    info("The Caesar cipher shifts every letter N positions in the alphabet.")
+    info("Example with a shift of 3: A→D, B→E, Z→C")
+    info("Historically used by Julius Caesar for military messages.")
+    callout("warn", "Warning",
+            "This cipher is trivially breakable (only 25 possible keys).\n"
+            "It's shown only to illustrate monoalphabetic substitution.")
     sep()
 
-    texto = ask("Texto")
-    raw_n  = ask("Desplazamiento (1–25)")
+    text = ask("Text")
+    raw_n = ask("Shift (1–25)")
     try:
         n = int(raw_n) % 26
     except ValueError:
-        warn("Número inválido.")
+        warn("Invalid number.")
         pause()
         return
 
@@ -102,110 +101,110 @@ def cifrado_cesar():
                 result_chars.append(ch)
         return "".join(result_chars)
 
-    cifrado    = caesar(texto, n)
-    descifrado = caesar(cifrado, -n)
+    encrypted = caesar(text, n)
+    decrypted = caesar(encrypted, -n)
 
     sep()
-    result("Original",   texto)
-    result("Cifrado",    cifrado)
-    result("Descifrado", descifrado)
+    result("Original",  text)
+    result("Encrypted", encrypted)
+    result("Decrypted", decrypted)
 
     sep()
-    section("Análisis de fuerza bruta (todas las 25 combinaciones)")
+    section("Brute-force analysis (all 25 keys)")
     for i in range(1, 26):
-        print(f"  [{i:>2}] {cc(C.DIM, caesar(texto, i))}")
+        print(f"  [{i:>2}] {cc(C.DIM, caesar(text, i))}")
     pause()
 
 
-def cifrado_asimetrico_concepto():
-    header("Criptografía Asimétrica (RSA / ECDSA)", "Módulo 7 · Llave pública / privada")
-    step(1, "El problema del intercambio de llaves",
-         "Con cifrado simétrico (AES): ¿cómo le mandas la llave al receptor sin que alguien la robe?\n"
-         "Respuesta: criptografía asimétrica.")
-    step(2, "Par de llaves",
-         "Cada participante genera UN PAR:\n"
-         "  • Llave PÚBLICA: la compartes con el mundo. Cualquiera puede cifrar con ella.\n"
-         "  • Llave PRIVADA: solo tú la tienes. Solo tú puedes descifrar lo que cifran con tu pública.")
-    step(3, "Flujo de comunicación segura",
-         "1. Bob genera su par de llaves.\n"
-         "2. Bob publica su llave pública (en un certificado, en GitHub, etc.).\n"
-         "3. Alice cifra el mensaje con la LLAVE PÚBLICA de Bob.\n"
-         "4. Solo Bob puede descifrarlo con su LLAVE PRIVADA.\n"
-         "Ni la propia Alice puede descifrar lo que cifró — eso garantiza privacidad.")
-    step(4, "Firmas digitales (al revés)",
-         "Para FIRMAR, Bob usa su LLAVE PRIVADA → todos verifican con su LLAVE PÚBLICA.\n"
-         "Si la firma verifica → el mensaje vino de Bob y no fue alterado (integridad + autenticidad).")
-    step(5, "TLS lo combina todo",
-         "1. El servidor manda su certificado con llave pública.\n"
-         "2. El cliente usa RSA/ECDH para intercambiar una clave de sesión.\n"
-         "3. A partir de ahí, todo se cifra con AES (simétrico) — más rápido.")
+def asymmetric_crypto_concepts():
+    header("Asymmetric Cryptography (RSA / ECDSA)", "Module 7 · Public / private keys")
+    step(1, "The key-exchange problem",
+         "With symmetric encryption (AES): how do you send the key to the receiver without someone stealing it?\n"
+         "Answer: asymmetric cryptography.")
+    step(2, "Key pair",
+         "Each participant generates ONE PAIR:\n"
+         "  • PUBLIC key: you share it with the world. Anyone can encrypt with it.\n"
+         "  • PRIVATE key: only you have it. Only you can decrypt what was encrypted with your public key.")
+    step(3, "Secure communication flow",
+         "1. Bob generates his key pair.\n"
+         "2. Bob publishes his public key (in a certificate, on GitHub, etc.).\n"
+         "3. Alice encrypts the message with Bob's PUBLIC KEY.\n"
+         "4. Only Bob can decrypt it with his PRIVATE KEY.\n"
+         "Not even Alice can decrypt what she encrypted — that guarantees privacy.")
+    step(4, "Digital signatures (the other way around)",
+         "To SIGN, Bob uses his PRIVATE KEY → everyone verifies with his PUBLIC KEY.\n"
+         "If the signature checks out → the message came from Bob and wasn't altered (integrity + authenticity).")
+    step(5, "TLS combines everything",
+         "1. The server sends its certificate with its public key.\n"
+         "2. The client uses RSA/ECDH to exchange a session key.\n"
+         "3. From then on, everything is encrypted with AES (symmetric) — much faster.")
 
     sep()
-    section("Generación de par de llaves (simulación conceptual)")
+    section("Key pair generation (conceptual simulation)")
     key_id = secrets.token_hex(8)
-    pub_stub  = f"ssh-rsa AAAAB3NzaC1yc2E...{key_id}... usuario@host"
+    pub_stub  = f"ssh-rsa AAAAB3NzaC1yc2E...{key_id}... user@host"
     priv_stub = f"-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAK...{key_id}...\n-----END RSA PRIVATE KEY-----"
-    print(f"  {cc(C.BGREEN, 'Llave pública (comparte):')}  {cc(C.DIM, pub_stub)}")
-    print(f"  {cc(C.BRED,   'Llave privada (NUNCA compartas):')} {cc(C.DIM, priv_stub[:60] + '...')}")
+    print(f"  {cc(C.BGREEN, 'Public key (share it):')}  {cc(C.DIM, pub_stub)}")
+    print(f"  {cc(C.BRED,   'Private key (NEVER share it):')} {cc(C.DIM, priv_stub[:60] + '...')}")
 
-    callout("warn", "Regla de oro",
-            "La llave privada NUNCA sale de tu máquina.\n"
-            "Comprometerla = comprometer toda tu identidad criptográfica.")
+    callout("warn", "Golden rule",
+            "The private key NEVER leaves your machine.\n"
+            "If it's compromised, your whole cryptographic identity is compromised.")
     pause()
 
 
 def hmac_demo():
-    header("HMAC — Autenticación de mensajes", "Módulo 7 · Integridad + autenticación")
-    info("HMAC combina una llave secreta con el hash para verificar que el mensaje viene de quien dice.")
+    header("HMAC — Message Authentication", "Module 7 · Integrity + authentication")
+    info("HMAC combines a secret key with a hash to prove a message comes from who it claims.")
     sep()
-    mensaje = ask("Mensaje")
-    llave   = ask("Llave secreta compartida")
-    if not mensaje or not llave:
+    message = ask("Message")
+    key     = ask("Shared secret key")
+    if not message or not key:
         return
 
-    h = hmac.new(llave.encode(), mensaje.encode(), hashlib.sha256)
+    h = hmac.new(key.encode(), message.encode(), hashlib.sha256)
     tag = h.hexdigest()
 
     sep()
-    result("Mensaje",   mensaje)
-    result("Llave",     "*" * len(llave))
+    result("Message",     message)
+    result("Key",         "*" * len(key))
     result("HMAC-SHA256", tag)
 
     sep()
-    # Verificar
-    msg_verificar = ask("Mensaje a verificar (copia el original o modifícalo)")
-    h2 = hmac.new(llave.encode(), msg_verificar.encode(), hashlib.sha256)
+    # Verify
+    to_verify = ask("Message to verify (copy the original or modify it)")
+    h2 = hmac.new(key.encode(), to_verify.encode(), hashlib.sha256)
     if hmac.compare_digest(h.hexdigest(), h2.hexdigest()):
-        ok("HMAC válido. El mensaje NO fue modificado y la llave es correcta.")
+        ok("Valid HMAC. The message was NOT modified and the key is correct.")
     else:
-        warn("HMAC inválido. El mensaje fue alterado O la llave es diferente.")
+        warn("Invalid HMAC. The message was altered OR the key is different.")
 
-    callout("info", "¿Dónde se usa HMAC?",
-            "JWTs (tokens web), cookies de sesión, webhooks de GitHub/Stripe,\n"
-            "verificación de mensajes en APIs, integridad de backups.")
+    callout("info", "Where is HMAC used?",
+            "JWTs (web tokens), session cookies, GitHub/Stripe webhooks,\n"
+            "API message verification, backup integrity.")
     pause()
 
 
 def base64_tool():
-    header("Base64 — Codificación binario a texto", "Módulo 7 · Codificación")
-    info("Base64 NO es cifrado. Solo convierte bytes a texto ASCII seguro para transmisión.")
-    info("Se usa en: adjuntos de email (MIME), JWTs, autenticación HTTP Basic, certificados PEM.")
+    header("Base64 — Binary-to-text encoding", "Module 7 · Encoding")
+    info("Base64 is NOT encryption. It only turns bytes into ASCII text that's safe to transmit.")
+    info("Used in: email attachments (MIME), JWTs, HTTP Basic auth, PEM certificates.")
     sep()
-    opts = ["Codificar texto → Base64", "Decodificar Base64 → texto"]
+    opts = ["Encode text → Base64", "Decode Base64 → text"]
     idx, _ = ask("", opts)
 
     if idx == 0:
-        texto = ask("Texto a codificar")
-        if texto:
-            encoded = base64.b64encode(texto.encode("utf-8")).decode("ascii")
-            result("Base64",    encoded)
-            result("Longitud original", f"{len(texto)} bytes")
-            result("Longitud codificada", f"{len(encoded)} bytes (+{len(encoded)-len(texto)} overhead)")
+        text = ask("Text to encode")
+        if text:
+            encoded = base64.b64encode(text.encode("utf-8")).decode("ascii")
+            result("Base64",          encoded)
+            result("Original length", f"{len(text)} bytes")
+            result("Encoded length",  f"{len(encoded)} bytes (+{len(encoded)-len(text)} overhead)")
     else:
-        b64 = ask("Base64 a decodificar")
+        b64 = ask("Base64 to decode")
         try:
             decoded = base64.b64decode(b64 + "==").decode("utf-8")
-            result("Texto", decoded)
+            result("Text", decoded)
         except Exception as e:
             warn(f"Error: {e}")
     pause()
@@ -214,15 +213,15 @@ def base64_tool():
 def run():
     while True:
         opts = [
-            "Calculadora de hashes (MD5, SHA-1, SHA-256, SHA-512, SHA-3, BLAKE2)",
-            "Verificar integridad (comparar dos hashes / textos)",
-            "Cifrado César (sustitución clásica — educativo)",
-            "Criptografía asimétrica (RSA/ECDSA — conceptos paso a paso)",
-            "HMAC — Autenticación de mensajes con llave compartida",
-            "Base64 — Codificar y decodificar",
+            "Hash calculator (MD5, SHA-1, SHA-256, SHA-512, SHA-3, BLAKE2)",
+            "Verify integrity (compare two hashes / texts)",
+            "Caesar cipher (classical substitution — educational)",
+            "Asymmetric cryptography (RSA/ECDSA — concepts step by step)",
+            "HMAC — Message authentication with a shared key",
+            "Base64 — Encode and decode",
         ]
-        choice = menu("Módulo 7 · Criptografía y Seguridad", opts)
+        choice = menu("Module 7 · Cryptography and Security", opts)
         if choice == -1:
             break
-        [calcular_hash, verificar_integridad, cifrado_cesar,
-         cifrado_asimetrico_concepto, hmac_demo, base64_tool][choice]()
+        [hash_calculator, verify_integrity, caesar_cipher,
+         asymmetric_crypto_concepts, hmac_demo, base64_tool][choice]()

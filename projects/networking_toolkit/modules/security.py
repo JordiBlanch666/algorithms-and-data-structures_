@@ -1,152 +1,152 @@
-from .utils import (header, section, step, substep, result, sep, info,
-                    warn, ok, callout, pause, C, cc, menu)
+from .utils import (header, section, step, result, sep,
+                    callout, pause, C, cc, menu)
 
-# ── Módulo 6: Ciberseguridad ──────────────────────────────────────────────────
+# ── Module 6: Cybersecurity ───────────────────────────────────────────────────
 
-def triada_cia():
-    header("Tríada CIA", "Módulo 6 · Los tres pilares de la seguridad")
-    step(1, "Confidencialidad (Confidentiality)",
-         "Solo quienes están autorizados pueden ver la información.\n"
-         "Protegida con: cifrado (TLS, AES), control de acceso (RBAC), autenticación MFA.")
-    step(2, "Integridad (Integrity)",
-         "Los datos no han sido modificados sin autorización.\n"
-         "Protegida con: hashing (SHA-256), firmas digitales (RSA/ECDSA), checksums.")
-    step(3, "Disponibilidad (Availability)",
-         "Los sistemas están accesibles cuando se necesitan.\n"
-         "Protegida con: redundancia, backups, anti-DDoS, clustering, monitoreo.")
+def cia_triad():
+    header("CIA Triad", "Module 6 · The three pillars of security")
+    step(1, "Confidentiality",
+         "Only authorized people can see the information.\n"
+         "Protected by: encryption (TLS, AES), access control (RBAC), MFA authentication.")
+    step(2, "Integrity",
+         "Data has not been modified without authorization.\n"
+         "Protected by: hashing (SHA-256), digital signatures (RSA/ECDSA), checksums.")
+    step(3, "Availability",
+         "Systems are accessible when they're needed.\n"
+         "Protected by: redundancy, backups, anti-DDoS, clustering, monitoring.")
 
     sep()
-    section("Ejemplos de fallo en cada pilar")
-    ejemplos = [
-        ("Confidencialidad", "Alguien intercepta tráfico HTTP y lee tus contraseñas.\n"
-                              "Un empleado accede a archivos de RRHH sin permiso."),
-        ("Integridad",       "Un atacante MITM altera el contenido de un archivo en tránsito.\n"
-                              "Un virus modifica un ejecutable del sistema."),
-        ("Disponibilidad",   "Un ataque DDoS satura el servidor y lo hace inaccesible.\n"
-                              "Un disco duro falla y no hay backup."),
+    section("Examples of failure in each pillar")
+    examples = [
+        ("Confidentiality", "Someone intercepts HTTP traffic and reads your passwords.\n"
+                            "An employee opens HR files without permission."),
+        ("Integrity",       "A MITM attacker alters a file while it's in transit.\n"
+                            "A virus modifies a system executable."),
+        ("Availability",    "A DDoS attack floods the server and makes it unreachable.\n"
+                            "A hard drive fails and there is no backup."),
     ]
-    for pilar, ejemplo in ejemplos:
-        result(pilar, "")
-        print(f"    {cc(C.DIM, ejemplo)}")
+    for pillar, example in examples:
+        result(pillar, "")
+        print(f"    {cc(C.DIM, example)}")
         print()
     pause()
 
 
-def tipos_ataque():
-    header("Tipos de Ataques Comunes", "Módulo 6 · Ciberseguridad")
+def attack_types():
+    header("Common Attack Types", "Module 6 · Cybersecurity")
 
-    ataques = [
-        ("Phishing", "Engaño por email o web falsa para robar credenciales.\n"
-                     "Variantes: spear phishing (dirigido), whaling (CEO), smishing (SMS).",
-         "Verificar URL, no hacer clic en links sospechosos, usar MFA."),
-        ("MITM (Man in the Middle)", "El atacante se interpone en la comunicación y puede leer/alterar datos.\n"
-                                      "Ejemplo: ARP spoofing en WiFi público.",
-         "Usar HTTPS+HSTS, certificados válidos, evitar WiFi público sin VPN."),
-        ("DDoS (Denial of Service)", "Inundar un servidor con tráfico hasta que se satura y cae.\n"
-                                      "Botnet: miles de dispositivos comprometidos atacando simultáneamente.",
-         "CDN, rate limiting, anti-DDoS (Cloudflare, AWS Shield)."),
-        ("SQL Injection", "Inyectar código SQL en campos de formulario para manipular la base de datos.\n"
-                           "' OR '1'='1 — frase clásica de SQL injection.",
-         "Prepared statements, validación de entrada, WAF."),
-        ("XSS (Cross-Site Scripting)", "Inyectar JavaScript malicioso en una página web.\n"
-                                        "Puede robar cookies de sesión o redirigir al usuario.",
-         "Escapar HTML, Content Security Policy (CSP), HttpOnly cookies."),
-        ("Fuerza bruta / Diccionario", "Probar miles de contraseñas hasta encontrar la correcta.\n"
-                                        "Diccionario: lista de contraseñas comunes (rockyou.txt tiene 14M).",
-         "Contraseñas largas, MFA, bloqueo tras intentos fallidos, CAPTCHA."),
-        ("Ransomware", "Malware que cifra tus archivos y pide rescate para descifrarlos.\n"
-                        "Se propaga por phishing, RDP expuesto, vulnerabilidades sin parchear.",
-         "Backups offline, no abrir adjuntos sospechosos, parchear sistemas."),
-        ("ARP Spoofing", "Enviar respuestas ARP falsas para asociar la MAC del atacante a la IP del gateway.\n"
-                          "Resultado: todo el tráfico pasa por el atacante (MITM).",
-         "ARP inspection dinámica en switches, VPNs, cifrado del tráfico."),
+    attacks = [
+        ("Phishing", "Fake emails or websites designed to steal credentials.\n"
+                     "Variants: spear phishing (targeted), whaling (executives), smishing (SMS).",
+         "Check URLs, don't click suspicious links, use MFA."),
+        ("MITM (Man in the Middle)", "The attacker sits between two parties and can read or alter the data.\n"
+                                     "Example: ARP spoofing on public Wi-Fi.",
+         "Use HTTPS+HSTS and valid certificates; avoid public Wi-Fi without a VPN."),
+        ("DDoS (Distributed Denial of Service)", "Flooding a server with traffic until it's overwhelmed and goes down.\n"
+                                                 "Botnet: thousands of compromised devices attacking at once.",
+         "CDN, rate limiting, anti-DDoS services (Cloudflare, AWS Shield)."),
+        ("SQL Injection", "Injecting SQL code into form fields to manipulate the database.\n"
+                          "' OR '1'='1 — the classic SQL injection string.",
+         "Prepared statements, input validation, a WAF."),
+        ("XSS (Cross-Site Scripting)", "Injecting malicious JavaScript into a web page.\n"
+                                       "It can steal session cookies or redirect the user.",
+         "Escape HTML, Content Security Policy (CSP), HttpOnly cookies."),
+        ("Brute force / Dictionary", "Trying thousands of passwords until one works.\n"
+                                     "Dictionary: a list of common passwords (rockyou.txt has 14M).",
+         "Long passwords, MFA, lockout after failed attempts, CAPTCHA."),
+        ("Ransomware", "Malware that encrypts your files and demands a ransom to decrypt them.\n"
+                       "Spreads through phishing, exposed RDP and unpatched vulnerabilities.",
+         "Offline backups, don't open suspicious attachments, keep systems patched."),
+        ("ARP Spoofing", "Sending fake ARP replies so the attacker's MAC is linked to the gateway's IP.\n"
+                         "Result: all traffic flows through the attacker (MITM).",
+         "Dynamic ARP inspection on switches, VPNs, encrypted traffic."),
     ]
 
-    for name, desc, defensa in ataques:
+    for name, desc, defense in attacks:
         sep()
         print(f"  {cc(C.BRED + C.BOLD, '◉ ' + name)}")
         print(f"  {cc(C.DIM, desc)}")
-        print(f"  {cc(C.BGREEN, '  Defensa:')} {cc(C.DIM, defensa)}")
+        print(f"  {cc(C.BGREEN, '  Defense:')} {cc(C.DIM, defense)}")
 
     pause()
 
 
-def https_explicado():
-    header("¿Cómo HTTPS protege tus datos?", "Módulo 6 · TLS handshake paso a paso")
-    step(1, "TCP Handshake",   "Se establece la conexión TCP al puerto 443 (SYN, SYN-ACK, ACK).")
+def https_explained():
+    header("How does HTTPS protect your data?", "Module 6 · TLS handshake step by step")
+    step(1, "TCP handshake",   "A TCP connection to port 443 is established (SYN, SYN-ACK, ACK).")
     step(2, "ClientHello",
-         "El cliente envía:\n"
-         "  • Versiones TLS soportadas (TLS 1.2, TLS 1.3)\n"
-         "  • Lista de cipher suites (ej: TLS_AES_256_GCM_SHA384)\n"
-         "  • Número aleatorio del cliente (client random)")
+         "The client sends:\n"
+         "  • Supported TLS versions (TLS 1.2, TLS 1.3)\n"
+         "  • A list of cipher suites (e.g. TLS_AES_256_GCM_SHA384)\n"
+         "  • A client random number")
     step(3, "ServerHello",
-         "El servidor responde:\n"
-         "  • Cipher suite elegida\n"
-         "  • Número aleatorio del servidor (server random)\n"
-         "  • Su certificado X.509 firmado por una CA")
-    step(4, "Verificación del certificado",
-         "El cliente verifica:\n"
-         "  a) La CA que firmó el certificado es de confianza (está en el truststore del OS)\n"
-         "  b) El CN/SAN del certificado coincide con el dominio visitado\n"
-         "  c) El certificado no está expirado ni revocado (OCSP)")
-    step(5, "Key Exchange",
-         "Con TLS 1.3 se usa ECDHE (Elliptic Curve Diffie-Hellman Ephemeral):\n"
-         "  • Ambos lados calculan independientemente un secreto compartido\n"
-         "  • Nadie en el camino puede calcularlo (solo los dos extremos)\n"
-         "  • 'Ephemeral' = nueva llave por sesión → Forward Secrecy")
-    step(6, "Derivación de llaves de sesión",
-         "Del secreto compartido + los randoms se derivan:\n"
-         "  • Llave de cifrado cliente→servidor (AES-256)\n"
-         "  • Llave de cifrado servidor→cliente (AES-256)\n"
-         "  • Llaves de integridad (MAC keys)")
-    step(7, "Canal seguro",
-         "A partir de aquí, todos los datos van cifrados con AES-GCM.\n"
-         "  • AES cifra los datos (confidencialidad)\n"
-         "  • GCM verifica que no fueron alterados (integridad)\n"
-         "  • ECDHE garantiza Forward Secrecy")
+         "The server replies with:\n"
+         "  • The chosen cipher suite\n"
+         "  • A server random number\n"
+         "  • Its X.509 certificate signed by a CA")
+    step(4, "Certificate verification",
+         "The client checks that:\n"
+         "  a) The CA that signed the certificate is trusted (it's in the OS trust store)\n"
+         "  b) The certificate's CN/SAN matches the domain being visited\n"
+         "  c) The certificate isn't expired or revoked (OCSP)")
+    step(5, "Key exchange",
+         "TLS 1.3 uses ECDHE (Elliptic Curve Diffie-Hellman Ephemeral):\n"
+         "  • Both sides independently compute a shared secret\n"
+         "  • Nobody in between can compute it (only the two endpoints)\n"
+         "  • 'Ephemeral' = a new key per session → Forward Secrecy")
+    step(6, "Session key derivation",
+         "From the shared secret + the random numbers they derive:\n"
+         "  • A client→server encryption key (AES-256)\n"
+         "  • A server→client encryption key (AES-256)\n"
+         "  • Integrity keys (MAC keys)")
+    step(7, "Secure channel",
+         "From here on, all data is encrypted with AES-GCM.\n"
+         "  • AES encrypts the data (confidentiality)\n"
+         "  • GCM verifies it wasn't altered (integrity)\n"
+         "  • ECDHE guarantees Forward Secrecy")
 
     callout("info", "Forward Secrecy",
-            "Incluso si en el futuro alguien obtiene la llave privada del servidor,\n"
-            "NO puede descifrar sesiones pasadas — porque las llaves de sesión\n"
-            "son efímeras y únicas por conexión.")
+            "Even if someone later obtains the server's private key,\n"
+            "they CANNOT decrypt past sessions — because session keys\n"
+            "are ephemeral and unique to each connection.")
     pause()
 
 
-def vlans_y_segmentacion():
-    header("VLANs y Segmentación de Red", "Módulo 5 · Seguridad de capa 2")
-    step(1, "¿Qué es una VLAN?",
-         "Virtual LAN: divide lógicamente una red física en múltiples redes aisladas.\n"
-         "Los dispositivos en distintas VLANs no se ven entre sí sin un router.")
-    step(2, "¿Por qué usar VLANs?",
-         "• Seguridad: VLAN de contabilidad separada de VLAN de producción\n"
-         "• Rendimiento: reduce el dominio de broadcast\n"
-         "• Administración: agrupa dispositivos lógicamente sin mover cables")
-    step(3, "VLAN de gestión",
-         "Siempre crea una VLAN separada para administrar switches y routers.\n"
-         "Nunca administres dispositivos de red desde la VLAN de usuarios.")
-    step(4, "Trunk vs Access ports",
-         "Access port: conecta un dispositivo final. Solo una VLAN.\n"
-         "Trunk port: conecta switches entre sí. Lleva múltiples VLANs (802.1Q tagging).")
+def vlans_and_segmentation():
+    header("VLANs and Network Segmentation", "Module 5 · Layer 2 security")
+    step(1, "What is a VLAN?",
+         "Virtual LAN: logically divides one physical network into several isolated networks.\n"
+         "Devices in different VLANs can't see each other without a router.")
+    step(2, "Why use VLANs?",
+         "• Security: keep the accounting VLAN separate from the production VLAN\n"
+         "• Performance: smaller broadcast domains\n"
+         "• Management: group devices logically without moving cables")
+    step(3, "Management VLAN",
+         "Always create a separate VLAN to manage switches and routers.\n"
+         "Never manage network devices from the user VLAN.")
+    step(4, "Trunk vs. access ports",
+         "Access port: connects one end device. Carries a single VLAN.\n"
+         "Trunk port: connects switches to each other. Carries several VLANs (802.1Q tagging).")
     step(5, "Inter-VLAN routing",
-         "Para que dos VLANs se comuniquen necesitas un router o switch L3.\n"
-         "Router-on-a-stick: un router con sub-interfaces, una por VLAN.")
+         "Two VLANs need a router or layer 3 switch to talk to each other.\n"
+         "Router-on-a-stick: one router with sub-interfaces, one per VLAN.")
 
-    callout("info", "Segmentación como defensa",
-            "Si un atacante compromete un dispositivo en la VLAN de invitados,\n"
-            "no puede acceder a los servidores en la VLAN de producción.\n"
-            "Principio de mínimo privilegio aplicado a la red.")
+    callout("info", "Segmentation as a defense",
+            "If an attacker compromises a device on the guest VLAN,\n"
+            "they can't reach the servers on the production VLAN.\n"
+            "The principle of least privilege applied to the network.")
     pause()
 
 
 def run():
     while True:
         opts = [
-            "Tríada CIA (Confidencialidad, Integridad, Disponibilidad)",
-            "Tipos de ataques comunes (Phishing, MITM, DDoS, SQLi, XSS, Ransomware...)",
-            "¿Cómo HTTPS protege tus datos? (TLS handshake paso a paso)",
-            "VLANs y segmentación de red",
+            "CIA triad (Confidentiality, Integrity, Availability)",
+            "Common attacks (Phishing, MITM, DDoS, SQLi, XSS, Ransomware...)",
+            "How does HTTPS protect your data? (TLS handshake step by step)",
+            "VLANs and network segmentation",
         ]
-        choice = menu("Módulo 6 · Ciberseguridad", opts)
+        choice = menu("Module 6 · Cybersecurity", opts)
         if choice == -1:
             break
-        [triada_cia, tipos_ataque, https_explicado, vlans_y_segmentacion][choice]()
+        [cia_triad, attack_types, https_explained, vlans_and_segmentation][choice]()

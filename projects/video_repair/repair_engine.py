@@ -1,7 +1,7 @@
-# Autor: Jordi Y Blanch
+# Author: Jordi Y Blanch
 """
-Motor principal del reparador de vídeos.
-Detecta el formato y delega al módulo correspondiente.
+Main engine of the video repairer.
+Detects the format and hands off to the matching module.
 """
 import logging
 import shutil
@@ -45,16 +45,16 @@ class RepairResult:
             return (f"✓ {self.src.name} → {self.dst.name} "
                     f"({human_size(self.output_size)}) "
                     f"fixes={self.fixes}")
-        return f"✗ {self.src.name}: {self.error or 'fallo desconocido'}"
+        return f"✗ {self.src.name}: {self.error or 'unknown failure'}"
 
 
 class RepairEngine:
     """
-    Repara uno o varios archivos de vídeo corruptos.
+    Repairs one or more corrupted video files.
 
-    Uso básico:
-        engine = RepairEngine(output_dir=Path("reparados"))
-        for result in engine.repair_all(Path("corruptos")):
+    Basic usage:
+        engine = RepairEngine(output_dir=Path("repaired"))
+        for result in engine.repair_all(Path("corrupted")):
             print(result.summary())
     """
 
@@ -71,7 +71,7 @@ class RepairEngine:
                 src=src, dst=src, format=ext,
                 issues=["unsupported_format"], fixes=[],
                 success=False, output_size=0,
-                error=f"Formato {ext} no soportado. Válidos: {list(SUPPORTED)}",
+                error=f"Format {ext} is not supported. Valid: {list(SUPPORTED)}",
             )
 
         dst = self._dest_path(src)
@@ -79,12 +79,12 @@ class RepairEngine:
             backup_file(src)
 
         repairer = SUPPORTED[ext]
-        log.info(f"Reparando: {src.name} ({human_size(src.stat().st_size)})")
+        log.info(f"Repairing: {src.name} ({human_size(src.stat().st_size)})")
 
         try:
             result_dict = repairer(src, dst)
         except Exception as e:
-            log.error(f"Error inesperado reparando {src.name}: {e}")
+            log.error(f"Unexpected error repairing {src.name}: {e}")
             return RepairResult(
                 src=src, dst=dst, format=ext,
                 issues=["unexpected_error"], fixes=[],
@@ -102,7 +102,7 @@ class RepairEngine:
 
     def repair_all(self, source: Path) -> list[RepairResult]:
         """
-        Repara todos los archivos de vídeo en `source` (archivo o directorio).
+        Repair every video file in `source` (a file or a folder).
         """
         if source.is_file():
             files = [source]
@@ -123,6 +123,6 @@ class RepairEngine:
             stem, suffix = src.stem, src.suffix
             i = 1
             while dst.exists():
-                dst = self.output_dir / f"{stem}_reparado_{i}{suffix}"
+                dst = self.output_dir / f"{stem}_repaired_{i}{suffix}"
                 i += 1
         return dst

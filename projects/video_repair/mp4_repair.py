@@ -1,13 +1,13 @@
-# Autor: Jordi Y Blanch
+# Author: Jordi Y Blanch
 """
-Reparador de archivos MP4 / MOV / M4V.
+Repairer for MP4 / MOV / M4V files.
 
-Corrige los problemas más comunes:
-  1. Tamaños de box incorrectos
-  2. átomo moov ausente o al final del archivo (grabación interrumpida)
-  3. Atom ftyp faltante
-  4. Archivo truncado con mdat incompleto
-  5. Reordenación de boxes: ftyp → moov → mdat (streaming-friendly)
+Fixes the most common problems:
+  1. Wrong box sizes
+  2. A missing moov atom, or one at the end of the file (interrupted recording)
+  3. A missing ftyp atom
+  4. A truncated file with an incomplete mdat
+  5. Box reordering: ftyp → moov → mdat (streaming-friendly)
 """
 import struct
 import logging
@@ -22,7 +22,7 @@ from utils import (
 
 log = logging.getLogger(__name__)
 
-# Boxes conocidos del estándar ISO BMFF / QuickTime
+# Known boxes from the ISO BMFF / QuickTime standard
 KNOWN_BOXES = {
     "ftyp", "moov", "mdat", "free", "skip", "wide", "pnot",
     "mvhd", "trak", "tkhd", "mdia", "mdhd", "hdlr", "minf",
@@ -33,7 +33,7 @@ KNOWN_BOXES = {
     "trun", "mfra", "tfra", "mfro", "sidx", "ssix",
 }
 
-# Tipos ftyp compatibles
+# Compatible ftyp brands
 FTYP_BRANDS = {
     b"isom", b"iso2", b"mp41", b"mp42", b"M4V ", b"M4A ",
     b"qt  ", b"avc1", b"MSNV", b"f4v ", b"crx ", b"heic",
@@ -42,17 +42,17 @@ FTYP_BRANDS = {
 
 @dataclass
 class Box:
-    offset: int      # posición en el archivo
-    size: int        # tamaño total incluyendo cabecera
+    offset: int      # position in the file
+    size: int        # total size including the header
     box_type: str    # fourcc
-    header_size: int # 8 o 16 (si usa tamaño de 64 bits)
-    data_offset: int # offset donde empiezan los datos del box
+    header_size: int # 8 or 16 (when it uses a 64-bit size)
+    data_offset: int # offset where the box data begins
 
 
 def _parse_box_header(data: bytes, offset: int) -> Box | None:
     """
-    Lee la cabecera de un box ISO BMFF en `offset`.
-    Devuelve None si los bytes no forman un box válido.
+    Read the header of an ISO BMFF box at `offset`.
+    Returns None if the bytes don't form a valid box.
     """
     if offset + 8 > len(data):
         return None
@@ -64,14 +64,14 @@ def _parse_box_header(data: bytes, offset: int) -> Box | None:
         return None
 
     if size == 1:
-        # Tamaño de 64 bits
+        # 64-bit size
         if offset + 16 > len(data):
             return None
         size = read_u64_be(data, offset + 8)
         header_size = 16
         data_offset = offset + 16
     elif size == 0:
-        # Tamaño hasta fin de archivo
+        # Size runs to the end of the file
         size = len(data) - offset
         header_size = 8
         data_offset = offset + 8
@@ -87,7 +87,7 @@ def _parse_box_header(data: bytes, offset: int) -> Box | None:
 
 
 def _scan_boxes(data: bytes, start: int = 0, end: int | None = None) -> list[Box]:
-    """Escanea boxes desde `start` hasta `end` y devuelve los válidos."""
+    """Scan boxes from `start` to `end` and return the valid ones."""
     end = end or len(data)
     boxes = []
     pos = start
@@ -112,7 +112,7 @@ def _scan_boxes(data: bytes, start: int = 0, end: int | None = None) -> list[Box
 
 
 def _find_moov_by_scan(data: bytes) -> int:
-    """Busca la firma 'moov' en todo el archivo cuando el parseo normal falla."""
+    """Search the whole file for the 'moov' signature when normal parsing fails."""
     pos = 0
     while pos < len(data) - 8:
         if data[pos+4:pos+8] == b"moov":
@@ -124,7 +124,7 @@ def _find_moov_by_scan(data: bytes) -> int:
 
 
 def _build_ftyp() -> bytes:
-    """Genera un átomo ftyp mínimo compatible con reproductores estándar."""
+    """Build a minimal ftyp atom that standard players accept."""
     compatible = b"isom" + b"iso2" + b"avc1" + b"mp41"
     size = 8 + 4 + 4 + len(compatible)   # header + major + minor + compat
     return write_u32_be(size) + b"ftyp" + b"isom" + b"\x00\x02\x00\x00" + compatible
@@ -132,9 +132,9 @@ def _build_ftyp() -> bytes:
 
 def _fix_stco_offsets(moov_data: bytes, delta: int) -> bytes:
     """
-    Ajusta los offsets absolutos de los chunk offset tables (stco/co64)
-    dentro del blob del moov, sumando `delta` bytes.
-    Necesario cuando reordenamos ftyp/moov antes del mdat.
+    Shift the absolute offsets in the chunk offset tables (stco/co64)
+    inside the moov blob by `delta` bytes.
+    Needed when ftyp/moov are moved in front of mdat.
     """
     result = bytearray(moov_data)
     pos = 0
@@ -167,10 +167,10 @@ def _fix_stco_offsets(moov_data: bytes, delta: int) -> bytes:
     return bytes(result)
 
 
-# ── Diagnóstico ───────────────────────────────────────────────────────────────
+# ── Diagnosis ─────────────────────────────────────────────────────────────────
 def diagnose(path: Path) -> dict:
     """
-    Analiza un MP4 y devuelve un diccionario con los problemas detectados.
+    Analyze an MP4 and return a dict with the problems found.
     """
     data = path.read_bytes()
     issues = []
@@ -185,7 +185,7 @@ def diagnose(path: Path) -> dict:
     if "ftyp" not in types:
         issues.append("ftyp_missing")
     if "moov" not in types:
-        # Intento de búsqueda por firma
+        # Try to find it by its signature
         moov_pos = _find_moov_by_scan(data)
         if moov_pos >= 0:
             issues.append("moov_corrupted_size")
@@ -194,12 +194,12 @@ def diagnose(path: Path) -> dict:
     if "mdat" not in types:
         issues.append("mdat_missing")
 
-    # ¿moov está después de mdat? (grabación interrumpida)
+    # Is moov after mdat? (interrupted recording)
     if "moov" in types and "mdat" in types:
         if types["moov"].offset > types["mdat"].offset:
             issues.append("moov_after_mdat")
 
-    # ¿Tamaño del último box desborda el archivo?
+    # Does the last box's size run past the end of the file?
     if boxes:
         last = boxes[-1]
         if last.offset + last.size > len(data) + 512:
@@ -209,23 +209,23 @@ def diagnose(path: Path) -> dict:
     return info
 
 
-# ── Reparación ────────────────────────────────────────────────────────────────
+# ── Repair ────────────────────────────────────────────────────────────────────
 def repair(src: Path, dst: Path) -> list[str]:
     """
-    Repara `src` y guarda el resultado en `dst`.
-    Devuelve lista de reparaciones aplicadas.
+    Repair `src` and save the result to `dst`.
+    Returns the list of fixes applied.
     """
     data  = src.read_bytes()
     fixes: list[str] = []
     boxes = _scan_boxes(data)
     types = {b.box_type: b for b in boxes}
 
-    # ── 1. moov con tamaño incorrecto → buscar por firma ─────────────────────
+    # ── 1. moov with a wrong size → find it by its signature ─────────────────
     if "moov" not in types:
         moov_pos = _find_moov_by_scan(data)
         if moov_pos >= 0:
-            log.info("moov encontrado por firma — corrigiendo tamaño")
-            # Recalcular tamaño hasta el próximo box reconocible o fin de archivo
+            log.info("moov found by signature — fixing its size")
+            # Recompute the size up to the end of the file
             remaining = len(data) - moov_pos
             corrected = bytearray(data)
             struct.pack_into(">I", corrected, moov_pos, remaining)
@@ -235,16 +235,16 @@ def repair(src: Path, dst: Path) -> list[str]:
             fixes.append("moov_size_corrected")
 
     if "moov" not in types and "mdat" not in types:
-        raise CorruptionError("No se encontró moov ni mdat. El archivo está demasiado dañado.")
+        raise CorruptionError("Neither moov nor mdat was found. The file is too damaged.")
 
-    # ── 2. ftyp faltante → insertar uno genérico ──────────────────────────────
+    # ── 2. Missing ftyp → insert a generic one ────────────────────────────────
     needs_ftyp = "ftyp" not in types
     ftyp_data  = data[types["ftyp"].offset: types["ftyp"].offset + types["ftyp"].size] \
                  if not needs_ftyp else _build_ftyp()
     if needs_ftyp:
         fixes.append("ftyp_inserted")
 
-    # ── 3. Reordenar: ftyp → moov → mdat ─────────────────────────────────────
+    # ── 3. Reorder: ftyp → moov → mdat ───────────────────────────────────────
     if "moov" in types and "mdat" in types:
         moov_box = types["moov"]
         mdat_box = types["mdat"]
@@ -256,7 +256,7 @@ def repair(src: Path, dst: Path) -> list[str]:
         new_ftyp_size  = len(ftyp_data)
         new_moov_start = new_ftyp_size
 
-        # El mdat empezará justo después del nuevo moov
+        # mdat will start right after the new moov
         new_mdat_start = new_ftyp_size + len(moov_data)
 
         old_mdat_start = mdat_box.offset
@@ -265,7 +265,7 @@ def repair(src: Path, dst: Path) -> list[str]:
             moov_data = _fix_stco_offsets(moov_data, delta)
             fixes.append(f"chunk_offsets_adjusted_by_{delta:+d}")
 
-        # Agregar resto de boxes (free, udta, etc.) que no sean ftyp/moov/mdat
+        # Append the remaining boxes (free, udta, etc.) other than ftyp/moov/mdat
         extra = b"".join(
             data[b.offset: b.offset + b.size]
             for b in boxes
@@ -282,23 +282,23 @@ def repair(src: Path, dst: Path) -> list[str]:
     return fixes
 
 
-# ── API pública ───────────────────────────────────────────────────────────────
+# ── Public API ────────────────────────────────────────────────────────────────
 def repair_mp4(src: Path, dst: Path) -> dict:
     """
-    Punto de entrada principal.
-    Devuelve dict con 'issues', 'fixes', 'success', 'output_size'.
+    Main entry point.
+    Returns a dict with 'issues', 'fixes', 'success', 'output_size'.
     """
     info   = diagnose(src)
     issues = info["issues"]
 
     if not issues:
-        log.info(f"{src.name}: no se detectaron problemas graves.")
+        log.info(f"{src.name}: no serious problems found.")
         import shutil
         shutil.copy2(src, dst)
         return {"issues": [], "fixes": [], "success": True,
                 "output_size": dst.stat().st_size}
 
-    log.info(f"{src.name}: problemas detectados → {issues}")
+    log.info(f"{src.name}: problems found → {issues}")
     try:
         fixes = repair(src, dst)
         return {"issues": issues, "fixes": fixes, "success": True,

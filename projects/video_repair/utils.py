@@ -1,6 +1,6 @@
-# Autor: Jordi Y Blanch
+# Author: Jordi Y Blanch
 """
-Utilidades comunes para parseo y escritura de estructuras binarias de vídeo.
+Shared helpers for parsing and writing binary video structures.
 """
 import struct
 from pathlib import Path
@@ -35,11 +35,11 @@ def fourcc(data: bytes, offset: int) -> str:
 
 
 class CorruptionError(Exception):
-    """Error detectado durante el análisis de un archivo de vídeo."""
+    """Error found while analyzing a video file."""
 
 
 def backup_file(path: Path) -> Path:
-    """Crea una copia .bak del archivo antes de repararlo."""
+    """Create a .bak copy of the file before repairing it."""
     bak = path.with_suffix(path.suffix + ".bak")
     if not bak.exists():
         bak.write_bytes(path.read_bytes())

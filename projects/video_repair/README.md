@@ -1,46 +1,46 @@
-# VideoRepair — Reparador de vídeos corruptos
+# VideoRepair — Corrupted Video Repairer
 
-> **Autor:** Jordi Y Blanch
+> **Author:** Jordi Y Blanch
 
-Herramienta de reparación de vídeos corruptos escrita en Python puro (sin dependencias externas).
-Soporta MP4, MOV, AVI, MKV, WebM, MPG y VOB.
+A corrupted-video repair tool written in pure Python (no external dependencies).
+It supports MP4, MOV, AVI, MKV, WebM, MPG and VOB.
 
-## Cómo funciona
+## How it works
 
-Analiza la estructura interna del contenedor de vídeo y corrige los problemas más comunes:
+It analyzes the internal structure of the video container and fixes the most common problems:
 
-- **MP4 / MOV**: reconstruye el átomo `moov`, ajusta offsets de chunks, inserta `ftyp` si falta
-- **AVI**: reconstruye el índice `idx1` escaneando el bloque `movi`, corrige tamaño RIFF
-- **MKV / WebM**: reconstruye `SeekHead`, marca el `Segment` como tamaño desconocido
-- **MPG / MPEG**: elimina paquetes corruptos, trunca la cola de basura al final
+- **MP4 / MOV**: rebuilds the `moov` atom, adjusts chunk offsets, inserts `ftyp` if it's missing
+- **AVI**: rebuilds the `idx1` index by scanning the `movi` block, fixes the RIFF size
+- **MKV / WebM**: rebuilds the `SeekHead`, marks the `Segment` size as unknown
+- **MPG / MPEG**: drops corrupted packets, truncates trailing garbage
 
-## Requisitos
+## Requirements
 
 - Python 3.11+
-- Sin dependencias externas
+- No external dependencies
 
-## Uso
+## Usage
 
 ```bash
-# Diagnosticar un archivo
+# Diagnose a file
 python main_repair.py --diagnose video.mp4
 
-# Reparar un archivo
-python main_repair.py --input video.mp4 --output C:\Reparados
+# Repair a file
+python main_repair.py --input video.mp4 --output C:\Repaired
 
-# Reparar toda una carpeta
-python main_repair.py --input C:\Recuperados --output C:\Reparados
+# Repair a whole folder
+python main_repair.py --input C:\Recovered --output C:\Repaired
 ```
 
-## Estructura
+## Structure
 
 ```
 video_repair/
-├── main_repair.py     — CLI principal
-├── repair_engine.py   — Orquestador
-├── mp4_repair.py      — Reparador MP4 / MOV / M4V
-├── avi_repair.py      — Reparador AVI
-├── mkv_repair.py      — Reparador MKV / WebM
-├── mpg_repair.py      — Reparador MPG / MPEG / VOB
-└── utils.py           — Utilidades binarias comunes
+├── main_repair.py     — Main CLI
+├── repair_engine.py   — Orchestrator
+├── mp4_repair.py      — MP4 / MOV / M4V repairer
+├── avi_repair.py      — AVI repairer
+├── mkv_repair.py      — MKV / WebM repairer
+├── mpg_repair.py      — MPG / MPEG / VOB repairer
+└── utils.py           — Shared binary helpers
 ```

@@ -1,12 +1,13 @@
-# Autor: Jordi Y Blanch
+# Author: Jordi Y Blanch
 """
-Reparador de archivos MKV / WebM (formato EBML).
+Repairer for MKV / WebM files (EBML format).
 
-Corrige:
-  1. Tamaño del Segment desconocido o incorrecto → se marca como desconocido
-  2. SeekHead ausente o corrupto → se reconstruye con posiciones reales
-  3. Cues ausentes → se reconstruyen a partir de los Clusters
-  4. Void / padding innecesario al inicio
+Fixes:
+  1. Unknown or wrong Segment size → marked as unknown (safe for players)
+  2. Missing or corrupted SeekHead → rebuilt with the real element positions
+  3. The old SeekHead, if any, is replaced with a Void element of the same size
+
+Missing Cues are reported by diagnose() but not rebuilt.
 """
 import struct
 import logging
@@ -16,7 +17,7 @@ from utils import CorruptionError, human_size
 
 log = logging.getLogger(__name__)
 
-# ── EBML IDs de los elementos más importantes ─────────────────────────────────
+# ── EBML IDs of the most important elements ───────────────────────────────────
 EBML_HEADER   = 0x1A45DFA3
 SEGMENT       = 0x18538067
 SEEK_HEAD     = 0x114D9B74
@@ -32,20 +33,20 @@ CUE_TIME      = 0xB3
 CUE_TRACK_POS = 0xB7
 CUE_TRACK     = 0xF7
 CUE_CLUSTER   = 0xF1
-TIMECODE      = 0xE7       # timecode dentro de Cluster
+TIMECODE      = 0xE7       # timecode inside a Cluster
 VOID          = 0xEC
 TAGS          = 0x1254C367
 ATTACHMENTS   = 0x1941A469
 CHAPTERS      = 0x1043A770
 
-UNKNOWN_SIZE  = b"\x01\xFF\xFF\xFF\xFF\xFF\xFF\xFF"  # tamaño desconocido EBML
+UNKNOWN_SIZE  = b"\x01\xFF\xFF\xFF\xFF\xFF\xFF\xFF"  # EBML unknown size
 
 
-# ── EBML: lectura de enteros de longitud variable ─────────────────────────────
+# ── EBML: reading variable-length integers ────────────────────────────────────
 def _read_vint(data: bytes, pos: int) -> tuple[int, int]:
     """
-    Lee un entero VINT (variable-length integer) desde `pos`.
-    Devuelve (valor, bytes_consumidos).
+    Read a VINT (variable-length integer) starting at `pos`.
+    Returns (value, bytes_consumed).
     """
     if pos >= len(data):
         return -1, 0
@@ -64,13 +65,13 @@ def _read_vint(data: bytes, pos: int) -> tuple[int, int]:
         return -1, 0
 
     raw = int.from_bytes(data[pos:pos+width], "big")
-    # Quitar el bit de ancho
-    raw &= ~(0x80 >> (width - 1)) << ((width - 1) * 8)
+    # Clear the width marker bit (it sits at bit 7 * width)
+    raw &= (1 << (7 * width)) - 1
     return raw, width
 
 
 def _read_element_id(data: bytes, pos: int) -> tuple[int, int]:
-    """Lee un EBML Element ID (mismo formato que VINT pero se conserva el bit de ancho)."""
+    """Read an EBML Element ID (same format as a VINT, but the width bit is kept)."""
     if pos >= len(data):
         return -1, 0
     first = data[pos]
@@ -92,17 +93,17 @@ def _read_element_id(data: bytes, pos: int) -> tuple[int, int]:
 
 
 def _encode_vint(value: int, min_width: int = 1) -> bytes:
-    """Codifica un valor como VINT EBML."""
+    """Encode a value as an EBML VINT."""
     for width in range(1, 9):
         max_val = (1 << (7 * width)) - 2
         if value <= max_val and width >= min_width:
             raw = value | (1 << (7 * width))
             return raw.to_bytes(width, "big")
-    raise ValueError(f"Valor demasiado grande para VINT: {value}")
+    raise ValueError(f"Value too large for a VINT: {value}")
 
 
 def _encode_element_id(eid: int) -> bytes:
-    """Codifica un Element ID EBML como bytes."""
+    """Encode an EBML Element ID as bytes."""
     if eid <= 0xFF:
         return eid.to_bytes(1, "big")
     elif eid <= 0xFFFF:
@@ -114,11 +115,23 @@ def _encode_element_id(eid: int) -> bytes:
 
 
 def _make_element(eid: int, payload: bytes) -> bytes:
-    """Construye un elemento EBML con ID + tamaño + payload."""
+    """Build an EBML element with ID + size + payload."""
     return _encode_element_id(eid) + _encode_vint(len(payload)) + payload
 
 
-# ── Escaneo de elementos ──────────────────────────────────────────────────────
+def _void_element(total_size: int) -> bytes:
+    """Build a Void element that takes up exactly `total_size` bytes."""
+    for width in range(1, 9):
+        payload_len = total_size - 1 - width
+        if payload_len < 0:
+            break
+        size_bytes = _encode_vint(payload_len, min_width=width)
+        if len(size_bytes) == width:
+            return bytes([VOID]) + size_bytes + b"\x00" * payload_len
+    raise ValueError(f"Cannot build a Void element of {total_size} bytes")
+
+
+# ── Element scanning ──────────────────────────────────────────────────────────
 class Element:
     __slots__ = ("eid", "pos", "header_size", "data_size", "unknown_size")
 
@@ -159,7 +172,7 @@ def _parse_element(data: bytes, pos: int) -> Element | None:
 
 
 def _scan_top_level(data: bytes, seg_start: int) -> list[Element]:
-    """Escanea elementos de nivel superior dentro del Segment."""
+    """Scan the top-level elements inside the Segment."""
     elements = []
     pos = seg_start
 
@@ -183,8 +196,8 @@ def _scan_top_level(data: bytes, seg_start: int) -> list[Element]:
 
 def _find_clusters(data: bytes, seg_start: int) -> list[tuple[int, int]]:
     """
-    Busca Clusters escaneando por su ID (0x1F43B675).
-    Devuelve lista de (posición_absoluta, timecode).
+    Find Clusters by scanning for their ID (0x1F43B675).
+    Returns a list of (absolute_position, timecode).
     """
     clusters = []
     search = _encode_element_id(CLUSTER)
@@ -200,7 +213,7 @@ def _find_clusters(data: bytes, seg_start: int) -> list[tuple[int, int]]:
             pos = idx + 1
             continue
 
-        # Leer timecode del cluster (primer elemento dentro)
+        # Read the cluster's timecode (its first child element)
         inner = el.data_start
         tc    = 0
         while inner < el.data_start + min(64, el.data_size):
@@ -219,9 +232,9 @@ def _find_clusters(data: bytes, seg_start: int) -> list[tuple[int, int]]:
     return clusters
 
 
-# ── Construcción de SeekHead ──────────────────────────────────────────────────
+# ── SeekHead construction ─────────────────────────────────────────────────────
 def _build_seek_entry(eid: int, position: int) -> bytes:
-    """Un elemento Seek (apunta a un elemento por ID y posición)."""
+    """A Seek element (points to an element by ID and position)."""
     id_bytes  = _encode_element_id(eid)
     seek_id   = _make_element(SEEK_ID, id_bytes)
     seek_pos  = _make_element(SEEK_POSITION, position.to_bytes(
@@ -230,12 +243,12 @@ def _build_seek_entry(eid: int, position: int) -> bytes:
 
 
 def _build_seek_head(positions: dict[int, int]) -> bytes:
-    """Construye un SeekHead completo con los elementos proporcionados."""
+    """Build a complete SeekHead for the given elements."""
     seeks = b"".join(_build_seek_entry(eid, pos) for eid, pos in positions.items())
     return _make_element(SEEK_HEAD, seeks)
 
 
-# ── Diagnóstico ───────────────────────────────────────────────────────────────
+# ── Diagnosis ─────────────────────────────────────────────────────────────────
 def diagnose(path: Path) -> dict:
     data   = path.read_bytes()
     issues = []
@@ -269,24 +282,24 @@ def diagnose(path: Path) -> dict:
     return {"issues": issues, "file_size": len(data)}
 
 
-# ── Reparación ────────────────────────────────────────────────────────────────
+# ── Repair ────────────────────────────────────────────────────────────────────
 def repair(src: Path, dst: Path) -> list[str]:
     data  = src.read_bytes()
     fixes: list[str] = []
 
-    # Localizar EBML header y Segment
+    # Locate the EBML header and the Segment
     ebml_el = _parse_element(data, 0)
     if ebml_el is None or ebml_el.eid != EBML_HEADER:
-        raise CorruptionError("No se encontró el encabezado EBML.")
+        raise CorruptionError("The EBML header was not found.")
 
     seg_offset = ebml_el.header_size + ebml_el.data_size
     seg_el     = _parse_element(data, seg_offset)
     if seg_el is None or seg_el.eid != SEGMENT:
-        raise CorruptionError("No se encontró el elemento Segment.")
+        raise CorruptionError("The Segment element was not found.")
 
-    seg_start = seg_el.data_start   # donde empiezan los elementos del segmento
+    seg_start = seg_el.data_start   # where the segment's elements begin
 
-    # ── 1. Marcar tamaño del Segment como desconocido (más seguro) ────────────
+    # ── 1. Mark the Segment size as unknown (safest option) ──────────────────
     seg_id_bytes = _encode_element_id(SEGMENT)
     new_seg_header = seg_id_bytes + UNKNOWN_SIZE
     header_part = data[:seg_offset] + new_seg_header
@@ -295,11 +308,11 @@ def repair(src: Path, dst: Path) -> list[str]:
     seg_start = len(header_part)
     fixes.append("segment_size_set_unknown")
 
-    # ── 2. Escanear clusters reales ───────────────────────────────────────────
+    # ── 2. Scan the real clusters ─────────────────────────────────────────────
     clusters = _find_clusters(data, seg_start)
-    log.info(f"Encontrados {len(clusters)} clusters.")
+    log.info(f"Found {len(clusters)} clusters.")
 
-    # ── 3. Encontrar posiciones de Info y Tracks ──────────────────────────────
+    # ── 3. Find the positions of Info, Tracks and the rest ───────────────────
     top_elements = _scan_top_level(data, seg_start)
     positions: dict[int, int] = {}
 
@@ -310,19 +323,24 @@ def repair(src: Path, dst: Path) -> list[str]:
     if clusters:
         positions[CLUSTER] = clusters[0][0] - seg_start
 
-    # ── 4. Construir nuevo SeekHead ───────────────────────────────────────────
-    new_seek_head = _build_seek_head(positions)
-
-    # Quitar SeekHead viejo si existe
+    # ── 4. Replace the old SeekHead, if any, with a Void of the same size ────
     old_sh = next((el for el in top_elements if el.eid == SEEK_HEAD), None)
     if old_sh:
-        data = (data[:old_sh.pos] +
-                b"\xEC" + _encode_vint(old_sh.data_size + old_sh.header_size - 1) +
-                b"\x00" * (old_sh.data_size + old_sh.header_size - 2) +
-                data[old_sh.pos + old_sh.header_size + old_sh.data_size:])
+        end = old_sh.pos + old_sh.total_size
+        data = data[:old_sh.pos] + _void_element(old_sh.total_size) + data[end:]
         fixes.append("seekhead_old_voided")
 
-    # Insertar nuevo SeekHead al principio del Segment
+    # ── 5. Build the new SeekHead ─────────────────────────────────────────────
+    # It goes at the start of the Segment, so every position shifts by its own
+    # length. Repeat until the length stops changing.
+    shift = 0
+    while True:
+        new_seek_head = _build_seek_head({eid: p + shift for eid, p in positions.items()})
+        if len(new_seek_head) == shift:
+            break
+        shift = len(new_seek_head)
+
+    # Insert the new SeekHead at the start of the Segment
     data = data[:seg_start] + new_seek_head + data[seg_start:]
     fixes.append(f"seekhead_rebuilt_{len(positions)}_entries")
 
@@ -340,7 +358,7 @@ def repair_mkv(src: Path, dst: Path) -> dict:
         return {"issues": issues, "fixes": [], "success": True,
                 "output_size": dst.stat().st_size}
 
-    log.info(f"{src.name}: problemas → {issues}")
+    log.info(f"{src.name}: problems → {issues}")
     try:
         fixes = repair(src, dst)
         return {"issues": issues, "fixes": fixes, "success": True,

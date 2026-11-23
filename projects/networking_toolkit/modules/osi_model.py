@@ -1,218 +1,218 @@
-from .utils import (header, section, step, substep, result, sep, info,
+from .utils import (header, step, result, sep, info, warn,
                     callout, ask, pause, C, cc, menu)
 
-# ── Módulo 2: Modelos OSI y TCP/IP ───────────────────────────────────────────
+# ── Module 2: OSI and TCP/IP models ───────────────────────────────────────────
 
 OSI_LAYERS = [
     {
-        "n": 7, "name": "Aplicación", "tag": "Application",
-        "pdu": "Datos / Mensaje",
-        "desc": "La capa con la que interactúas directamente. Define cómo las aplicaciones acceden a la red.",
+        "n": 7, "name": "Application",
+        "pdu": "Data / Message",
+        "desc": "The layer you interact with directly. Defines how applications access the network.",
         "protocols": ["HTTP", "HTTPS", "FTP", "SMTP", "POP3", "IMAP", "DNS", "DHCP", "SSH", "Telnet", "SNMP", "NTP"],
-        "devices": ["Computadoras, servidores, aplicaciones"],
-        "example": "Cuando abres Chrome y escribes una URL, el browser usa HTTP/HTTPS (capa 7).",
+        "devices": ["Computers, servers, applications"],
+        "example": "When you open Chrome and type a URL, the browser uses HTTP/HTTPS (layer 7).",
         "color": C.BMAGENTA,
     },
     {
-        "n": 6, "name": "Presentación", "tag": "Presentation",
-        "pdu": "Datos",
-        "desc": "Traduce, cifra y comprime los datos. Garantiza que el receptor entienda el formato del emisor.",
+        "n": 6, "name": "Presentation",
+        "pdu": "Data",
+        "desc": "Translates, encrypts and compresses data so the receiver understands the sender's format.",
         "protocols": ["SSL/TLS", "JPEG", "MPEG", "ASCII", "Unicode", "XDR"],
-        "devices": ["Codecs, cifrado TLS"],
-        "example": "Cuando HTTPS cifra los datos con TLS antes de enviarlos, eso es capa 6.",
+        "devices": ["Codecs, TLS encryption"],
+        "example": "When HTTPS encrypts data with TLS before sending it, that's layer 6.",
         "color": C.BBLUE,
     },
     {
-        "n": 5, "name": "Sesión", "tag": "Session",
-        "pdu": "Datos",
-        "desc": "Establece, gestiona y termina sesiones (conversaciones) entre aplicaciones.",
+        "n": 5, "name": "Session",
+        "pdu": "Data",
+        "desc": "Establishes, manages and terminates sessions (conversations) between applications.",
         "protocols": ["NetBIOS", "RPC", "PPTP", "SIP"],
-        "devices": ["Gateways de aplicación"],
-        "example": "Cuando haces una videollamada de Zoom, la capa 5 mantiene la sesión activa.",
+        "devices": ["Application gateways"],
+        "example": "During a Zoom video call, layer 5 keeps the session alive.",
         "color": C.BCYAN,
     },
     {
-        "n": 4, "name": "Transporte", "tag": "Transport",
-        "pdu": "Segmento (TCP) / Datagrama (UDP)",
-        "desc": "Entrega confiable de datos de extremo a extremo. Gestiona puertos, control de flujo y retransmisión.",
+        "n": 4, "name": "Transport",
+        "pdu": "Segment (TCP) / Datagram (UDP)",
+        "desc": "Reliable end-to-end delivery. Handles ports, flow control and retransmission.",
         "protocols": ["TCP", "UDP", "SCTP"],
-        "devices": ["Firewalls de capa 4, load balancers"],
-        "example": "TCP garantiza que todos los paquetes de una página web lleguen en orden. UDP prefiere velocidad (streaming).",
+        "devices": ["Layer 4 firewalls, load balancers"],
+        "example": "TCP guarantees every packet of a web page arrives in order. UDP prefers speed (streaming).",
         "color": C.BGREEN,
     },
     {
-        "n": 3, "name": "Red", "tag": "Network",
-        "pdu": "Paquete",
-        "desc": "Enrutamiento entre redes distintas. Usa direcciones IP para encontrar el camino al destino.",
+        "n": 3, "name": "Network",
+        "pdu": "Packet",
+        "desc": "Routing between different networks. Uses IP addresses to find the path to the destination.",
         "protocols": ["IP (v4/v6)", "ICMP", "IGMP", "OSPF", "BGP", "RIP", "ARP"],
-        "devices": ["Routers, switches capa 3"],
-        "example": "Cuando haces ping, el router usa la dirección IP destino para decidir por qué interfaz enviar el paquete.",
+        "devices": ["Routers, layer 3 switches"],
+        "example": "When you ping, the router uses the destination IP to choose which interface to send the packet out of.",
         "color": C.BYELLOW,
     },
     {
-        "n": 2, "name": "Enlace de datos", "tag": "Data Link",
-        "pdu": "Frame (trama)",
-        "desc": "Transferencia confiable dentro de la misma red local. Usa direcciones MAC. Detecta errores con CRC.",
-        "protocols": ["Ethernet", "WiFi (802.11)", "PPP", "VLAN (802.1Q)", "STP", "ARP"],
-        "devices": ["Switches, bridges, puntos de acceso WiFi"],
-        "example": "El switch usa la tabla MAC para saber a qué puerto físico enviar una trama.",
+        "n": 2, "name": "Data Link",
+        "pdu": "Frame",
+        "desc": "Reliable transfer within the same local network. Uses MAC addresses and detects errors with CRC.",
+        "protocols": ["Ethernet", "Wi-Fi (802.11)", "PPP", "VLAN (802.1Q)", "STP", "ARP"],
+        "devices": ["Switches, bridges, Wi-Fi access points"],
+        "example": "A switch uses its MAC table to know which physical port to send a frame to.",
         "color": C.BRED,
     },
     {
-        "n": 1, "name": "Física", "tag": "Physical",
+        "n": 1, "name": "Physical",
         "pdu": "Bits",
-        "desc": "Transmisión de bits crudos sobre el medio físico. Define voltajes, frecuencias, conectores.",
-        "protocols": ["Ethernet física", "USB", "Bluetooth", "DSL", "802.11 radio"],
-        "devices": ["Hubs, repetidores, cables, fibra óptica, NIC"],
-        "example": "Cuando enchufas un cable Ethernet, la capa 1 convierte los bits en señales eléctricas.",
+        "desc": "Transmits raw bits over the physical medium. Defines voltages, frequencies and connectors.",
+        "protocols": ["Physical Ethernet", "USB", "Bluetooth", "DSL", "802.11 radio"],
+        "devices": ["Hubs, repeaters, cables, fiber optics, NICs"],
+        "example": "When you plug in an Ethernet cable, layer 1 turns bits into electrical signals.",
         "color": C.DIM,
     },
 ]
 
 TCPIP_LAYERS = [
     {
-        "n": 4, "name": "Aplicación",
-        "osi_equiv": "Capas 5, 6, 7 de OSI",
+        "n": 4, "name": "Application",
+        "osi_equiv": "OSI layers 5, 6, 7",
         "protocols": ["HTTP/S", "FTP", "SMTP", "DNS", "DHCP", "SSH"],
     },
     {
-        "n": 3, "name": "Transporte",
-        "osi_equiv": "Capa 4 de OSI",
+        "n": 3, "name": "Transport",
+        "osi_equiv": "OSI layer 4",
         "protocols": ["TCP", "UDP"],
     },
     {
         "n": 2, "name": "Internet",
-        "osi_equiv": "Capa 3 de OSI",
+        "osi_equiv": "OSI layer 3",
         "protocols": ["IP", "ICMP", "ARP"],
     },
     {
-        "n": 1, "name": "Acceso a la red",
-        "osi_equiv": "Capas 1 y 2 de OSI",
-        "protocols": ["Ethernet", "WiFi", "PPP"],
+        "n": 1, "name": "Network Access",
+        "osi_equiv": "OSI layers 1 and 2",
+        "protocols": ["Ethernet", "Wi-Fi", "PPP"],
     },
 ]
 
 
-def mostrar_osi_completo():
-    header("Modelo OSI — 7 Capas", "Módulo 2 · Arquitectura de red")
+def show_full_osi():
+    header("OSI Model — 7 Layers", "Module 2 · Network architecture")
     for layer in OSI_LAYERS:
-        titulo = f"Capa {layer['n']} · {layer['name']} ({layer['tag']})"
-        print(f"\n  {cc(layer['color'] + C.BOLD, titulo)}")
+        title = f"Layer {layer['n']} · {layer['name']}"
+        print(f"\n  {cc(layer['color'] + C.BOLD, title)}")
         result("PDU",       layer["pdu"])
-        result("Protocolos", ", ".join(layer["protocols"]))
-        result("Dispositivos", ", ".join(layer["devices"]))
+        result("Protocols", ", ".join(layer["protocols"]))
+        result("Devices",   ", ".join(layer["devices"]))
         info(layer["desc"])
-        print(f"  {cc(C.DIM, '  Ejemplo: ' + layer['example'])}")
+        print(f"  {cc(C.DIM, '  Example: ' + layer['example'])}")
         print(f"  {cc(C.DIM, '-'*60)}")
     pause()
 
 
-def ver_capa_detalle():
-    header("Detalle de Capa OSI", "Módulo 2")
+def layer_detail():
+    header("OSI Layer Detail", "Module 2")
     print()
     for l in OSI_LAYERS:
-        print(f"    {cc(C.BCYAN, str(l['n']) + '.')} {l['name']} ({l['tag']})")
+        print(f"    {cc(C.BCYAN, str(l['n']) + '.')} {l['name']}")
     print()
-    raw = ask("Número de capa (1–7)")
+    raw = ask("Layer number (1–7)")
     try:
         n = int(raw)
         layer = next(l for l in OSI_LAYERS if l["n"] == n)
     except (ValueError, StopIteration):
-        warn("Capa inválida.")
+        warn("Invalid layer.")
         pause()
         return
 
-    header(f"Capa {layer['n']} · {layer['name']}", layer["desc"])
+    header(f"Layer {layer['n']} · {layer['name']}", layer["desc"])
 
-    step(1, "PDU (Protocol Data Unit)", f"En esta capa los datos se llaman: {layer['pdu']}")
-    step(2, "Protocolos")
+    step(1, "PDU (Protocol Data Unit)", f"At this layer the data is called: {layer['pdu']}")
+    step(2, "Protocols")
     for p in layer["protocols"]:
         print(f"      • {p}")
-    step(3, "Dispositivos / Tecnologías")
+    step(3, "Devices / Technologies")
     for d in layer["devices"]:
         print(f"      • {d}")
-    step(4, "Ejemplo práctico", layer["example"])
+    step(4, "Practical example", layer["example"])
 
-    # Posición en la pila
+    # Position in the stack
     sep()
-    info("Posición en la pila OSI:")
+    info("Position in the OSI stack:")
     for l in OSI_LAYERS:
-        marker = f" ◄── {cc(C.BGREEN, 'AQUÍ')}" if l["n"] == layer["n"] else ""
+        marker = f" ◄── {cc(C.BGREEN, 'HERE')}" if l["n"] == layer["n"] else ""
         c = layer["color"] if l["n"] == layer["n"] else C.DIM
-        nombre_capa = f"Capa {l['n']} · {l['name']}"
-        print(f"    {cc(c, nombre_capa)}{marker}")
+        layer_name = f"Layer {l['n']} · {l['name']}"
+        print(f"    {cc(c, layer_name)}{marker}")
     pause()
 
 
-def comparar_osi_tcpip():
-    header("OSI vs TCP/IP", "Módulo 2 · Comparación de modelos")
-    info("OSI tiene 7 capas (teórico/referencia). TCP/IP tiene 4 (el que realmente se usa).")
+def compare_osi_tcpip():
+    header("OSI vs. TCP/IP", "Module 2 · Model comparison")
+    info("OSI has 7 layers (theory/reference). TCP/IP has 4 (the one actually used).")
     sep()
 
-    print(f"  {'OSI (7 capas)':<35} {'TCP/IP (4 capas)'}")
+    print(f"  {'OSI (7 layers)':<35} {'TCP/IP (4 layers)'}")
     print(f"  {'─'*33} {'─'*33}")
     osi_to_tcpip = {
-        7: "Aplicación", 6: "Aplicación", 5: "Aplicación",
-        4: "Transporte",
+        7: "Application", 6: "Application", 5: "Application",
+        4: "Transport",
         3: "Internet",
-        2: "Acceso a la red", 1: "Acceso a la red",
+        2: "Network Access", 1: "Network Access",
     }
     colors = {
-        "Aplicación": C.BMAGENTA, "Transporte": C.BGREEN,
-        "Internet": C.BYELLOW, "Acceso a la red": C.BRED,
+        "Application": C.BMAGENTA, "Transport": C.BGREEN,
+        "Internet": C.BYELLOW, "Network Access": C.BRED,
     }
     for l in OSI_LAYERS:
         tc = osi_to_tcpip[l["n"]]
-        etiqueta = f"[{l['n']}] {l['name']}"
-        print(f"  {cc(l['color'], etiqueta): <45} {cc(colors[tc], tc)}")
+        label = f"[{l['n']}] {l['name']}"
+        print(f"  {cc(l['color'], label): <45} {cc(colors[tc], tc)}")
 
     sep()
-    callout("info", "¿Por qué existe OSI si usamos TCP/IP?",
-            "OSI es el modelo teórico universal que se usa para ENSEÑAR y DIAGNOSTICAR.\n"
-            "TCP/IP es el modelo práctico que realmente implementa Internet.\n"
-            "Cuando un técnico dice 'problema de capa 3', está usando la nomenclatura OSI.")
+    callout("info", "Why does OSI exist if we use TCP/IP?",
+            "OSI is the universal theoretical model used to TEACH and TROUBLESHOOT.\n"
+            "TCP/IP is the practical model the Internet actually implements.\n"
+            "When a technician says 'it's a layer 3 problem', they're using OSI terms.")
     pause()
 
 
-def encapsulacion():
-    header("Proceso de Encapsulación", "Módulo 2 · Cómo viajan los datos")
-    info("Cuando envías datos, cada capa agrega su propia cabecera (encapsulación).")
-    info("Cuando los recibes, cada capa quita su cabecera (desencapsulación).")
+def encapsulation():
+    header("Encapsulation Process", "Module 2 · How data travels")
+    info("When you send data, each layer adds its own header (encapsulation).")
+    info("When you receive it, each layer removes its header (decapsulation).")
     sep()
 
     steps = [
-        ("Aplicación (7)", "Datos del usuario: 'GET /index.html HTTP/1.1'",
-         "El browser genera la solicitud HTTP."),
-        ("Transporte (4)", "[TCP Header | Datos HTTP]",
-         "TCP agrega: puerto origen, puerto destino, número de secuencia."),
-        ("Red (3)", "[IP Header | TCP Header | Datos HTTP]",
-         "IP agrega: IP origen (192.168.1.10), IP destino (93.184.216.34)."),
-        ("Enlace (2)", "[Eth Header | IP Header | TCP | Datos | CRC]",
-         "Ethernet agrega: MAC origen, MAC destino, verificación CRC."),
-        ("Física (1)", "11001010 01101100 10110100 ... (bits)",
-         "Los bytes se convierten en señales eléctricas / fotones de luz."),
+        ("Application (7)", "User data: 'GET /index.html HTTP/1.1'",
+         "The browser builds the HTTP request."),
+        ("Transport (4)", "[TCP Header | HTTP Data]",
+         "TCP adds: source port, destination port, sequence number."),
+        ("Network (3)", "[IP Header | TCP Header | HTTP Data]",
+         "IP adds: source IP (192.168.1.10), destination IP (93.184.216.34)."),
+        ("Data Link (2)", "[Eth Header | IP Header | TCP | Data | CRC]",
+         "Ethernet adds: source MAC, destination MAC, CRC check."),
+        ("Physical (1)", "11001010 01101100 10110100 ... (bits)",
+         "Bytes become electrical signals / pulses of light."),
     ]
 
-    for i, (capa, pdu, desc) in enumerate(steps, 1):
-        step(i, capa, desc)
+    for i, (layer, pdu, desc) in enumerate(steps, 1):
+        step(i, layer, desc)
         print(f"      {cc(C.BYELLOW, pdu)}")
         print()
 
-    callout("info", "Analogía postal",
-            "Escribe una carta (datos) → la metes en un sobre (TCP) → escribes la dirección (IP)\n"
-            "→ el cartero la pone en un camión con la ruta (Ethernet) → el camión rueda (física).")
+    callout("info", "Postal analogy",
+            "Write a letter (data) → put it in an envelope (TCP) → write the address (IP)\n"
+            "→ the mail carrier loads it on a truck with a route (Ethernet) → the truck drives (physical).")
     pause()
 
 
 def run():
     while True:
         opts = [
-            "Ver todas las capas OSI (resumen completo)",
-            "Ver detalle de una capa específica (1–7)",
-            "Comparar OSI vs TCP/IP",
-            "Proceso de encapsulación paso a paso",
+            "Show all OSI layers (full summary)",
+            "Show details of one layer (1–7)",
+            "Compare OSI vs. TCP/IP",
+            "Encapsulation process step by step",
         ]
-        choice = menu("Módulo 2 · Modelos OSI y TCP/IP", opts)
+        choice = menu("Module 2 · OSI and TCP/IP Models", opts)
         if choice == -1:
             break
-        [mostrar_osi_completo, ver_capa_detalle, comparar_osi_tcpip, encapsulacion][choice]()
+        [show_full_osi, layer_detail, compare_osi_tcpip, encapsulation][choice]()

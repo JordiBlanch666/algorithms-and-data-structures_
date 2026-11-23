@@ -28,26 +28,33 @@ This repository tracks that transition, term by term. My main project today is a
 ```
 📦 algorithms-and-data-structures/
  ├── 📂 algorithms/
- │   ├── 📂 ordenamiento/        ← Bubble, Selection, Insertion sort
- │   ├── 📂 busqueda/            ← Linear & Binary search
+ │   ├── 📂 sorting/             ← Bubble, Selection, Insertion sort
+ │   ├── 📂 searching/           ← Linear & Binary search
  │   └── 📂 recursion/           ← Factorial & Fibonacci (with memoization)
- ├── 📂 data_structures/       ← Stack (LIFO) & Queue (FIFO)
- ├── 📂 fundamentals/             ← Functions, native data structures, file I/O
+ ├── 📂 data_structures/         ← Stack (LIFO) & Queue (FIFO)
+ ├── 📂 fundamentals/            ← Functions, built-in types, file I/O
  ├── 📂 oop/                     ← OOP: the four pillars + banking system
- ├── 📂 networking/                   ← Networking: DNS, TCP, HTTP, port scanner
- ├── 📂 data-science/            ← Data science & machine learning (3rd term)  ⬅ new
+ ├── 📂 networking/              ← Networking: DNS, TCP, HTTP, port scanner
+ ├── 📂 data-science/            ← Data science & machine learning (3rd term)
  │   └── 📂 diabetes-progression/   ← EDA, model comparison, cross-validation
- ├── 📂 sql/                     ← SQL & databases (3rd term)  ⬅ new
+ ├── 📂 sql/                     ← SQL & databases (3rd term)
  │   ├── 📂 sql-nutrition-clinic/    ← Nutrition clinic: BMI, progress, revenue
  │   ├── 📂 sql-help-desk-tickets/   ← Help Desk: SLA, MTTR, CSAT, backlog
  │   └── 📂 sql-streaming-analytics/ ← Streaming: MRR, churn, cohorts
  └── 📂 projects/
-     ├── 📂 sonora_player/       ← Desktop music player with synced lyrics  ⬅ new
-     ├── 📂 calculadora/         ← Calculator with history & memory  ⬅ new
-     ├── 📂 todo_app/            ← To-Do app with priorities & JSON  ⬅ new
-     ├── 📂 hangman/             ← Hangman game with ASCII art       ⬅ new
-     ├── 📂 quiz/                ← Quiz app with timer & categories  ⬅ new
-     └── 📂 gestor_calificaciones/ ← Grade Manager CLI
+     ├── 📂 sonora_player/       ← Desktop music player with synced lyrics
+     ├── 📂 networking_toolkit/  ← Interactive networking course CLI (subnetting, DNS, crypto)
+     ├── 📂 file_recovery/       ← Deleted photo/video recovery (NTFS MFT + file carving)
+     ├── 📂 video_repair/        ← Corrupted MP4/AVI/MKV/MPG repair
+     ├── 📂 video_dubber/        ← AI video dubbing into Latin American Spanish
+     ├── 📂 ai_virtual_mouse/    ← Hand-tracking virtual mouse (OpenCV + MediaPipe)
+     ├── 📂 asana_automation/    ← Asana board built through the REST API
+     ├── 📂 snake_game/          ← Browser snake game with 20 levels (HTML/CSS/JS)
+     ├── 📂 calculator/          ← Calculator with history & memory
+     ├── 📂 todo_app/            ← To-Do app with priorities & JSON
+     ├── 📂 hangman/             ← Hangman game with ASCII art
+     ├── 📂 quiz/                ← Quiz app with timer & categories
+     └── 📂 grade_manager/       ← Grade Manager CLI
 ```
 
 Run the full portfolio demo from the root:
@@ -81,6 +88,20 @@ python main.py
 | Background thread for HTTP requests without freezing the UI | `fetch_lyrics()` + `root.after()` |
 | Graceful error handling (offline, corrupted files, DRM-protected `.m4p`) | throughout |
 | Unit tests, including a real `.m4a` decode | `tests/test_sonora.py` |
+
+### More projects
+
+| Project | What it does | Stack |
+|---------|--------------|-------|
+| [`networking_toolkit`](projects/networking_toolkit) | Interactive CLI for the networking course: subnet calculator, real DNS lookups, hashing, TLS walkthrough and 12 troubleshooting guides | Python standard library |
+| [`file_recovery`](projects/file_recovery) | Recovers deleted photos and videos on Windows by parsing the NTFS MFT and carving raw sectors for magic bytes | Python, Win32 API via `ctypes` |
+| [`video_repair`](projects/video_repair) | Diagnoses and repairs corrupted MP4/MOV, AVI, MKV/WebM and MPG files by rebuilding their container structures | Pure Python, binary parsing |
+| [`video_dubber`](projects/video_dubber) | Downloads a video, transcribes it, translates it and dubs it into Latin American Spanish | yt-dlp, faster-whisper, Edge TTS, ffmpeg |
+| [`ai_virtual_mouse`](projects/ai_virtual_mouse) | Controls the mouse with hand gestures through the webcam | OpenCV, MediaPipe |
+| [`asana_automation`](projects/asana_automation) | Builds a complete Asana board (sections, custom fields, 18 tasks) through the REST API, plus a Word guide | Python `requests`, Node `docx` |
+| [`snake_game`](projects/snake_game) | Browser snake game with 20 levels, touch controls and swipe support | HTML, CSS, JavaScript |
+
+---
 
 ### Calculator CLI
 > `projects/calculator/calculator.py`

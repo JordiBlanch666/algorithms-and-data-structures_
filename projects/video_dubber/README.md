@@ -1,177 +1,179 @@
-# Video Dubber → Español Latino
+# Video Dubber → Latin American Spanish
 
-Herramienta de doblaje automático que descarga videos de **YouTube** o **VK** y genera una versión doblada al **español latinoamericano** usando inteligencia artificial. El idioma de origen se detecta automáticamente — funciona con ruso, inglés, francés, alemán y cualquier idioma soportado por Whisper.
+An automatic dubbing tool that downloads videos from **YouTube** or **VK** and creates a version dubbed into **Latin American Spanish** using AI. The source language is detected automatically — it works with Russian, English, French, German and any other language Whisper supports.
 
-El resultado suena como un **doblaje de documental**: la voz doblada va a velocidad natural, mientras el audio original (música, ambiente) se conserva a bajo volumen de fondo.
+The result sounds like a **documentary voice-over**: the dubbed voice plays at natural speed while the original audio (music, ambience) stays in the background at low volume.
 
 ## Pipeline
 
 ```
-URL del video (YouTube o VK) — o archivo local
+Video URL (YouTube or VK) — or a local file
     │
-    ├─ youtube.com / youtu.be ──► cliente Android de yt-dlp (sin cookies)
-    └─ vk.com / vkvideo.ru ─────► sin cookies → cookies de Edge → Chrome → Firefox
-    │
-    ▼
-Extracción de audio WAV 16 kHz mono (ffmpeg)
+    ├─ youtube.com / youtu.be ──► yt-dlp Android client (no cookies)
+    └─ vk.com / vkvideo.ru ─────► no cookies → Edge cookies → Chrome → Firefox
     │
     ▼
-Transcripción + detección de idioma (faster-whisper)
+Audio extraction to 16 kHz mono WAV (ffmpeg)
     │
     ▼
-Traducción X → ES (Google Translate)
+Transcription + language detection (faster-whisper)
     │
     ▼
-Síntesis de voz en español latino (Edge TTS)
+Translation X → ES (Google Translate)
     │
     ▼
-Ensamblaje estilo documental — voz a velocidad natural (pydub + ffmpeg)
+Latin American Spanish speech synthesis (Edge TTS)
     │
     ▼
-Mezcla: voz doblada (100%) + audio original de fondo (15%) (ffmpeg)
+Documentary-style assembly — voice at natural speed (pydub + ffmpeg)
     │
     ▼
-Video doblado (.mp4)
+Mix: dubbed voice (100%) + original background audio (15%) (ffmpeg)
+    │
+    ▼
+Dubbed video (.mp4)
 ```
 
-## Requisitos previos
+## Prerequisites
 
-- **Python 3.9+**
-- **ffmpeg** (debe estar en el PATH del sistema)
+- **Python 3.10+**
+- **ffmpeg** (must be on the system PATH)
 
-### Instalar ffmpeg en Windows
+### Installing ffmpeg on Windows
 
-1. Descarga la versión *release full* desde [gyan.dev/ffmpeg/builds](https://www.gyan.dev/ffmpeg/builds/)
-2. Extrae el ZIP en una carpeta (p.ej. `C:\ffmpeg`)
-3. Añade `C:\ffmpeg\bin` a las variables de entorno → PATH
+1. Download the *release full* build from [gyan.dev/ffmpeg/builds](https://www.gyan.dev/ffmpeg/builds/)
+2. Extract the ZIP into a folder (e.g. `C:\ffmpeg`)
+3. Add `C:\ffmpeg\bin` to the environment variables → PATH
 
-Verifica que funciona:
+Check that it works:
 
 ```bash
 ffmpeg -version
 ```
 
-## Instalación
+## Installation
 
 ```bash
 cd projects/video_dubber
 pip install -r requirements.txt
 ```
 
-## Uso rápido — dubber.bat
+## Quick start — dubber.bat
 
-Doble clic en `dubber.bat`. El asistente interactivo pregunta paso a paso:
+Double-click `dubber.bat`. The interactive wizard asks step by step for:
 
-1. URL del video (YouTube o VK) o ruta a un archivo local
-2. Idioma de origen (Enter = auto-detectar)
-3. Voz latinoamericana (menú 1–4)
-4. Modelo Whisper (calidad de transcripción)
-5. Volumen del audio de fondo (0–100%)
+1. The video URL (YouTube or VK) or a path to a local file
+2. The source language (Enter = auto-detect)
+3. The Latin American voice (menu 1–4)
+4. The Whisper model (transcription quality)
+5. The background audio volume (0–100%)
 
-> **VK con videos privados o de grupo:** si el script no puede descargar el video, cierra completamente Edge o Chrome y vuelve a intentar. Windows bloquea el archivo de cookies mientras el navegador está abierto.
+> **Private or group VK videos:** if the script can't download the video, fully close Edge or Chrome and try again. Windows locks the cookie file while the browser is open.
 
-## Uso por línea de comandos
+## Command-line usage
 
 ```bash
-python dubber.py <URL> [opciones]
+python dubber.py <URL> [options]
 ```
 
-### Ejemplos
+### Examples
 
 ```bash
-# YouTube — auto-detectar idioma
+# YouTube — auto-detect the language
 python dubber.py https://youtu.be/XXXX
 
-# VK — auto-detectar idioma
+# VK — auto-detect the language
 python dubber.py https://vk.com/video-XXXXXXX_XXXXXXX
 
-# Forzar idioma de origen
-python dubber.py https://youtu.be/XXXX --idioma-origen en
-python dubber.py https://vk.com/video-XXXX --idioma-origen ru
+# Force the source language
+python dubber.py https://youtu.be/XXXX --source-lang en
+python dubber.py https://vk.com/video-XXXX --source-lang ru
 
-# Especificar archivo de salida
-python dubber.py <URL> -o mi_video_doblado.mp4
+# Choose the output file
+python dubber.py <URL> -o my_dubbed_video.mp4
 
-# Mayor calidad de transcripción
-python dubber.py <URL> --modelo small
+# Better transcription quality
+python dubber.py <URL> --model small
 
-# Cambiar voz del doblaje
-python dubber.py <URL> --voz es-MX-DaliaNeural
+# Change the dubbing voice
+python dubber.py <URL> --voice es-MX-DaliaNeural
 
-# Ajustar volumen del audio de fondo (0.0 = silencio, 1.0 = original completo)
-python dubber.py <URL> --volumen-fondo 0.20
+# Adjust the background audio volume (0.0 = silent, 1.0 = full original)
+python dubber.py <URL> --bg-volume 0.20
 
-# Usar archivo local en vez de URL
-python dubber.py ruta/al/video.mp4 --idioma-origen fr
+# Use a local file instead of a URL
+python dubber.py path/to/video.mp4 --source-lang fr
 ```
 
-El primer uso descarga el modelo Whisper `base` (~150 MB).
+The first run downloads the Whisper `base` model (~150 MB).
 
-El archivo de salida se guarda en la misma carpeta del script con el formato `<nombre>_doblado_es_YYYYMMDD_HHMMSS.mp4` para no sobreescribir doblajes anteriores del mismo video.
+The output file is saved in the script's folder as `<name>_dubbed_es_YYYYMMDD_HHMMSS.mp4`, so earlier dubs of the same video are never overwritten.
 
-## Opciones
+## Options
 
-| Argumento | Descripción | Por defecto |
-|-----------|-------------|-------------|
-| `url` | URL del video (YouTube o VK) o ruta a archivo local | *(obligatorio)* |
-| `-o`, `--output` | Ruta del archivo de salida (`.mp4`) | `<nombre>_doblado_es_<timestamp>.mp4` |
-| `--modelo` | Modelo Whisper para transcripción | `base` |
-| `--voz` | Voz de Edge TTS para el doblaje | `es-MX-JorgeNeural` |
-| `--idioma-origen` | Código ISO 639-1 del idioma original (`ru`, `en`, `fr`…). Por defecto auto-detecta. | auto |
-| `--volumen-fondo` | Volumen del audio original mezclado de fondo (`0.0`–`1.0`) | `0.15` |
+| Argument | Description | Default |
+|----------|-------------|---------|
+| `url` | Video URL (YouTube or VK) or path to a local file | *(required)* |
+| `-o`, `--output` | Output file path (`.mp4`) | `<name>_dubbed_es_<timestamp>.mp4` |
+| `--model` | Whisper model for transcription | `base` |
+| `--voice` | Edge TTS voice for the dub | `es-MX-JorgeNeural` |
+| `--source-lang` | ISO 639-1 code of the original language (`ru`, `en`, `fr`…). Auto-detects by default. | auto |
+| `--bg-volume` | Volume of the original audio mixed in the background (`0.0`–`1.0`) | `0.15` |
 
-## Descarga de videos VK
+## Downloading VK videos
 
-Para videos públicos de VK no se necesita ninguna configuración adicional.
+Public VK videos need no extra setup.
 
-Para videos privados o de grupo, el script intenta automáticamente leer las cookies de Edge, Chrome y Firefox (en ese orden). Si falla:
+For private or group videos, the script automatically tries to read the cookies from Edge, Chrome and Firefox (in that order). If that fails:
 
-1. **Cierra completamente** Edge o Chrome antes de ejecutar el script
-2. Vuelve a intentar — yt-dlp podrá acceder al archivo de cookies sin que el navegador lo bloquee
+1. **Fully close** Edge or Chrome before running the script
+2. Try again — yt-dlp can then read the cookie file without the browser locking it
 
-## Idiomas de origen soportados
+You can also export a `cookies.txt` file with the "Get cookies.txt LOCALLY" extension and place it next to `dubber.py`.
 
-Cualquier idioma que reconozca Whisper. Códigos comunes:
+## Supported source languages
 
-| Código | Idioma |
-|--------|--------|
-| `ru` | Ruso |
-| `en` | Inglés |
-| `fr` | Francés |
-| `de` | Alemán |
-| `zh` | Chino |
-| `ja` | Japonés |
-| `pt` | Portugués |
-| `it` | Italiano |
+Any language Whisper recognizes. Common codes:
 
-## Modelos Whisper
+| Code | Language |
+|------|----------|
+| `ru` | Russian |
+| `en` | English |
+| `fr` | French |
+| `de` | German |
+| `zh` | Chinese |
+| `ja` | Japanese |
+| `pt` | Portuguese |
+| `it` | Italian |
 
-| Modelo | Tamaño | Velocidad | Calidad |
-|--------|--------|-----------|---------|
-| `tiny` | ~75 MB | Muy rápido | Básica |
-| `base` | ~150 MB | Rápido | Buena *(por defecto)* |
-| `small` | ~500 MB | Moderado | Muy buena |
-| `medium` | ~1.5 GB | Lento | Excelente |
-| `large-v3` | ~3 GB | Muy lento | Máxima |
+## Whisper models
 
-## Voces disponibles (español latino)
+| Model | Size | Speed | Quality |
+|-------|------|-------|---------|
+| `tiny` | ~75 MB | Very fast | Basic |
+| `base` | ~150 MB | Fast | Good *(default)* |
+| `small` | ~500 MB | Moderate | Very good |
+| `medium` | ~1.5 GB | Slow | Excellent |
+| `large-v3` | ~3 GB | Very slow | Best |
 
-| Voz | Variante | Género |
-|-----|----------|--------|
-| `es-MX-JorgeNeural` | México | Hombre *(por defecto)* |
-| `es-MX-DaliaNeural` | México | Mujer |
-| `es-US-AlonsoNeural` | EEUU | Hombre |
-| `es-AR-TomasNeural` | Argentina | Hombre |
+## Available voices (Latin American Spanish)
 
-> El script valida automáticamente que la voz esté disponible en Edge TTS y usa la siguiente de la lista si no lo está.
+| Voice | Variant | Gender |
+|-------|---------|--------|
+| `es-MX-JorgeNeural` | Mexico | Male *(default)* |
+| `es-MX-DaliaNeural` | Mexico | Female |
+| `es-US-AlonsoNeural` | USA | Male |
+| `es-AR-TomasNeural` | Argentina | Male |
 
-## Dependencias
+> The script automatically checks that the voice is available in Edge TTS and falls back to the next one on the list if it isn't.
 
-| Librería | Versión mínima | Función |
-|----------|---------------|---------|
-| `yt-dlp` | 2024.1.1 | Descarga videos de YouTube y VK |
-| `faster-whisper` | 1.0.0 | Transcripción y detección automática de idioma |
-| `deep-translator` | 1.11.4 | Traducción al español (Google Translate) |
-| `edge-tts` | 6.1.9 | Síntesis de voz en español latino |
-| `pydub` | 0.25.1 | Manipulación y ensamblaje de audio |
-| `ffmpeg` | — | Procesamiento de video/audio (externo) |
+## Dependencies
+
+| Library | Minimum version | Purpose |
+|---------|-----------------|---------|
+| `yt-dlp` | 2024.1.1 | Downloads videos from YouTube and VK |
+| `faster-whisper` | 1.0.0 | Transcription and automatic language detection |
+| `deep-translator` | 1.11.4 | Translation into Spanish (Google Translate) |
+| `edge-tts` | 6.1.9 | Latin American Spanish speech synthesis |
+| `pydub` | 0.25.1 | Audio manipulation and assembly |
+| `ffmpeg` | — | Video/audio processing (external) |

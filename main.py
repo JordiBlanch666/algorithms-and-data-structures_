@@ -13,86 +13,86 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
 
-def _pedir_lista() -> list:
-    raw = input("\n  Ingresa tu lista separada por comas (ej: 45, 12, 78, 3, 56): ").strip()
+def _ask_for_list() -> list:
+    raw = input("\n  Enter your list separated by commas (e.g. 45, 12, 78, 3, 56): ").strip()
     try:
         return [int(x.strip()) for x in raw.split(",") if x.strip()]
     except ValueError:
-        print("  Lista inválida — solo números enteros separados por comas.")
+        print("  Invalid list — integers separated by commas only.")
         return []
 
 
 def _bubble_steps(lst: list, verbose: bool) -> tuple:
     arr = lst.copy()
-    n, comparaciones, intercambios, pasadas = len(arr), 0, 0, 0
+    n, comparisons, swaps, passes = len(arr), 0, 0, 0
     for i in range(n - 1):
         swapped = False
-        pasadas += 1
+        passes += 1
         for j in range(n - 1 - i):
-            comparaciones += 1
+            comparisons += 1
             if arr[j] > arr[j + 1]:
                 arr[j], arr[j + 1] = arr[j + 1], arr[j]
-                intercambios += 1
+                swaps += 1
                 swapped = True
         if verbose:
-            print(f"    Pasada {pasadas}: {arr}  (swap: {'sí' if swapped else 'no'})")
+            print(f"    Pass {passes}: {arr}  (swapped: {'yes' if swapped else 'no'})")
         if not swapped:
             break
-    return arr, comparaciones, intercambios, pasadas
+    return arr, comparisons, swaps, passes
 
 
 def _insertion_steps(lst: list, verbose: bool) -> tuple:
     arr = lst.copy()
-    comparaciones, movimientos = 0, 0
+    comparisons, moves = 0, 0
     for i in range(1, len(arr)):
         key = arr[i]
         j = i - 1
         while j >= 0 and arr[j] > key:
-            comparaciones += 1
+            comparisons += 1
             arr[j + 1] = arr[j]
-            movimientos += 1
+            moves += 1
             j -= 1
         arr[j + 1] = key
         if verbose:
-            print(f"    Insertar {key:>4}: {arr}")
-    return arr, comparaciones, movimientos
+            print(f"    Insert {key:>4}: {arr}")
+    return arr, comparisons, moves
 
 
 def _selection_steps(lst: list, verbose: bool) -> tuple:
     arr = lst.copy()
-    n, comparaciones, intercambios = len(arr), 0, 0
+    n, comparisons, swaps = len(arr), 0, 0
     for i in range(n - 1):
         min_idx = i
         for j in range(i + 1, n):
-            comparaciones += 1
+            comparisons += 1
             if arr[j] < arr[min_idx]:
                 min_idx = j
         arr[i], arr[min_idx] = arr[min_idx], arr[i]
         if min_idx != i:
-            intercambios += 1
+            swaps += 1
         if verbose:
-            print(f"    Mínimo → pos {i}: {arr}")
-    return arr, comparaciones, intercambios
+            print(f"    Minimum → pos {i}: {arr}")
+    return arr, comparisons, swaps
 
 
 def _demo_sorting(data: list):
-    verbose = input("\n  ¿Ver paso a paso? [s/n]: ").strip().lower() == "s"
-    print(f"\n  Lista original: {data}\n")
+    verbose = input("\n  Show step by step? [y/n]: ").strip().lower() == "y"
+    print(f"\n  Original list: {data}\n")
 
     print("  ── Bubble Sort ──")
-    res, comp, swaps, pasadas = _bubble_steps(data, verbose)
-    print(f"  Resultado:      {res}")
-    print(f"  Pasadas: {pasadas}  |  Comparaciones: {comp}  |  Intercambios: {swaps}\n")
+    res, comp, swaps, passes = _bubble_steps(data, verbose)
+    print(f"  Result:      {res}")
+    print(f"  Passes: {passes}  |  Comparisons: {comp}  |  Swaps: {swaps}\n")
 
     print("  ── Insertion Sort ──")
     res, comp, movs = _insertion_steps(data, verbose)
-    print(f"  Resultado:  {res}")
-    print(f"  Comparaciones: {comp}  |  Movimientos: {movs}\n")
+    print(f"  Result:  {res}")
+    print(f"  Comparisons: {comp}  |  Moves: {movs}\n")
 
     print("  ── Selection Sort ──")
     res, comp, swaps = _selection_steps(data, verbose)
-    print(f"  Resultado:  {res}")
-    print(f"  Comparaciones: {comp}  |  Intercambios: {swaps}")
+    print(f"  Result:  {res}")
+    print(f"  Comparisons: {comp}  |  Swaps: {swaps}")
 
 
 def _demo_search(data: list):
@@ -100,66 +100,66 @@ def _demo_search(data: list):
     from algorithms.searching.binary_search import binary_search
 
     try:
-        target = int(input("\n  ¿Qué número buscas? ").strip())
+        target = int(input("\n  Which number are you looking for? ").strip())
     except ValueError:
-        print("  Número inválido.")
+        print("  Invalid number.")
         return
 
-    verbose = input("  ¿Ver paso a paso? [s/n]: ").strip().lower() == "s"
+    verbose = input("  Show step by step? [y/n]: ").strip().lower() == "y"
     print()
 
-    # Búsqueda lineal
-    pasos_lineal = 0
-    idx_lineal = -1
+    # Linear search
+    linear_steps = 0
+    linear_idx = -1
     for i, val in enumerate(data):
-        pasos_lineal += 1
+        linear_steps += 1
         if verbose:
-            marca = " ← ENCONTRADO" if val == target else ""
-            print(f"    Lineal  [{i}] = {val}{marca}")
+            marker = " ← FOUND" if val == target else ""
+            print(f"    Linear  [{i}] = {val}{marker}")
         if val == target:
-            idx_lineal = i
+            linear_idx = i
             break
 
-    if idx_lineal == -1 and verbose:
-        print(f"    Lineal  — {target} no está en la lista")
+    if linear_idx == -1 and verbose:
+        print(f"    Linear  — {target} is not in the list")
 
-    resultado_lineal = f"índice {idx_lineal}" if idx_lineal != -1 else "no encontrado"
-    print(f"\n  Lineal:  {resultado_lineal}  ({pasos_lineal} comparaciones)")
+    linear_result = f"index {linear_idx}" if linear_idx != -1 else "not found"
+    print(f"\n  Linear:  {linear_result}  ({linear_steps} comparisons)")
 
-    # Búsqueda binaria (requiere lista ordenada)
+    # Binary search (requires a sorted list)
     sorted_data = sorted(data)
-    left, right, pasos_binaria, idx_binaria = 0, len(sorted_data) - 1, 0, -1
+    left, right, binary_steps, binary_idx = 0, len(sorted_data) - 1, 0, -1
     while left <= right:
         mid = (left + right) // 2
-        pasos_binaria += 1
+        binary_steps += 1
         if verbose:
-            print(f"    Binaria [{left}..{right}] mid={mid} → {sorted_data[mid]}", end="")
+            print(f"    Binary  [{left}..{right}] mid={mid} → {sorted_data[mid]}", end="")
         if sorted_data[mid] == target:
-            idx_binaria = mid
+            binary_idx = mid
             if verbose:
-                print(" ← ENCONTRADO")
+                print(" ← FOUND")
             break
         elif sorted_data[mid] < target:
             if verbose:
-                print(" → buscar derecha")
+                print(" → search right")
             left = mid + 1
         else:
             if verbose:
-                print(" → buscar izquierda")
+                print(" → search left")
             right = mid - 1
 
-    resultado_binaria = f"índice {idx_binaria} en lista ordenada {sorted_data}" if idx_binaria != -1 else "no encontrado"
-    print(f"  Binaria: {resultado_binaria}  ({pasos_binaria} comparaciones)")
+    binary_result = f"index {binary_idx} in sorted list {sorted_data}" if binary_idx != -1 else "not found"
+    print(f"  Binary:  {binary_result}  ({binary_steps} comparisons)")
 
 
 def _demo_fibonacci():
     try:
-        n = int(input("\n  Fibonacci(n) — ingresa n: ").strip())
+        n = int(input("\n  Fibonacci(n) — enter n: ").strip())
     except ValueError:
-        print("  Número inválido.")
+        print("  Invalid number.")
         return
 
-    verbose = input("  ¿Ver cada F(i) calculado? [s/n]: ").strip().lower() == "s"
+    verbose = input("  Show each computed F(i)? [y/n]: ").strip().lower() == "y"
 
     memo = {0: 0, 1: 1}
 
@@ -174,24 +174,24 @@ def _demo_fibonacci():
     if verbose:
         print(f"    F(0) = 0  (base)")
         print(f"    F(1) = 1  (base)")
-    secuencia = [fib(i) for i in range(n + 1)]
-    print(f"\n  F(0) a F({n}): {secuencia}")
-    print(f"  F({n}) = {secuencia[-1]}")
+    sequence = [fib(i) for i in range(n + 1)]
+    print(f"\n  F(0) to F({n}): {sequence}")
+    print(f"  F({n}) = {sequence[-1]}")
 
 
 def demo_algorithms():
-    data = _pedir_lista()
+    data = _ask_for_list()
     if not data:
         return
 
     while True:
-        print(f"\n  Tu lista: {data}")
-        print("  [1] Ordenar — Bubble, Insertion, Selection")
-        print("  [2] Buscar un valor")
+        print(f"\n  Your list: {data}")
+        print("  [1] Sort — Bubble, Insertion, Selection")
+        print("  [2] Search for a value")
         print("  [3] Fibonacci(n)")
-        print("  [0] Volver")
+        print("  [0] Back")
 
-        choice = input("\n  Opción: ").strip()
+        choice = input("\n  Option: ").strip()
         if choice == "0":
             break
         elif choice == "1":
@@ -201,7 +201,7 @@ def demo_algorithms():
         elif choice == "3":
             _demo_fibonacci()
         else:
-            print("  Opción inválida.")
+            print("  Invalid option.")
 
 
 def demo_data_structures():

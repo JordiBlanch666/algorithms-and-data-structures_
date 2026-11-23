@@ -5,7 +5,7 @@ import mediapipe as mp
 
 pyautogui.FAILSAFE = False
 
-# ── Configuración ──────────────────────────────────────────────
+# ── Settings ───────────────────────────────────────────────────
 FRAME_REDUCTION = 100
 SMOOTHING = 7
 
@@ -29,7 +29,7 @@ clicking       = False
 mode           = "Idle"
 
 
-# ── Utilidades ─────────────────────────────────────────────────
+# ── Helpers ────────────────────────────────────────────────────
 def get_landmarks(img):
     rgb     = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     results = hands.process(rgb)
@@ -47,14 +47,14 @@ def fingers_up(lm):
     tips = [8, 12, 16, 20]
     up   = [1 if lm[4][0] > lm[3][0] else 0]
     up  += [1 if lm[t][1] < lm[t - 2][1] else 0 for t in tips]
-    return up  # [pulgar, índice, medio, anular, meñique]
+    return up  # [thumb, index, middle, ring, pinky]
 
 
 def distance(p1, p2):
     return math.hypot(p2[0] - p1[0], p2[1] - p1[1])
 
 
-# ── Bucle principal ─────────────────────────────────────────────
+# ── Main loop ───────────────────────────────────────────────────
 while True:
     success, img = cap.read()
     if not success:
@@ -74,7 +74,7 @@ while True:
         ix, iy  = lm[8]
         mx, my  = lm[12]
 
-        # ── Mover cursor: solo índice levantado ──────────────────
+        # ── Move cursor: only the index finger up ────────────────
         if fingers[1] == 1 and fingers[2] == 0:
             mode = "Moving"
             if dragging:
@@ -97,7 +97,7 @@ while True:
             prev_x, prev_y = curr_x, curr_y
             cv2.circle(img, (ix, iy), 12, (0, 255, 0), cv2.FILLED)
 
-        # ── Click izquierdo: índice + medio juntos ───────────────
+        # ── Left click: index + middle fingers together ──────────
         elif fingers[1] == 1 and fingers[2] == 1:
             dist = distance(lm[8], lm[12])
             mode = "Clicking" if dist < 35 else "Ready to Click"
@@ -111,13 +111,13 @@ while True:
             elif dist >= 35:
                 clicking = False
 
-        # ── Click derecho: índice + anular ───────────────────────
+        # ── Right click: index + ring fingers ────────────────────
         elif fingers[1] == 1 and fingers[3] == 1 and fingers[2] == 0:
             mode = "Right Click"
             if distance(lm[8], lm[16]) < 35:
                 pyautogui.rightClick()
 
-        # ── Drag & Drop: pulgar + índice pinzados ────────────────
+        # ── Drag & drop: thumb + index pinched ───────────────────
         elif fingers[0] == 1 and fingers[1] == 1 and fingers[2] == 0:
             mode = "Dragging"
             if distance(lm[4], lm[8]) < 35:

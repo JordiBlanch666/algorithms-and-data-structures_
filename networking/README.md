@@ -31,15 +31,15 @@ connect, and exchange data. All use Python's standard library — no pip require
 
 ```bash
 # Network info (requires internet)
-python redes/01_network_info.py
+python networking/01_network_info.py
 
 # TCP server/client — open two terminals
-python redes/02_tcp_client_server.py server   # terminal 1
-python redes/02_tcp_client_server.py client   # terminal 2
+python networking/02_tcp_client_server.py server   # terminal 1
+python networking/02_tcp_client_server.py client   # terminal 2
 
 # HTTP client (requires internet)
-python redes/03_http_client.py
+python networking/03_http_client.py
 
 # Port scanner (localhost only — safe)
-python redes/04_port_scanner.py
+python networking/04_port_scanner.py
 ```

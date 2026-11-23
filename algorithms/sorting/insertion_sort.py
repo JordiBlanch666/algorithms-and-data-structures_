@@ -32,10 +32,6 @@ def insertion_sort(lst: list) -> list:
     return arr
 
 
-# Alias for backward compatibility with existing imports.
-insercion = insertion_sort
-
-
 if __name__ == "__main__":
     numbers = [12, 11, 13, 5, 6]
     print(f"Original: {numbers}")

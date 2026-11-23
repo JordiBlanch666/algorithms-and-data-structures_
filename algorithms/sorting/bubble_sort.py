@@ -35,10 +35,6 @@ def bubble_sort(lst: list) -> list:
     return arr
 
 
-# Keep the old name as an alias so other modules that import 'burbuja' still work.
-burbuja = bubble_sort
-
-
 if __name__ == "__main__":
     numbers = [64, 34, 25, 12, 22, 11, 90]
     print(f"Original: {numbers}")

@@ -70,7 +70,7 @@ No requiere instalar ninguna librería externa.
 
 ```bash
 git clone <repositorio>
-cd proyectos/file_recovery
+cd projects/file_recovery
 ```
 
 ## Uso

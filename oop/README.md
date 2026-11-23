@@ -33,6 +33,6 @@ Account (ABC)              ← abstract class, encapsulation
 | `@property` | Read-only balance exposed cleanly without a getter method |
 
 ```bash
-python poo/herencia.py
-python poo/04_polimorfismo.py
+python oop/banking_system.py
+python oop/04_polymorphism.py
 ```

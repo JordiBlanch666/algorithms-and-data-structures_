@@ -25,7 +25,7 @@ No requiere dependencias externas. Solo Python 3.8+.
 
 ```bash
 git clone https://github.com/JordiBlanch666/algorithms-and-data-structures_.git
-cd algorithms-and-data-structures_/proyectos/redes_toolkit
+cd algorithms-and-data-structures_/projects/networking_toolkit
 python main.py
 ```
 

@@ -50,10 +50,6 @@ class Stack:
         return f"Stack({self._data})"
 
 
-# ── Alias so existing code that imports 'Pila' still works ───────────────────
-Pila = Stack
-
-
 def check_brackets(expression: str) -> bool:
     """
     Real-world use case for a stack: validate that brackets are balanced.
@@ -78,10 +74,6 @@ def check_brackets(expression: str) -> bool:
 
     # If anything is left in the stack, there are unclosed openers.
     return stack.is_empty()
-
-
-# Alias so existing code that imports 'verificar_parentesis' still works.
-verificar_parentesis = check_brackets
 
 
 if __name__ == "__main__":

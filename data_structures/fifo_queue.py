@@ -52,10 +52,6 @@ class Queue:
         return f"Queue({list(self._data)})"
 
 
-# Aliases so existing code that imports the Spanish names still works.
-Cola = Queue
-
-
 if __name__ == "__main__":
     # Simulate a service queue — first come, first served.
     queue = Queue()

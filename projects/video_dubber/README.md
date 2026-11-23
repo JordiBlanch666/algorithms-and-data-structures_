@@ -54,7 +54,7 @@ ffmpeg -version
 ## Instalación
 
 ```bash
-cd proyectos/video_dubber_ru_es
+cd projects/video_dubber
 pip install -r requirements.txt
 ```
 

@@ -96,8 +96,8 @@ def _demo_sorting(data: list):
 
 
 def _demo_search(data: list):
-    from algoritmos.busqueda.lineal import linear_search
-    from algoritmos.busqueda.binaria import binary_search
+    from algorithms.searching.linear_search import linear_search
+    from algorithms.searching.binary_search import binary_search
 
     try:
         target = int(input("\n  ¿Qué número buscas? ").strip())
@@ -205,15 +205,15 @@ def demo_algorithms():
 
 
 def demo_data_structures():
-    from estructuras_datos.pila import Pila, verificar_parentesis
-    from estructuras_datos.cola import Cola
+    from data_structures.stack import Stack, check_brackets
+    from data_structures.fifo_queue import Queue
 
-    stack = Pila()
+    stack = Stack()
     for v in [10, 20, 30]:
         stack.push(v)
     print(f"  Stack: {stack}  → pop: {stack.pop()}")
 
-    queue = Cola()
+    queue = Queue()
     for v in ["A", "B", "C"]:
         queue.enqueue(v)
     print(f"  Queue: {queue}  → dequeue: {queue.dequeue()}")
@@ -221,12 +221,12 @@ def demo_data_structures():
     expressions = ["(a + b) * [c]", "((x + y)", "{a + [b]}"]
     print("\n  Bracket validation:")
     for expr in expressions:
-        status = "✓" if verificar_parentesis(expr) else "✗"
+        status = "✓" if check_brackets(expr) else "✗"
         print(f"    {status}  {expr}")
 
 
 def demo_oop():
-    from poo.herencia import SavingsAccount, CheckingAccount
+    from oop.banking_system import SavingsAccount, CheckingAccount
 
     print("  — Savings Account —")
     savings = SavingsAccount("Jordi Blanch", 1000.0, interest_rate=0.05)

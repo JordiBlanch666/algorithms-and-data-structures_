@@ -23,11 +23,6 @@ def linear_search(lst: list, target) -> int:
     return -1
 
 
-# Aliases so both old and new import styles work.
-lineal = linear_search
-busqueda_lineal = linear_search
-
-
 if __name__ == "__main__":
     numbers = [4, 2, 7, 1, 9, 3]
     target = 7

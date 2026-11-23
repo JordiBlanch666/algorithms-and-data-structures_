@@ -27,21 +27,21 @@ This repository tracks that transition, term by term. My main project today is a
 
 ```
 📦 algorithms-and-data-structures/
- ├── 📂 algoritmos/
+ ├── 📂 algorithms/
  │   ├── 📂 ordenamiento/        ← Bubble, Selection, Insertion sort
  │   ├── 📂 busqueda/            ← Linear & Binary search
  │   └── 📂 recursion/           ← Factorial & Fibonacci (with memoization)
- ├── 📂 estructuras_datos/       ← Stack (LIFO) & Queue (FIFO)
- ├── 📂 fundamentos/             ← Functions, native data structures, file I/O
- ├── 📂 poo/                     ← OOP: the four pillars + banking system
- ├── 📂 redes/                   ← Networking: DNS, TCP, HTTP, port scanner
+ ├── 📂 data_structures/       ← Stack (LIFO) & Queue (FIFO)
+ ├── 📂 fundamentals/             ← Functions, native data structures, file I/O
+ ├── 📂 oop/                     ← OOP: the four pillars + banking system
+ ├── 📂 networking/                   ← Networking: DNS, TCP, HTTP, port scanner
  ├── 📂 data-science/            ← Data science & machine learning (3rd term)  ⬅ new
  │   └── 📂 diabetes-progression/   ← EDA, model comparison, cross-validation
  ├── 📂 sql/                     ← SQL & databases (3rd term)  ⬅ new
  │   ├── 📂 sql-nutrition-clinic/    ← Nutrition clinic: BMI, progress, revenue
  │   ├── 📂 sql-help-desk-tickets/   ← Help Desk: SLA, MTTR, CSAT, backlog
  │   └── 📂 sql-streaming-analytics/ ← Streaming: MRR, churn, cohorts
- └── 📂 proyectos/
+ └── 📂 projects/
      ├── 📂 sonora_player/       ← Desktop music player with synced lyrics  ⬅ new
      ├── 📂 calculadora/         ← Calculator with history & memory  ⬅ new
      ├── 📂 todo_app/            ← To-Do app with priorities & JSON  ⬅ new
@@ -61,14 +61,14 @@ python main.py
 ## Projects
 
 ### Sonora — Desktop Music Player
-> [`proyectos/sonora_player`](proyectos/sonora_player)
+> [`projects/sonora_player`](projects/sonora_player)
 
 Desktop music player built with **Tkinter**. Plays MP3, WAV, OGG, FLAC, AIFF and **AAC/M4A**
 (iTunes purchases), with M3U playlists, search, shuffle and repeat, embedded cover art and
 **synced lyrics** from local `.lrc` files or the LRCLIB public API.
 
 ```bash
-cd proyectos/sonora_player
+cd projects/sonora_player
 pip install -r requirements.txt
 python main.py
 ```
@@ -83,12 +83,12 @@ python main.py
 | Unit tests, including a real `.m4a` decode | `tests/test_sonora.py` |
 
 ### Calculator CLI
-> `proyectos/calculadora/calculadora.py`
+> `projects/calculator/calculator.py`
 
 A command-line calculator with operation history, memory register, and safe expression parsing — no `eval()` used.
 
 ```bash
-python proyectos/calculadora/calculadora.py
+python projects/calculator/calculator.py
 ```
 
 ```
@@ -115,12 +115,12 @@ python proyectos/calculadora/calculadora.py
 ---
 
 ### To-Do App CLI
-> `proyectos/todo_app/todo.py`
+> `projects/todo_app/todo.py`
 
 Task manager with three priority levels, status filters, and JSON persistence. Data survives between sessions.
 
 ```bash
-python proyectos/todo_app/todo.py
+python projects/todo_app/todo.py
 ```
 
 ```
@@ -147,12 +147,12 @@ python proyectos/todo_app/todo.py
 ---
 
 ### Hangman
-> `proyectos/hangman/hangman.py`
+> `projects/hangman/hangman.py`
 
 Classic word-guessing game with ASCII art gallows, three difficulty levels, and a built-in word bank.
 
 ```bash
-python proyectos/hangman/hangman.py
+python projects/hangman/hangman.py
 ```
 
 ```
@@ -181,12 +181,12 @@ python proyectos/hangman/hangman.py
 ---
 
 ### Quiz App CLI
-> `proyectos/quiz/quiz.py`
+> `projects/quiz/quiz.py`
 
 Multiple-choice quiz on Python fundamentals and Networking basics. 15-second timer per question, speed bonus for answers under 5 seconds.
 
 ```bash
-python proyectos/quiz/quiz.py
+python projects/quiz/quiz.py
 ```
 
 ```
@@ -269,10 +269,10 @@ Four pillars, four files, one integrating project.
 
 | File | Concept | Demo |
 |------|---------|------|
-| `poo/01_clases_objetos.py` | Classes & objects | Product catalog with VAT |
-| `poo/02_encapsulacion.py` | Encapsulation | Bank account with private attributes |
-| `poo/03_herencia.py` | Inheritance + `super()` | Animal → Dog / Cat / Parrot hierarchy |
-| `poo/04_polimorfismo.py` | Polymorphism + ABC | Geometric shapes with a common interface |
+| `oop/01_classes_objects.py` | Classes & objects | Product catalog with VAT |
+| `oop/02_encapsulation.py` | Encapsulation | Bank account with private attributes |
+| `oop/03_inheritance.py` | Inheritance + `super()` | Animal → Dog / Cat / Parrot hierarchy |
+| `oop/04_polymorphism.py` | Polymorphism + ABC | Geometric shapes with a common interface |
 
 ### Featured OOP Project — Banking System
 
@@ -283,7 +283,7 @@ Account (ABC)              ← abstract class, encapsulation
 ```
 
 ```bash
-python poo/herencia.py
+python oop/banking_system.py
 ```
 
 | Concept | Where |
@@ -301,10 +301,10 @@ python poo/herencia.py
 
 | File | Concept | What it does |
 |------|---------|--------------|
-| `redes/01_network_info.py` | DNS & IP addressing | Resolves hostnames, reverse lookup |
-| `redes/02_tcp_client_server.py` | TCP sockets | Echo server + client over localhost |
-| `redes/03_http_client.py` | HTTP protocol | Real GET requests, status codes, JSON API |
-| `redes/04_port_scanner.py` | Ports & services | Concurrent scanner with thread pool |
+| `networking/01_network_info.py` | DNS & IP addressing | Resolves hostnames, reverse lookup |
+| `networking/02_tcp_client_server.py` | TCP sockets | Echo server + client over localhost |
+| `networking/03_http_client.py` | HTTP protocol | Real GET requests, status codes, JSON API |
+| `networking/04_port_scanner.py` | Ports & services | Concurrent scanner with thread pool |
 
 ---
 

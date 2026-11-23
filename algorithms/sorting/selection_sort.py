@@ -33,10 +33,6 @@ def selection_sort(lst: list) -> list:
     return arr
 
 
-# Alias for backward compatibility.
-seleccion = selection_sort
-
-
 if __name__ == "__main__":
     numbers = [29, 10, 14, 37, 13]
     print(f"Original: {numbers}")

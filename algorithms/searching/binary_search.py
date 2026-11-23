@@ -36,11 +36,6 @@ def binary_search(lst: list, target) -> int:
     return -1   # target is not in the list
 
 
-# Aliases so both old and new import styles work.
-binaria = binary_search
-busqueda_binaria = binary_search
-
-
 if __name__ == "__main__":
     numbers = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]
     target = 23

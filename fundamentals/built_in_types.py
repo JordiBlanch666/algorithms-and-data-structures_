@@ -1,48 +1,48 @@
 """
-Estructuras de Datos en Python
-Ejemplos prácticos de listas, diccionarios, tuplas y conjuntos.
+Built-in Data Structures in Python
+Practical examples of lists, dictionaries, tuples and sets.
 """
 
 
-# ── Listas ────────────────────────────────────────────────────────────────────
+# ── Lists ─────────────────────────────────────────────────────────────────────
 
-frutas = ["manzana", "banana", "cereza"]
-frutas.append("mango")
-frutas.insert(1, "fresa")
-frutas.remove("banana")
+fruits = ["apple", "banana", "cherry"]
+fruits.append("mango")
+fruits.insert(1, "strawberry")
+fruits.remove("banana")
 
-print("Lista:", frutas)
-print("Comprensión — frutas largas:", [f for f in frutas if len(f) > 5])
+print("List:", fruits)
+print("Comprehension — long fruit names:", [f for f in fruits if len(f) > 5])
 
 
-# ── Diccionarios ──────────────────────────────────────────────────────────────
+# ── Dictionaries ──────────────────────────────────────────────────────────────
 
-estudiante = {
-    "nombre": "Ana García",
-    "carrera": "Ingeniería en Software",
-    "semestre": 1,
-    "materias": ["Algoritmos", "Cálculo", "Programación"],
+student = {
+    "name": "Ana García",
+    "major": "Software Engineering",
+    "term": 1,
+    "courses": ["Algorithms", "Calculus", "Programming"],
 }
 
-print("\nEstudiante:", estudiante["nombre"])
-print("Materias:", ", ".join(estudiante["materias"]))
+print("\nStudent:", student["name"])
+print("Courses:", ", ".join(student["courses"]))
 
-estudiante["promedio"] = 9.2
-print("Promedio agregado:", estudiante)
-
-
-# ── Tuplas (inmutables) ───────────────────────────────────────────────────────
-
-coordenadas = (19.4326, -99.1332)  # CDMX
-latitud, longitud = coordenadas
-print(f"\nCDMX → lat: {latitud}, lon: {longitud}")
+student["gpa"] = 9.2
+print("GPA added:", student)
 
 
-# ── Conjuntos ─────────────────────────────────────────────────────────────────
+# ── Tuples (immutable) ────────────────────────────────────────────────────────
 
-lenguajes_a = {"Python", "JavaScript", "Java"}
-lenguajes_b = {"Python", "Go", "Rust", "Java"}
+coordinates = (19.4326, -99.1332)  # Mexico City
+latitude, longitude = coordinates
+print(f"\nMexico City → lat: {latitude}, lon: {longitude}")
 
-print("\nEn ambos:", lenguajes_a & lenguajes_b)
-print("En A pero no B:", lenguajes_a - lenguajes_b)
-print("Unión:", lenguajes_a | lenguajes_b)
+
+# ── Sets ──────────────────────────────────────────────────────────────────────
+
+languages_a = {"Python", "JavaScript", "Java"}
+languages_b = {"Python", "Go", "Rust", "Java"}
+
+print("\nIn both:", languages_a & languages_b)
+print("In A but not B:", languages_a - languages_b)
+print("Union:", languages_a | languages_b)

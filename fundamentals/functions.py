@@ -1,55 +1,53 @@
 """
-Funciones en Python
-Cubre: parámetros, valores por defecto, *args, **kwargs y lambdas.
+Functions in Python
+Covers: parameters, default values, *args, **kwargs and lambdas.
 """
 
-from typing import Optional
+
+# ── Basic function ────────────────────────────────────────────────────────────
+
+def greet(name: str, greeting: str = "Hello") -> str:
+    return f"{greeting}, {name}!"
 
 
-# ── Función básica ────────────────────────────────────────────────────────────
-
-def saludar(nombre: str, saludo: str = "Hola") -> str:
-    return f"{saludo}, {nombre}!"
+print(greet("Ana"))
+print(greet("Carlos", "Good afternoon"))
 
 
-print(saludar("Ana"))
-print(saludar("Carlos", "Buenas tardes"))
+# ── *args and **kwargs ────────────────────────────────────────────────────────
+
+def add(*numbers: float) -> float:
+    return sum(numbers)
 
 
-# ── *args y **kwargs ──────────────────────────────────────────────────────────
-
-def suma(*numeros: float) -> float:
-    return sum(numeros)
+def create_profile(name: str, **attributes) -> dict:
+    return {"name": name, **attributes}
 
 
-def crear_perfil(nombre: str, **atributos) -> dict:
-    return {"nombre": nombre, **atributos}
+print(f"\nSum: {add(1, 2, 3, 4, 5)}")
+print("Profile:", create_profile("Ana", age=20, major="Software Engineering", term=1))
 
 
-print(f"\nSuma: {suma(1, 2, 3, 4, 5)}")
-print("Perfil:", crear_perfil("Ana", edad=20, carrera="ISW", semestre=1))
+# ── Higher-order functions ────────────────────────────────────────────────────
+
+def apply(func, items: list) -> list:
+    return [func(x) for x in items]
 
 
-# ── Funciones de orden superior ───────────────────────────────────────────────
-
-def aplicar(funcion, lista: list) -> list:
-    return [funcion(x) for x in lista]
-
-
-numeros = [1, 4, 9, 16, 25]
-raices = aplicar(lambda x: x ** 0.5, numeros)
-print(f"\nRaíces de {numeros}:")
-print([round(r, 2) for r in raices])
+numbers = [1, 4, 9, 16, 25]
+roots = apply(lambda x: x ** 0.5, numbers)
+print(f"\nSquare roots of {numbers}:")
+print([round(r, 2) for r in roots])
 
 
-# ── Función pura vs con efectos ───────────────────────────────────────────────
+# ── Pure function vs. side effects ────────────────────────────────────────────
 
-def celsius_a_fahrenheit(c: float) -> float:
-    """Función pura: mismo input → mismo output, sin efectos externos."""
+def celsius_to_fahrenheit(c: float) -> float:
+    """Pure function: same input → same output, no external side effects."""
     return (c * 9 / 5) + 32
 
 
-temperaturas_mx = [0, 15, 22, 30, 40]
-print("\nTemperaturas México (°C → °F):")
-for c in temperaturas_mx:
-    print(f"  {c}°C = {celsius_a_fahrenheit(c):.1f}°F")
+mexico_temperatures = [0, 15, 22, 30, 40]
+print("\nMexico temperatures (°C → °F):")
+for c in mexico_temperatures:
+    print(f"  {c}°C = {celsius_to_fahrenheit(c):.1f}°F")
